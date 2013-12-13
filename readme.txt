@@ -113,6 +113,7 @@ If you add item customization forms using WooCommerce Rich Guys Swiss Knife your
 
 1. Settings Page WooCommerce Poor Guys Swiss Knife.
 2. WooCommerce Rich Guys Swiss Knife (Due date 2013/12/20)
+3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
 
