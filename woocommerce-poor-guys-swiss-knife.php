@@ -7,7 +7,7 @@
  * Contributor: ulih
  * Author: Uli Hake
  * Author URI: http://takebarcelona.com/authorship/uli-hake
- * Version: 1.1.2
+ * Version: 1.2.0
  * @package WordPress
  * @subpackage WooCommerce Poor Guys Swiss Knife
  * @author Uli Hake
@@ -86,7 +86,7 @@ if ( $wcpgsk_woocommerce_active ) {
 	endif;
 	//load into our global
 	$wcpgsk = new WCPGSK_Main( __FILE__ );
-	$wcpgsk->version = '1.1.2';	
+	$wcpgsk->version = '1.2.0';	
 } else {
 	return;
 }

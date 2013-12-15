@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender
 Requires at least: 3.1
 Tested up to: 3.8
-Stable tag: 1.1.2
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,7 +20,9 @@ Data captured via customized (added) form fields is available within your order 
 
 You can even organize your form with drag and drop and define if a field spans over the full row or set it as first or last element on a checkout form row.
 
-WooCommerce Poor Guys Swiss Knife has been developed in cooperation with [Nicestay](http://www.nicestay.net) to set up a transfer and shuttle service website based on WooCommerce.
+WooCommerce Poor Guys Swiss Knife has been developed in cooperation with [Nicestay](http://www.nicestay.net) to set up a transfer and shuttle service website related with their short term rental business of apartments in Barcelona.
+
+Now includes translations for German and Spanish.
 
 == Usage ==
 
@@ -116,6 +118,12 @@ If you add item customization forms using WooCommerce Rich Guys Swiss Knife your
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.2.0 =
+
+* Language .mo and .po files for Spanish and German
+* Default language .pot file for collaborators who want to help translate WooCommerce Poor Guys Swiss Knife
+* Fix compatibility problem with WooCommerce Rich Guys Swiss Knife
 
 = 1.1.2 =
 Official Wordpress Release including 3.8. compatibility check

@@ -633,12 +633,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			<div id="wcpgsk_error_dialog" title="WC Poor Guys Swiss Knife Error">
 				<p id="wcpgsk_error_message"></p>
 			</div>
-
-			<div id="wcpgsk_dialog-confirm-del-fieldset" title="<?php _e('Delete this fieldset?' , WCPGSK_DOMAIN); ?>">
-			<p><span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span><?php _e('The fieldset and its fields will be permanently deleted and cannot be recovered. Are you sure?' , WCPGSK_DOMAIN); ?></p>
-			</div>
-
+			
 			<?php
+				do_action( 'wcpgsk_settings_page_dialogs_one', $options );
 				$validateTip = __('Required form fields are marked with *.', WCPGSK_DOMAIN);
 				
 			?>
@@ -1386,9 +1383,11 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								}
 								break;
 							case 'selected':
-								foreach($value as $keyval => $option) {
-									if (!empty($option) || $value == 0) $selected = $option;
-								}
+								if ( !empty($value) ) :
+									foreach($value as $keyval => $option) {
+										if (!empty($option) || $value == 0) $selected = $option;
+									}
+								endif;
 								break;
 
 							case 'multiple':
