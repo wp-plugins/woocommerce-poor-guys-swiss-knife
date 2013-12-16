@@ -355,12 +355,7 @@ function wcpgsk_after_checkout_form($checkout) {
 	wp_enqueue_script( 'jquery-ui-slider' );
 	wp_enqueue_script( 'jquery-ui-button' );
 	wp_enqueue_script( 'jquery-ui-tabs' );
-	
-	if ($options['checkoutform']['enabletooltips'] == 1) :
-		wp_enqueue_script( 'jquery-ui-tooltip' );
-		wp_enqueue_style( 'jquery-ui-tooltip', plugins_url('/assets/css/jquery-ui-tooltip.css', __FILE__) , '', '', false);
-	endif;
-	
+		
 	wp_enqueue_script( 'jquery-ui-sliderAccess', plugins_url('/assets/js/jquery-ui-sliderAccess.js', __FILE__) , '', '', false);
 	wp_enqueue_script( 'jquery-ui-timepicker-addon', plugins_url('/assets/js/jquery-ui-timepicker-addon.js', __FILE__) , '', '', false);
 

@@ -58,9 +58,14 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 
 			add_action( 'woocommerce_checkout_process', array($this, 'wcpgsk_checkout_process') );
 
-			add_filter('woocommerce_load_order_data', array($this, 'wcpgsk_load_order_data'), 5, 1);
+			add_filter( 'woocommerce_load_order_data', array($this, 'wcpgsk_load_order_data'), 5,  1);
 			add_action( 'woocommerce_checkout_init', array($this, 'wcpgsk_checkout_init'), 10, 1 );
-
+			
+			//@TODO: We could offer an option to configure the billing and shipping formatted address
+			
+			add_action( 'woocommerce_email_after_order_table', array($this, 'wcpgsk_email_after_order_table') );// $order, false, true );
+			add_action( 'woocommerce_order_details_after_order_table', array($this, 'wcpgsk_order_details_after_order_table'), 10, 1 );
+			
 		}
 
 		/**
@@ -163,14 +168,201 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$options = get_option( 'wcpgsk_settings' );
 			$metas = array();
 			$checkout_fields = array_merge($woocommerce->countries->get_address_fields( $woocommerce->countries->get_base_country(), 'billing_' ), $woocommerce->countries->get_address_fields( $woocommerce->countries->get_base_country(), 'shipping_' ));
-
+			//$meta = array_merge($meta, $checkout_fields);
 			foreach ($checkout_fields as $key => $field) : 
-				if ( ( isset($options['woofields']['billing'][$key]['custom_' . $key]) && $options['woofields']['billing'][$key]['custom_' . $key] ) || ( isset($options['woofields']['shipping'][$key]['custom_' . $key]) && $options['woofields']['shipping'][$key]['custom_' . $key]) && !isset($meta[$key] ) ): 
+				if ( isset($options['woofields']['billing'][$key]['custom_' . $key]) && $options['woofields']['billing'][$key]['custom_' . $key] && !isset($meta[$key]) ) :
+					$meta[$key] = '';
+				elseif ( isset($options['woofields']['shipping'][$key]['custom_' . $key]) && $options['woofields']['shipping'][$key]['custom_' . $key] && !isset($meta[$key]) ) : 
 					$meta[$key] = '';
 				endif;				
 			endforeach;
 
 			return apply_filters( 'wcpgsk_load_order_data', $meta );	
+		}
+		
+		/**
+		 * Display billing and shipping form data captured.
+		 *
+		 * @access public
+		 * @since 1.3.0
+		 * @output html
+		 */		
+		public function wcpgsk_email_after_order_table($order) {
+			global $woocommerce;
+			$options = get_option( 'wcpgsk_settings' );
+			$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
+			$shipping_fields = $this->wcpgsk_additional_data($order, 'shipping');
+			?>
+			<table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0">
+
+				<tr>
+					<?php 
+					if ( isset($billing_fields) && !empty($billing_fields) ) : 
+					?>
+					<td valign="top" width="50%">
+
+						<h3><?php _e( 'Additional billing data', 'woocommerce' ); ?></h3>
+
+						<p>
+						<?php 
+							$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
+							if ( isset($billing_fields) && !empty($billing_fields) ) :
+								foreach ($billing_fields as $key => $field) :
+									echo $field['label'] . ": " . $field['captured'] . '<br />';
+								endforeach;
+							endif;
+						?>
+						</p>
+
+					</td>
+
+					<?php 
+					endif;
+					if ( get_option( 'woocommerce_ship_to_billing_address_only' ) == 'no' && isset($shipping_fields) && !empty($shipping_fields) ) : 
+					?>
+
+					<td valign="top" width="50%">
+
+						<h3><?php _e( 'Additional shipping data', 'woocommerce' ); ?></h3>
+
+						<p>
+						<?php 
+							foreach ($shipping_fields as $key => $field) :
+								echo $field['label'] . ": " . $field['captured'] . '<br />';
+							endforeach;
+						?>
+						</p>
+
+					</td>
+
+					<?php endif; ?>
+
+				</tr>
+
+			</table>
+			<?php
+		}
+		
+		/**
+		 * Display billing and shipping form data captured.
+		 *
+		 * @access public
+		 * @since 1.3.0
+		 * @output html
+		 */		
+		public function wcpgsk_order_details_after_order_table($order) {
+			global $woocommerce;
+			$options = get_option( 'wcpgsk_settings' );
+			$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
+			$shipping_fields = $this->wcpgsk_additional_data($order, 'shipping');
+			?>
+			<table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0">
+
+				<tr>
+					<?php 
+					if ( isset($billing_fields) && !empty($billing_fields) ) : 
+					?>
+					<td valign="top" width="50%">
+
+						<h3><?php _e( 'Additional billing data', 'woocommerce' ); ?></h3>
+
+						<p>
+						<?php 
+							$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
+							if ( isset($billing_fields) && !empty($billing_fields) ) :
+								foreach ($billing_fields as $key => $field) :
+									echo $field['label'] . ": " . $field['captured'] . '<br />';
+								endforeach;
+							endif;
+						?>
+						</p>
+
+					</td>
+
+					<?php 
+					endif;
+					if ( get_option( 'woocommerce_ship_to_billing_address_only' ) == 'no' && isset($shipping_fields) && !empty($shipping_fields) ) : 
+					?>
+
+					<td valign="top" width="50%">
+
+						<h3><?php _e( 'Additional shipping data', 'woocommerce' ); ?></h3>
+
+						<p>
+						<?php 
+							foreach ($shipping_fields as $key => $field) :
+								echo $field['label'] . ": " . $field['captured'] . '<br />';
+							endforeach;
+						?>
+						</p>
+
+					</td>
+
+					<?php endif; ?>
+
+				</tr>
+
+			</table>
+			<?php
+		}
+		
+		/**
+		 * Update our formatted address.
+		 *
+		 * @access public
+		 * @since 1.3.0
+		 * @output Settings page
+		 */		
+		public function wcpgsk_formatted_address_replacements($formatted, $args) {
+			return $formatted;	
+		}
+		
+		/**
+		 * Update our order billing address.
+		 *
+		 * @access public
+		 * @since 1.3.0
+		 * @output Settings page
+		 */		
+		public function wcpgsk_additional_data($order, $fortype) {
+			global $woocommerce;
+			$options = get_option( 'wcpgsk_settings' );
+			$captured_fields = array();
+			$field_order = 1;	
+			$checkout_fields = $woocommerce->countries->get_address_fields( $woocommerce->countries->get_base_country(), $fortype . '_' );
+			foreach ($checkout_fields as $key => $field) :
+				$checkout_fields[$key]['order'] = ((!empty($options['woofields']['order_' . $key]) && ctype_digit($options['woofields']['order_' . $key])) ? $options['woofields']['order_' . $key] : $field_order);
+				$checkout_fields[$key]['required'] = ((isset($options['woofields']['required_' . $key])) ? $options['woofields']['required_' . $key] : $checkout_fields[$key]['required']);
+				$checkout_fields[$key]['showorder'] = ((isset($options['woofields']['showorder_' . $key])) ? $options['woofields']['showorder_' . $key] : 0);
+				if (!isset($configField['label'])) $configField['label'] = __($checkout_fields[$key]['label'], WCPGSK_DOMAIN);				
+				$field_order++;
+			endforeach;
+
+			uasort($checkout_fields, array($this, "compareFieldOrder"));						
+
+			foreach ($checkout_fields as $key => $field) : 
+				//$fieldLabel = $field['displaylabel'];
+				$fieldkey = str_replace('billing_', '', $key);
+				if ($key != 'billing_email_validator' && $field['showorder'] == 1 && $key != 'billing_phone' && $key != 'billing_email') :
+					if ($options['woofields']['billing'][$key]['custom_' . $key]) :
+						$configField['label'] = __($checkout_fields[$key]['label'], WCPGSK_DOMAIN);
+						$configField['captured'] = $order->$key;
+						$captured_fields[$fieldkey] = $configField;
+					endif;
+				endif;
+			endforeach;
+			return $captured_fields;	
+		}
+
+		/**
+		 * Update our order shipping address.
+		 *
+		 * @access public
+		 * @since 1.3.0
+		 * @output Settings page
+		 */		
+		public function wcpgsk_order_formatted_shipping_address($address, $order) {
+			return $address;
 		}
 		
 		/**
