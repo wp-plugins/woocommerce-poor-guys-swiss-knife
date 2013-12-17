@@ -24,6 +24,8 @@ WooCommerce Poor Guys Swiss Knife has been developed in cooperation with [Nicest
 
 From version 1.3 onwards captured data in the context of billing and shipping custom fields will display as additional billing and shipping information on order receipt page and emails.
 
+WooCommerce Poor Guys Swiss Knife includes, starting with v.1.4.0 the possibility to enable confirmation fields, useful in the context of email and password fields, for instance.
+
 Now includes translations for German and Spanish.
 
 == Usage ==
@@ -57,7 +59,8 @@ You need to upgrade to WooCommerce Rich Guys Swiss Knife to use Variation Overlo
 * Order existing and added fields
 * Configure required status
 * Add new fields (support for date, time, text, textarea, number and select. Select fields can be configured to display as dropdown selects, radios or checkboxes)
-* Decide if data captured from a custom field will be shown in the order within the administration
+* Decide if data captured from a custom field will be shown in the order within the administration and in emails and customer order pages like receipts
+* Add confirmation fields for passwords and emails and other fields to oblige the user to validate his input repeating it
 * Define labels and placeholders
 * Set the css display class which allows you to rearrange your form (wide (full row), first or last element in row)
 * Configurator for custom field (allows you to finetune your custom fields and add values, limitations or validation to your custom fields)

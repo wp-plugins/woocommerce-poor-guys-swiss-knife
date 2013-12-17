@@ -86,7 +86,7 @@ if ( $wcpgsk_woocommerce_active ) {
 	endif;
 	//load into our global
 	$wcpgsk = new WCPGSK_Main( __FILE__ );
-	$wcpgsk->version = '1.3.0';	
+	$wcpgsk->version = '1.4.0';	
 } else {
 	return;
 }
