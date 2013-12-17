@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender
 Requires at least: 3.1
 Tested up to: 3.8
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,7 +78,7 @@ You need to upgrade to WooCommerce Rich Guys Swiss Knife to add personalization 
 
 = Minimum Requirements =
 
-* WordPress 3.5 or greater (may work on versions below but not tested)
+* WordPress 3.1 or greater (may work on versions below but not tested)
 * PHP version 5.2.4 or greater
 * WooCommerce 2.0 or greater
 
@@ -103,6 +103,24 @@ Automatic updates should work without problems, but, like always, backup your si
 
 == Frequently Asked Questions ==
 
+= What field types does WooCommerce Poor Guys Swiss Knife support = 
+With WooCommerce Poor Guys Swiss Knife you can support:
+
+* Fields of type text with the sub-types via validation of: email, password
+* Textarea
+* Date
+* Time
+* Number (as simple numeric input or ranges)
+* Select (with subtypes of checkboxes, radio buttons or single or multiple select boxes)
+
+With WooCommerce Poor Guys Swiss Knife you have more or less 11 diferent custom field types available.
+
+= Does Poor Guys Swiss Knife limit options for selects or other custom fields = 
+Not in any way. You can add as many options as you like. You can also add as many custom fields as you like.
+
+= There's only select available, how can I create checkboxes and radio buttons = 
+Checkboxes, radio buttons and selects are in fact all selections and you can define the presentation of a select field as dropdown or multiple selection box, as checkboxes or radio buttons. You only have to keep in mind the logic. Radio Buttons and dropdown selects are for single and exclusive selections, whereas a multiple choice selection box and checkboxes allow multiple selections. You can configure this in the settings of your select custom field.
+
 = Can I deactivate the plugin without problems = 
 Yes, you can. WooCommerce Poor Guys Swiss Knife does not alter in any way your WooCommerce installation. It uses hooks and filters to interact with WooCommerce.
 
@@ -120,6 +138,14 @@ If you add item customization forms using WooCommerce Rich Guys Swiss Knife your
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.4.0 =
+
+* Password input type support
+* Email input type with validation field if desired
+* Additional validation repeater field for fields of type text, password, number, email, etc.
+* Minor bug fixes
+
 
 = 1.3.0 =
 

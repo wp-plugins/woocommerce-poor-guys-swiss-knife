@@ -927,9 +927,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				<td>
 					<select for="wcpgsk_add_validate">
 						<option value="none"><?php _e('No validation', WCPGSK_DOMAIN) ; ?></option>
-						<option value="email"><?php _e('Email validation', WCPGSK_DOMAIN) ; ?></option>
+						<option value="email"><?php _e('Email validation', WCPGSK_DOMAIN) ; ?></option>				
 						<option value="date"><?php _e('Date', WCPGSK_DOMAIN) ; ?></option>
 						<option value="time"><?php _e('Time', WCPGSK_DOMAIN) ; ?></option>
+						<option value="password"><?php _e('Password', WCPGSK_DOMAIN) ; ?></option>
 						<option value="number"><?php _e('Number', WCPGSK_DOMAIN) ; ?></option>
 						<option value="integer"><?php _e('Integer', WCPGSK_DOMAIN) ; ?></option>
 						<option value="float"><?php _e('Float', WCPGSK_DOMAIN) ; ?></option>
@@ -937,6 +938,14 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						<option value="custom2"><?php _e('Custom2', WCPGSK_DOMAIN) ; ?></option>
 						<option value="custom3"><?php _e('Custom3', WCPGSK_DOMAIN) ; ?></option>
 					</select>
+				</td>
+			</tr>
+			<tr class="field_option field_option_select">
+				<td class="label">
+					<label><?php _e('Add repeat input for validation, e.g. email or password fields?', WCPGSK_DOMAIN) ; ?></label>
+				</td>
+				<td>
+					<ul class="wcpgsk-radio-list radio horizontal"><li><label><input id="wcpgsk_add_repeat_field_0" for="wcpgsk_add_repeat_field" value="0" type="radio" checked="&quot;checked&quot;" data-checked="&quot;checked&quot;" ><?php _e('No', WCPGSK_DOMAIN) ; ?></label></li><li><label><input id="wcpgsk_add_repeat_field_1" for="wcpgsk_add_repeat_field" value="1" type="radio"><?php _e('Yes', WCPGSK_DOMAIN) ; ?></label></li></ul>	
 				</td>
 			</tr>
 
@@ -1229,6 +1238,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			
 			if (isset($options['woofields']['billing']) && is_array($options['woofields']['billing'])) {
 				foreach($options['woofields']['billing'] as $customkey => $customconfig) {
+					//$fieldrepeater = null;
 					$fields[$customkey] = $this->createCustomStandardField($customkey, 'billing', $options['woofields']['type_' . $customkey]);
 				}
 			}
@@ -1425,22 +1435,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					unset($fields['billing'][$key]);
 				}
 				else {
+				
 					$orderfields[$key] = $fields['billing'][$key];
-					//set all our other data
-					//woocommerce changed?
-					//if ($options['woofields']['billing'][$key]['custom_' . $key])
-					//	$orderfields[$key] = createCustomStandardField($key, 'billing', $options['woofields']['type_' . $key]);			
-					if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) unset($orderfields[$key]['required']);
-						
+
 					$orderfields[$key]['label'] = !empty($options['woofields']['label_' . $key]) ? __($options['woofields']['label_' . $key], WCPGSK_DOMAIN) : '';
-					$orderfields[$key]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
-					//set the order data
-					if (empty($options['woofields']['order_' . $key]) || !ctype_digit($options['woofields']['order_' . $key])) {
-						$orderfields[$key]['order'] = $field_order;
-					}
-					else {
-						$orderfields[$key]['order'] = $options['woofields']['order_' . $key];
-					}
 					//cosmetic stuff
 					if (!empty($options['woofields']['class_' . $key])) {
 						if (!empty($orderfields[$key]['class']) && is_array($orderfields[$key]['class']))
@@ -1448,6 +1446,53 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						else
 							$orderfields[$key]['class'] = array ($options['woofields']['class_' . $key]);
 					}
+					
+					//set all our other data
+					//woocommerce changed?
+					//if ($options['woofields']['billing'][$key]['custom_' . $key])
+					//	$orderfields[$key] = createCustomStandardField($key, 'billing', $options['woofields']['type_' . $key]);			
+					if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) unset($orderfields[$key]['required']);
+					//check if repeater field
+				
+					$orderfields[$key]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
+					//set the order data
+
+					
+					if (empty($options['woofields']['order_' . $key]) || !ctype_digit($options['woofields']['order_' . $key])) {
+						$orderfields[$key]['order'] = $field_order;
+					}
+					else {
+						$orderfields[$key]['order'] = $options['woofields']['order_' . $key];
+					}
+					if ( isset($options['woofields']['settings_' . $key]) && $options['woofields']['settings_' . $key]) :
+						$params = $this->explodeParameters($options['woofields']['settings_' . $key]);
+						//if ( strpos($key, '_wcpgsk_repeater') !== false ) :
+						//$testkey = str_replace('_wcpgsk_repeater', '', $key);
+						//if ( !empty($options['woofields']['settings_' . $testkey]) ) :
+						if ( is_array($params) && !empty($params) && isset($params['repeat_field']) && $params['repeat_field'] == '1' ) :
+							$repkey = $key . '_wcpgsk_repeater';
+							
+							$orderfields[$repkey] = $this->createCustomStandardFieldClone($key, 'billing', $options['woofields']['type_' . $key]);
+
+							//set all our other data
+							//woocommerce changed?
+							//if ($options['woofields']['billing'][$key]['custom_' . $key])
+							//	$orderfields[$key] = createCustomStandardField($key, 'billing', $options['woofields']['type_' . $key]);			
+							if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) unset($orderfields[$repkey]['required']);
+							//check if repeater field
+						
+							$orderfields[$repkey]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
+							//set the order data
+
+							
+							if (empty($options['woofields']['order_' . $key]) || !ctype_digit($options['woofields']['order_' . $key])) {
+								$orderfields[$repkey]['order'] = $field_order + 0.5;
+							}
+							else {
+								$orderfields[$repkey]['order'] = intval($options['woofields']['order_' . $key]) + 0.5;
+							}
+						endif;
+					endif;
 					unset($fields['billing'][$key]);
 				}
 				$field_order++;
@@ -1472,24 +1517,16 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$field_order = 1;	
 			
 			$orderfields = array();
+			
 			foreach ($fields['shipping'] as $key => $field) {
-				if ($options['woofields']['remove_' . $key] == 1) {
+				if (isset($options['woofields']['remove_' . $key]) && $options['woofields']['remove_' . $key] == 1) {
 					unset($fields['shipping'][$key]);
 				}
 				else {
+				
 					$orderfields[$key] = $fields['shipping'][$key];
-					//set all our other data
-					if ($options['woofields']['required_' . $key] != 1) unset($orderfields[$key]['required']);
 
-					$orderfields[$key]['label'] = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
-					$orderfields[$key]['placeholder'] = __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN);
-					//set the order data
-					if (empty($options['woofields']['order_' . $key]) || !ctype_digit($options['woofields']['order_' . $key])) {
-						$orderfields[$key]['order'] = $field_order;
-					}
-					else {
-						$orderfields[$key]['order'] = $options['woofields']['order_' . $key];
-					}
+					$orderfields[$key]['label'] = !empty($options['woofields']['label_' . $key]) ? __($options['woofields']['label_' . $key], WCPGSK_DOMAIN) : '';
 					//cosmetic stuff
 					if (!empty($options['woofields']['class_' . $key])) {
 						if (!empty($orderfields[$key]['class']) && is_array($orderfields[$key]['class']))
@@ -1498,6 +1535,53 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							$orderfields[$key]['class'] = array ($options['woofields']['class_' . $key]);
 					}
 					
+					//set all our other data
+					//woocommerce changed?
+					//if ($options['woofields']['shipping'][$key]['custom_' . $key])
+					//	$orderfields[$key] = createCustomStandardField($key, 'shipping', $options['woofields']['type_' . $key]);			
+					if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) unset($orderfields[$key]['required']);
+					//check if repeater field
+				
+					$orderfields[$key]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
+					//set the order data
+
+					
+					if (empty($options['woofields']['order_' . $key]) || !ctype_digit($options['woofields']['order_' . $key])) {
+						$orderfields[$key]['order'] = $field_order;
+					}
+					else {
+						$orderfields[$key]['order'] = $options['woofields']['order_' . $key];
+					}
+
+					if ( isset($options['woofields']['settings_' . $key]) && $options['woofields']['settings_' . $key]) :
+						$params = $this->explodeParameters($options['woofields']['settings_' . $key]);
+						//if ( strpos($key, '_wcpgsk_repeater') !== false ) :
+						//$testkey = str_replace('_wcpgsk_repeater', '', $key);
+						//if ( !empty($options['woofields']['settings_' . $testkey]) ) :
+						if ( is_array($params) && !empty($params) && isset($params['repeat_field']) && $params['repeat_field'] == '1' ) :
+							$repkey = $key . '_wcpgsk_repeater';
+							
+							$orderfields[$repkey] = $this->createCustomStandardFieldClone($key, 'shipping', $options['woofields']['type_' . $key]);
+
+							//set all our other data
+							//woocommerce changed?
+							//if ($options['woofields']['shipping'][$key]['custom_' . $key])
+							//	$orderfields[$key] = createCustomStandardField($key, 'shipping', $options['woofields']['type_' . $key]);			
+							if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) unset($orderfields[$repkey]['required']);
+							//check if repeater field
+						
+							$orderfields[$repkey]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
+							//set the order data
+
+							
+							if (empty($options['woofields']['order_' . $key]) || !ctype_digit($options['woofields']['order_' . $key])) {
+								$orderfields[$repkey]['order'] = $field_order + 0.5;
+							}
+							else {
+								$orderfields[$repkey]['order'] = intval($options['woofields']['order_' . $key]) + 0.5;
+							}
+						endif;
+					endif;
 					unset($fields['shipping'][$key]);
 				}
 				$field_order++;
@@ -1523,14 +1607,22 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			
 			if (isset($options['checkoutform']['billingemailvalidator']) && $options['checkoutform']['billingemailvalidator'] == 1) {
 				if ($_POST[ 'billing_email' ] && $_POST[ 'billing_email_validator' ] && strtolower($_POST[ 'billing_email' ]) != strtolower($_POST[ 'billing_email_validator' ]))
-					$woocommerce->add_error(  '<strong>' . __('Email addresses do not match', 'woocommerce-poor-guys-swiss-knife') . ': ' . $_POST[ 'billing_email' ] . ' : ' . (empty($_POST[ 'billing_email_validator' ]) ? __('Missing validation email', 'woocommerce-poor-guys-swiss-knife') : $_POST[ 'billing_email_validator' ]) . '</strong>');
+					$woocommerce->add_error(  '<strong>' . __('Email addresses do not match', WCPGSK_DOMAIN) . ': ' . $_POST[ 'billing_email' ] . ' : ' . (empty($_POST[ 'billing_email_validator' ]) ? __('Missing validation email', WCPGSK_DOMAIN) : $_POST[ 'billing_email_validator' ]) . '</strong>');
 				elseif ($_POST[ 'billing_email' ] && !$_POST[ 'billing_email_validator' ])
-					$woocommerce->add_error(  '<strong>' . __('You have to supply a validation email for', 'woocommerce-poor-guys-swiss-knife') . ': ' . $_POST[ 'billing_email' ] . '</strong>');
+					$woocommerce->add_error(  '<strong>' . __('You have to supply a validation email for: ', WCPGSK_DOMAIN) . $_POST[ 'billing_email' ] . '</strong>');
 			}
 			
 			$combine = array();
 			foreach($_POST as $key => $val) {
-				if ( ( isset($options['woofields']['billing'][$key]['custom_' . $key]) && $options['woofields']['billing'][$key]['custom_' . $key] ) || ( isset( $options['woofields']['shipping'][$key]['custom_' . $key] ) && $options['woofields']['shipping'][$key]['custom_' . $key] ) ) {
+				if ( strpos($key, '_wcpgsk_repeater') !== false ) :
+					$testkey = str_replace('_wcpgsk_repeater', '', $key);
+					if ( $_POST[$key] != $_POST[$testkey] ) :
+						$woocommerce->add_error(  '<strong>' . sprintf(__('You have to validate the value <em style="color:red">%s</em> correctly! Please check your input.', WCPGSK_DOMAIN), $_POST[ $testkey ]) . '</strong>');
+					
+					endif;
+					unset($_POST[$key]);
+				
+				elseif ( ( isset($options['woofields']['billing'][$key]['custom_' . $key]) && $options['woofields']['billing'][$key]['custom_' . $key] ) || ( isset( $options['woofields']['shipping'][$key]['custom_' . $key] ) && $options['woofields']['shipping'][$key]['custom_' . $key] ) ) :
 					$combine[$key] = array();
 					if (is_array($_POST[$key])) {
 						foreach($_POST[$key] as $value){
@@ -1538,7 +1630,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						}			
 					}
 					else $combine[$key][] = esc_attr($val);
-				}
+				endif;
 			}
 			foreach($combine as $key => $val) {
 				$_POST[$key] = implode('|', $val);
@@ -1566,7 +1658,12 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							//does not make much sense as validation class is not really available in woocommerce
 							//we put this as a parameter
 							case 'validate':
-								$validate = array($value);
+								if ( $value && $value == 'password' ) :
+									$type = 'password';
+									$validate = array();
+								else :
+									$validate = array($value);
+								endif;
 								break;
 							case 'options':
 								
@@ -1589,7 +1686,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							case 'value':
 								if (!empty($value) || $value == 0) $default = $value;
 								break;
-								
+							
+							case 'repeat_field':
+								//not necessary here?
+								break;
 							default:
 								if (!empty($value) || $value == 0)
 									$custom_attributes[$key] = $value;
@@ -1600,6 +1700,20 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				$options['woofields']['placeholder_' . $customkey] = !empty($options['woofields']['placeholder_' . $customkey]) ? $options['woofields']['placeholder_' . $customkey] : '';
 				$options['woofields']['required_' . $customkey] = isset($options['woofields']['required_' . $customkey]) && $options['woofields']['required_' . $customkey] == 1 ? 1 : 0; 
 				switch($type) {
+					case 'password':
+						$custom_attributes['display'] = 'text';
+						$field = array(
+							'type'				=> 'password',
+							'label' 			=> __( $options['woofields']['label_' . $customkey], WCPGSK_DOMAIN ),
+							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
+							'required' 			=> (($options['woofields']['required_' . $customkey] == 1) ? true : false),
+							'custom_attributes'	=> $custom_attributes,
+							'class' 			=> array( $options['woofields']['class_' . $customkey] ),
+							'validate'			=> $validate,
+							'clear'				=> $clear
+						);
+					break;
+
 					case 'text':
 						$custom_attributes['display'] = 'text';
 						$field = array(
@@ -1693,6 +1807,175 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			return $field;
 		}
 
+		public function createCustomStandardFieldClone($customkey, $context, $type) {
+			$options = get_option( 'wcpgsk_settings' );
+			$clear = false;
+			$field = array();
+			if (isset($options['woofields'][$context]) && is_array($options['woofields'][$context])) {
+				$params = $this->explodeParameters($options['woofields']['settings_' . $customkey]);
+				$custom_attributes = array();
+				$seloptions = array();
+				$selected = null;
+				$clear = $options['woofields']['class_' . $customkey] == 'form-row-first' ? true : false;
+				$validate = array();
+				$display = '';
+				$default = '';
+				
+				if (is_array($params) && !empty($params)) {
+					foreach($params as $key => $value) {
+						switch($key) {
+							//does not make much sense as validation class is not really available in woocommerce
+							//we put this as a parameter
+							case 'validate':
+								if ( $value && $value == 'password' ) :
+									$type = 'password';
+									$validate = array();
+								else :
+									$validate = array($value);
+								endif;
+								break;
+							case 'options':
+								
+								foreach($value as $keyval => $option) {
+									$seloptions[$keyval] = __($option, WCPGSK_DOMAIN);
+								}
+								break;
+							case 'selected':
+								if ( !empty($value) ) :
+									foreach($value as $keyval => $option) {
+										if (!empty($option) || $value == 0) $selected = $option;
+									}
+								endif;
+								break;
+
+							case 'multiple':
+								if ($value == 1) $custom_attributes[$key] = 'multiple';
+								break;
+
+							case 'value':
+								if (!empty($value) || $value == 0) $default = $value;
+								break;
+							
+							default:
+								if (!empty($value) || $value == 0)
+									$custom_attributes[$key] = $value;
+						}
+					}
+				}
+				//$options['woofields']['label_' . $customkey] = !empty($options['woofields']['label_' . $customkey]) ? $options['woofields']['label_' . $customkey] : '';
+				$options['woofields']['placeholder_' . $customkey] = !empty($options['woofields']['placeholder_' . $customkey]) ? $options['woofields']['placeholder_' . $customkey] : '';
+				$options['woofields']['required_' . $customkey] = isset($options['woofields']['required_' . $customkey]) && $options['woofields']['required_' . $customkey] == 1 ? 1 : 0; 
+				$clone_class = 'form-row-wide';
+				if ($options['woofields']['class_' . $customkey] == 'form-row-first') $clone_class = 'form-row-last';
+				$clone_label = __('Repeat value', WCPGSK_DOMAIN);
+				
+				switch($type) {
+					case 'password':
+						$custom_attributes['display'] = 'text';
+						$field = array(
+							'type'				=> 'password',
+							'label' 			=> $clone_label,
+							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
+							'required' 			=> (($options['woofields']['required_' . $customkey] == 1) ? true : false),
+							'custom_attributes'	=> $custom_attributes,
+							'class' 			=> array( $clone_class ),
+							'validate'			=> $validate,
+							'clear'				=> $clear
+						);
+					break;
+					case 'text':
+						$custom_attributes['display'] = 'text';
+						$field = array(
+							'type'				=> 'text',
+							'label' 			=> $clone_label,
+							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
+							'required' 			=> (($options['woofields']['required_' . $customkey] == 1) ? true : false),
+							'custom_attributes'	=> $custom_attributes,
+							'class' 			=> array( $clone_class ),
+							'validate'			=> $validate,
+							'clear'				=> $clear
+						);
+					break;
+					
+					case 'number':
+						$custom_attributes['display'] = 'number';
+						$field = array(
+							'type'				=> 'text',
+							'label' 			=> $clone_label,
+							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
+							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
+							'custom_attributes'	=> $custom_attributes,
+							'default'			=> $default,
+							'class' 			=> array( $clone_class ),
+							'validate'			=> $validate,
+							'clear'				=> $clear
+						);
+						break;
+						
+					case 'date':
+						$custom_attributes['display'] = 'date';
+						$field = array(
+							'type'				=> 'text',
+							'label' 			=> $clone_label,
+							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
+							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
+							'custom_attributes'	=> $custom_attributes,
+							'class' 			=> array( $clone_class ),
+							'validate'			=> array('date'),
+							'clear'				=> $clear
+						);
+						break;
+
+						case 'time':
+						$custom_attributes['display'] = 'time';
+
+						$field = array(
+							'type'				=> 'text',
+							'label' 			=> $clone_label,
+							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
+							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
+							'custom_attributes'	=> $custom_attributes,
+							'class' 			=> array( $clone_class ),
+							'validate'			=> array('time'),
+							'clear'				=> $clear
+						);
+						break;
+
+						case 'textarea':
+						$custom_attributes['display'] = 'textarea';
+
+						$field = array(
+							'type'				=> 'textarea',
+							'label' 			=> $clone_label,
+							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
+							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
+							'custom_attributes'	=> $custom_attributes,
+							'class' 			=> array( $clone_class ),
+							'validate'			=> $validate,
+							'clear'				=> $clear
+						);
+						break;
+
+						case 'select':
+						$custom_attributes['display'] = $display;
+						$field = array(
+							'type'				=> 'select',
+							'label' 			=> $clone_label,
+							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
+							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
+							'options' 			=> $seloptions,
+							'default'			=> $selected,
+							'custom_attributes'	=> $custom_attributes,
+							'class' 			=> array( $clone_class ),
+							'validate'			=> $validate,
+							'clear'				=> $clear					
+						);
+						break;
+				}
+			}
+			return $field;
+		}
+		
 		private function explodeParameters($settings) {
 			$params = array();
 			foreach (explode('&', $settings) as $chunk) {
