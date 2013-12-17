@@ -58,7 +58,7 @@ You need to upgrade to WooCommerce Rich Guys Swiss Knife to use Variation Overlo
 
 * Order existing and added fields
 * Configure required status
-* Add new fields (support for date, time, text, textarea, number and select. Select fields can be configured to display as dropdown selects, radios or checkboxes)
+* Add new fields (support for date, time, text (email, password, etc.), textarea, number (simple or as ranges) and selections. Selections can be configured to display as dropdown and muliple selects, radio buttons or checkboxes)
 * Decide if data captured from a custom field will be shown in the order within the administration and in emails and customer order pages like receipts
 * Add confirmation fields for passwords and emails and other fields to oblige the user to validate his input repeating it
 * Define labels and placeholders
