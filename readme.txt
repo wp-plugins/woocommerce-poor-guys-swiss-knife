@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender
 Requires at least: 3.1
 Tested up to: 3.8
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,7 +63,7 @@ You need to upgrade to WooCommerce Rich Guys Swiss Knife to use Variation Overlo
 * Add confirmation fields for passwords and emails and other fields to oblige the user to validate his input repeating it
 * Define labels and placeholders
 * Set the css display class which allows you to rearrange your form (wide (full row), first or last element in row)
-* Configurator for custom field (allows you to finetune your custom fields and add values, limitations or validation to your custom fields)
+* Configurator for custom field (allows you to fine-tune your custom fields and add values, limitations or validation to your custom fields)
 
 = Checkout Order Section =
 
@@ -141,6 +141,10 @@ If you add item customization forms using WooCommerce Rich Guys Swiss Knife your
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.4.1 =
+
+* Fix activation error
 
 = 1.4.0 =
 
