@@ -676,7 +676,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 										
 										$checkout_fields[$key]['placeholder'] = isset($checkout_fields[$key]['placeholder']) ? $checkout_fields[$key]['placeholder'] : '';
 										$checkout_fields[$key]['label'] = isset($checkout_fields[$key]['label']) ? $checkout_fields[$key]['label'] : '';
-										$checkout_fields[$key]['required'] = isset($checkout_fields[$key]['required']) ? : 0;
+										$checkout_fields[$key]['required'] = isset($checkout_fields[$key]['required']) ? $checkout_fields[$key]['required'] : 0;
 										
 										$checkout_fields[$key]['fieldkey'] = $key;
 										$checkout_fields[$key]['displaylabel'] = isset($options['woofields']['label_' . $key]) && !empty($field['label']) ? __($field['label'], WCPGSK_DOMAIN) : $key;
