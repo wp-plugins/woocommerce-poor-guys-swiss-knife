@@ -251,7 +251,6 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 * @output html
 		 */		
 		public function wcpgsk_order_details_after_order_table($order) {
-			global $woocommerce;
 			$options = get_option( 'wcpgsk_settings' );
 			$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
 			$shipping_fields = $this->wcpgsk_additional_data($order, 'shipping');
