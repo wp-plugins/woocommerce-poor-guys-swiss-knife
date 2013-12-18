@@ -63,7 +63,7 @@ You need to upgrade to WooCommerce Rich Guys Swiss Knife to use Variation Overlo
 * Add confirmation fields for passwords and emails and other fields to oblige the user to validate his input repeating it
 * Define labels and placeholders
 * Set the css display class which allows you to rearrange your form (wide (full row), first or last element in row)
-* Configurator for custom field (allows you to finetune your custom fields and add values, limitations or validation to your custom fields)
+* Configurator for custom field (allows you to fine-tune your custom fields and add values, limitations or validation to your custom fields)
 
 = Checkout Order Section =
 
