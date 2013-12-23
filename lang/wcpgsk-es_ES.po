@@ -5,15 +5,127 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Project-Id-Version: WooCommerce Poor Guys Swiss Knife\n"
+"Project-Id-Version: WooCommerce Poor Guys Swiss Knife 1.5.0\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
 "Last-Translator: Ulrich Hake <uli.hake@gmail.com>\n"
-"Language-Team: Uli Hake <info@takebarcelona.com>\n"
+"Language-Team: uli hake <info@takebarcelona.com>\n"
 "MIME-Version: 1.0\n"
 "X-Poedit-Language: Spanish\n"
-"X-Poedit-Country: Spain\n"
+"X-Poedit-Country: SPAIN\n"
 "X-Poedit-SourceCharset: utf-8\n"
+
+# <td>
+# <span class="description"><?php _e('You can specify the maximum of items allowed in woocommerce customer carts. If you leave this blank 0 (=option deactivated) will be established.', WCPGSK_DOMAIN); ?></span>
+# </td>
+# wpml-name: e9b7f1c16afa01111ecff772339fdb51
+msgid "You can specify the maximum of items allowed in woocommerce customer carts. If you leave this blank 0 (=option deactivated) will be established."
+msgstr "Puede especificar el número máximo de artículos diferentes que pueden estar en el carrito. Si no especifica nada aquí, se establece 0 (=opción desactivada) por defecto."
+
+# <td>
+# <span class="description"><?php esc_attr(_e('You can specify the minimum of items allowed in woocommerce customer carts for wholesale purposes. If you leave this blank 0 (=option deactivated) will be established. Please be aware that you have to set the maximum to the same or a higher limit. This value will be automatically adjusted to assure store operations.', WCPGSK_DOMAIN)); ?></span>
+# </td>
+# wpml-name: a1f74fa0bc7f781513583408a4e0d124
+msgid "You can specify the minimum of items allowed in woocommerce customer carts for wholesale purposes. If you leave this blank 0 (=option deactivated) will be established. Please be aware that you have to set the maximum to the same or a higher limit. This value will be automatically adjusted to assure store operations."
+msgstr "Puede especificar el número mínimo de productos diferentes que tiene que contener el carrito. Si no especifica nada, se asume 0 (=opción desactivada). Procure de facilitar un valor igual o mayor para el número máximo de artículos diferentes permitidos. Si los valores son incosistentes se adaptarán automáticamente para asegurar el funcionamiento de la tienda."
+
+# 'variable' => __('Please, you should not confuse product quantity and the allowed maximum and minimum of individual items in a cart.', WCPGSK_DOMAIN),
+# 'grouped' => __('The min and max quantity values only have effect if you enable quantity input for a given product type. To disable this functionality you can set this value to 0.', WCPGSK_DOMAIN),
+# 'external' => __('To squizze out more of WooCommerce you may want to upgrade to WooCommerce Rich Guys Swiss Knife :-).', WCPGSK_DOMAIN),
+# wpml-name: 6faadec2a28ace0722b1c55dcc2c81a6
+msgid "The min and max quantity values only have effect if you enable quantity input for a given product type. To disable this functionality you can set this value to 0."
+msgstr "Valores para cantidades mínimas y máximas solamente tienen efecto si habilita el configurador para cantidades para el tipo de producto en cuestión. Si no quiere que se comprueben las cantidades puede desactivar la comprobación utilizando 0 como valor."
+
+# $woocommerce->cart->cart_contents[$cart_item_key]['quantity'] = $maxqty;
+# $woocommerce->add_message( sprintf(__( 'You cannot buy more than the allowed maximum quantity. We have set the allowed maximum of %s as quantity for you.', WCPGSK_DOMAIN ), $maxqty ) );
+# $woocommerce->set_messages();
+# wpml-name: 2fc2c3cc6d4831128b11d779b161a56d
+msgid "You cannot buy more than the allowed maximum quantity. We have set the allowed maximum of %s as quantity for you."
+msgstr "No se puede comprar una cantidad superior a la permitida. Hemos configurado automáticamente la cantidad máxima permitida de %s para Vd."
+
+# $woocommerce->cart->cart_contents[$cart_item_key]['quantity'] = $minqty;
+# $woocommerce->add_message( sprintf( __( 'You have to buy a minimum quantity. We have set the required minimum of %s as quantity for you.', WCPGSK_DOMAIN ), $minqty ) );
+# $woocommerce->set_messages();
+# wpml-name: 15b45d1681a84b589f0aff022c867a2a
+msgid "You have to buy a minimum quantity. We have set the required minimum of %s as quantity for you."
+msgstr "Tiene que comprar una cantidad mínima. Hemos configurado la cantidad mínima exigida de %s para Vd."
+
+# <td class="label">
+# <label><?php _e('Add repeat input for validation, e.g. email or password fields?', WCPGSK_DOMAIN) ; ?></label>
+# </td>
+# wpml-name: aa157773f03079f763de2330f360248c
+msgid "Add repeat input for validation, e.g. email or password fields?"
+msgstr "Añadir un campo adicional de validadción? (p.e. para campos de email y contraseña)"
+
+# <option value="time"><?php _e('Time', WCPGSK_DOMAIN) ; ?></option>
+# <option value="password"><?php _e('Password', WCPGSK_DOMAIN) ; ?></option>
+# <option value="number"><?php _e('Number', WCPGSK_DOMAIN) ; ?></option>
+# wpml-name: dc647eb65e6711e155375218212b3964
+msgid "Password"
+msgstr "Contraseña"
+
+# <th><?php _e('Required Field', WCPGSK_DOMAIN);  ?></th>
+# <th><?php _e('Hide in Emails/Receipts', WCPGSK_DOMAIN);  ?></th>
+# <th class="wcpgsk_replace"><?php _e('Label', WCPGSK_DOMAIN);  ?></th>
+# wpml-name: 4b16274b77f125bded3163650042cd52
+msgid "Hide in Emails/Receipts"
+msgstr "Esconder en Emails/Recibos"
+
+# <td>
+# <span class="description"><?php _e('You can set the additional shipping information section title used in emails and order receipts. If you leave this field empty the section title will be omitted.', WCPGSK_DOMAIN); ?></span>
+# </td>
+# wpml-name: 607f3d52bb66a3d03b096631fcf52346
+msgid "You can set the additional shipping information section title used in emails and order receipts. If you leave this field empty the section title will be omitted."
+msgstr "Puede facilitar aquí el título para campos añadidos en la sección de envio para definir como aparecen los campos añadidos en correos y recibos. Si no especifica nada, no se mostrará ningún título."
+
+# <tr>
+# <td><?php _e('Additional shipping fields title', WCPGSK_DOMAIN); ?>:</td>
+# <td>
+# wpml-name: be4ca8b1eb628833999937ad928150ad
+msgid "Additional shipping fields title"
+msgstr "Título para campos adicionales de envio"
+
+# <td>
+# <span class="description"><?php _e('You can set the additional billing information section title used in emails and order receipts. If you leave this field empty the section title will be omitted.', WCPGSK_DOMAIN); ?></span>
+# </td>
+# wpml-name: d651a6c30c92b16603819e05fdff1e14
+msgid "You can set the additional billing information section title used in emails and order receipts. If you leave this field empty the section title will be omitted."
+msgstr "Puede facilitar aquí el título para campos añadidos en la sección de facturación para definir como aparecen los campos añadidos en correos y recibos. Si no especifica nada, no se mostrará ningún título."
+
+# <tr>
+# <td><?php _e('Additional billing fields title', WCPGSK_DOMAIN); ?>:</td>
+# <td>
+# wpml-name: 6853963bdfe76d6a888ea5612a71c3e1
+msgid "Additional billing fields title"
+msgstr "Título para campos adicionales de facturación"
+
+# if ($options['woofields']['class_' . $customkey] == 'form-row-first') $clone_class = 'form-row-last';
+# $clone_label = __('Repeat value', WCPGSK_DOMAIN);
+#
+# wpml-name: 157cba6801db17d3ca170a321d172904
+msgid "Repeat value"
+msgstr "Repetir valor"
+
+# endif;
+# $woocommerce->add_error(  '<strong>' . sprintf(__('You have to validate the value <em style="color:red">%s</em> for %s correctly! Please check your input.', WCPGSK_DOMAIN), $captured_value, $forLabel ) . '</strong>');
+#
+# wpml-name: 4cfc18b68c3bbc6dd2a65e9d2327c7a8
+msgid "You have to validate the value <em style=\"color:red\">%s</em> for %s correctly! Please check your input."
+msgstr "Tiene que validar el valor <em style=\"color:red\">%s</em> del campo %s correctamente. Por favor, ¡compruebe su datos!"
+
+# elseif ($_POST[ 'billing_email' ] && !$_POST[ 'billing_email_validator' ])
+# $woocommerce->add_error(  '<strong>' . __('You have to supply a validation email for: ', WCPGSK_DOMAIN) . $_POST[ 'billing_email' ] . '</strong>');
+# }
+# wpml-name: 76bbefb6ca613d93784f5d2149583212
+msgid "You have to supply a validation email for: "
+msgstr "Tiene que validar este email:"
+
+# <ul>
+# <li><a href="http://takebarcelona.com/woocommerce-rich-guys-swiss-knife/">WooCommerce Rich Guys Swiss Knife</a> - <em><?php _e("The big brother of WooCommerce Poor Guys Swiss Knife", WCPGSK_DOMAIN); ?></em></li>
+# <li><a href="http://takebarcelona.com/tessa-authorship/">Tessa Authorship</a> - <em><?php _e("User independent authorship reflection for WordPress", WCPGSK_DOMAIN); ?></em></li>
+# wpml-name: f23f816b7d01a94e6efc8fb2a90cc661
+msgid "The big brother of WooCommerce Poor Guys Swiss Knife"
+msgstr "El hermano grande de WooCommerce Poor Guys Swiss Knife"
 
 # <div id="wcpgsk-dialog-validation-errors" title="<?php _e('Validation errors' , WCPGSK_DOMAIN); ?>">
 # <p><span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span><?php _e('Please check the fields marked with a red border. The values do not pass validation.' , WCPGSK_DOMAIN); ?></p>
@@ -358,191 +470,191 @@ msgstr "Añadir al  carrito"
 msgid "wcpgsk_cart_button_text"
 msgstr "Añadir al carrito"
 
-# // Sets error message.
-# $woocommerce->add_message( __( 'You still have not reached the minimum amount of items required for your cart!', WCPGSK_DOMAIN ) );
-# $woocommerce->set_messages();
+# if ($cart_btn_text && $cart_btn_text != '')
+# return apply_filters(__('wcpgsk_cart_button_text', WCPGSK_DOMAIN), $cart_btn_text, $ptype);
+# else return apply_filters('wcpgsk_cart_button_text', __('Add to Cart', WCPGSK_DOMAIN), $ptype);
 # wpml-name: 0f2831c2ed3f9b3df01539856ede889a
 msgid "You still have not reached the minimum amount of items required for your cart!"
 msgstr "Su cesta todavía no contiene la cantidad mínima requerida de artículos."
 
-# // Sets error message.
-# $woocommerce->add_message( __( 'You have reached the maximum amount of items allowed for your cart!', WCPGSK_DOMAIN ) );
-# $woocommerce->set_messages();
+# if ($cart_btn_text && $cart_btn_text != '')
+# return apply_filters(__('wcpgsk_cart_button_text', WCPGSK_DOMAIN), $cart_btn_text, $ptype);
+# else return apply_filters('wcpgsk_cart_button_text', __('Add to Cart', WCPGSK_DOMAIN), $ptype);
 # wpml-name: d245684b4a202e2a7367afd914915ba1
 msgid "You have reached the maximum amount of items allowed for your cart!"
 msgstr "Su cesta contiene la cantidad máxima permitida de artículos."
 
-# $woocommerce->cart->cart_contents[$cart_item_key]['quantity'] = $maxqty;
-# $woocommerce->add_message( __( 'You cannot buy more than the allowed maximum quantity. We have set the maximum quantity for you.', WCPGSK_DOMAIN ) );
-# $woocommerce->set_messages();
+# if ($cart_btn_text && $cart_btn_text != '')
+# return apply_filters(__('wcpgsk_cart_button_text', WCPGSK_DOMAIN), $cart_btn_text, $ptype);
+# else return apply_filters('wcpgsk_cart_button_text', __('Add to Cart', WCPGSK_DOMAIN), $ptype);
 # wpml-name: a3afe6ed4e1f3805894ece7279e753f3
 msgid "You cannot buy more than the allowed maximum quantity. We have set the maximum quantity for you."
 msgstr "No puede comprar una cantidad superior a la permitida. Hemos adaptado la cantidad a lo permitido."
 
-# $woocommerce->cart->cart_contents[$cart_item_key]['quantity'] = $minqty;
-# $woocommerce->add_message( __( 'You have to buy a minimum quantity. We have set the minimum quantity for you.', WCPGSK_DOMAIN ) );
-# $woocommerce->set_messages();
+# if ($cart_btn_text && $cart_btn_text != '')
+# return apply_filters(__('wcpgsk_cart_button_text', WCPGSK_DOMAIN), $cart_btn_text, $ptype);
+# else return apply_filters('wcpgsk_cart_button_text', __('Add to Cart', WCPGSK_DOMAIN), $ptype);
 # wpml-name: 70214ddcf0ae4c760ad1a97e27643db6
 msgid "You have to buy a minimum quantity. We have set the minimum quantity for you."
 msgstr "Tiene que comprar una cantidad mínima. Hemos puesto la cantidad mínima para Vd."
 
-# </td>
-# </tr>
-# </table>
+# <option value="min"><?php _e('Range with minimum', WCPGSK_DOMAIN) ; ?></option>
+# <option value="max"><?php _e('Range with maximum', WCPGSK_DOMAIN) ; ?></option>
+# </select>
 # wpml-name: a95a63153281124e82c785f9043345a0
 msgid "Range with maximum"
 msgstr "Rango númerico con máximo"
 
-# </select>
-# </td>
-# </tr>
+# <option value="true"><?php _e('Range with minimum and maximum', WCPGSK_DOMAIN) ; ?></option>
+# <option value="min"><?php _e('Range with minimum', WCPGSK_DOMAIN) ; ?></option>
+# <option value="max"><?php _e('Range with maximum', WCPGSK_DOMAIN) ; ?></option>
 # wpml-name: e029f1ad38273bcad98769ba042d7395
 msgid "Range with minimum"
 msgstr "Rango númerico con mínimo"
 
-# <option value="max"><?php _e('Range with maximum', WCPGSK_DOMAIN) ; ?></option>
-# </select>
-# </td>
+# <option value="false"><?php _e('Default', WCPGSK_DOMAIN) ; ?></option>
+# <option value="true"><?php _e('Range with minimum and maximum', WCPGSK_DOMAIN) ; ?></option>
+# <option value="min"><?php _e('Range with minimum', WCPGSK_DOMAIN) ; ?></option>
 # wpml-name: ef60e69b285e776d781849154cb85952
 msgid "Range with minimum and maximum"
 msgstr "Rango numérico con mínimo y máximo"
 
-# <option value="min"><?php _e('Range with minimum', WCPGSK_DOMAIN) ; ?></option>
-# <option value="max"><?php _e('Range with maximum', WCPGSK_DOMAIN) ; ?></option>
-# </select>
+# <select for="wcpgsk_add_numpres">
+# <option value="false"><?php _e('Default', WCPGSK_DOMAIN) ; ?></option>
+# <option value="true"><?php _e('Range with minimum and maximum', WCPGSK_DOMAIN) ; ?></option>
 # wpml-name: 7a1920d61156abc05a60135aefe8bc67
 msgid "Default"
 msgstr "Por defecto"
 
-#
-# </td>
-# <td>
+# <td class="label">
+# <label><?php _e('Number step', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: b1185959c47be3b0c2ea018766512e97
 msgid "Number step"
 msgstr "Número de paso"
 
-#
-# </td>
-# <td>
+# <td class="label">
+# <label><?php _e('Maximum value', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: 73f3b04d99cdbbfb2045ad2285986d77
 msgid "Maximum value"
 msgstr "Valor máximo"
 
-#
-# </td>
-# <td>
+# <td class="label">
+# <label><?php _e('Minimum value', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: 0d2ff4b5c95c1e4a191e8f9b5215d76d
 msgid "Minimum value"
 msgstr "Valor mínimo"
 
-# </td>
-# <td>
-# <input type="text" for="wcpgsk_add_rangemax" value="" />
+# <td class="label">
+# <label><?php _e('Default upper range value', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: 480a5a7f2f5a8f147e9fb53227054d19
 msgid "Default upper range value"
 msgstr "Valor máximo por defecto para el rango numérico"
 
-# </td>
-# <td>
-# <input type="text" for="wcpgsk_add_value" value="" />
+# <td class="label">
+# <label><?php _e('Default value', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: 31ce3cdcd67850870b616f75b555bbc5
 msgid "Default value"
 msgstr "Valor por defecto"
 
-# </td>
-# <td>
-# <input type="text" for="wcpgsk_add_minutesteps" value="" />
+# <td class="label">
+# <label><?php _e('Minute steps', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: 035d02aa5879427c39a4e314f91aaa93
 msgid "Minute steps"
 msgstr "Pasos para minutos"
 
-#
-# </td>
-# <td>
+# <td class="label">
+# <label><?php _e('Hour steps', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: c635749c7a199eea8ccf6a18113ff199
 msgid "Hour steps"
 msgstr "Pasos para horas"
 
-#
-# </td>
-# <td>
+# <td class="label">
+# <label><?php _e('Maximum hour', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: 4213cda84f5c50828bf294ac06e92150
 msgid "Maximum hour"
 msgstr "Hora máxima"
 
-#
-# </td>
-# <td>
+# <td class="label">
+# <label><?php _e('Minimum hour', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: e7331bc9e60d47db3afff0f63b89e47c
 msgid "Minimum hour"
 msgstr "Hora mínima"
 
-# </td>
-# <td>
-# <input type="text" for="wcpgsk_add_maxdays" value="" />
+# <td class="label">
+# <label><?php _e('Maximum offset in days', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: 253d9298e99db9c2d89b732796ca4b11
 msgid "Maximum offset in days"
 msgstr "Rango calendario máximo en días"
 
-#
-# </td>
-# <td>
+# <td class="label">
+# <label><?php _e('Minimum offset in days', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: 9199e0b99f1e34f9e043354d349e63bf
 msgid "Minimum offset in days"
 msgstr "Carencia para los calendarios en días"
 
-# </td>
-# <td>
-# <input type="text" for="wcpgsk_add_cols" value="" />
+# <td class="label">
+# <label><?php _e('Textarea cols', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: a74954d12871da635fd79d05fa058c6f
 msgid "Textarea cols"
 msgstr "Columnas campo de texto libre"
 
-#
-# </td>
-# <td>
+# <td class="label">
+# <label><?php _e('Textarea rows', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: 81908ed338eb6bc482c45091455d58ec
 msgid "Textarea rows"
 msgstr "Líneas para campo de texto"
 
-# </td>
-# </tr>
-#
+# <option value="custom2"><?php _e('Custom2', WCPGSK_DOMAIN) ; ?></option>
+# <option value="custom3"><?php _e('Custom3', WCPGSK_DOMAIN) ; ?></option>
+# </select>
 # wpml-name: 01cd47f19cbca3337e2f0864d20544c8
 msgid "Custom3"
 msgstr "Adaptable3"
 
-# </select>
-# </td>
-# </tr>
+# <option value="custom1"><?php _e('Custom1', WCPGSK_DOMAIN) ; ?></option>
+# <option value="custom2"><?php _e('Custom2', WCPGSK_DOMAIN) ; ?></option>
+# <option value="custom3"><?php _e('Custom3', WCPGSK_DOMAIN) ; ?></option>
 # wpml-name: 1d8ba0be5e8d76a3e6fb571c80929db2
 msgid "Custom2"
 msgstr "Adaptable2"
 
-# <option value="custom3"><?php _e('Custom3', WCPGSK_DOMAIN) ; ?></option>
-# </select>
-# </td>
+# <option value="float"><?php _e('Float', WCPGSK_DOMAIN) ; ?></option>
+# <option value="custom1"><?php _e('Custom1', WCPGSK_DOMAIN) ; ?></option>
+# <option value="custom2"><?php _e('Custom2', WCPGSK_DOMAIN) ; ?></option>
 # wpml-name: bfacbbe4e8be8fbc78a60cd9f8e67dd5
 msgid "Custom1"
 msgstr "Adaptable1"
 
-# <option value="custom2"><?php _e('Custom2', WCPGSK_DOMAIN) ; ?></option>
-# <option value="custom3"><?php _e('Custom3', WCPGSK_DOMAIN) ; ?></option>
-# </select>
+# <option value="integer"><?php _e('Integer', WCPGSK_DOMAIN) ; ?></option>
+# <option value="float"><?php _e('Float', WCPGSK_DOMAIN) ; ?></option>
+# <option value="custom1"><?php _e('Custom1', WCPGSK_DOMAIN) ; ?></option>
 # wpml-name: 22ae0e2b89e5e3d477f988cc36d3272b
 msgid "Float"
 msgstr "Numéro punto flotante"
 
-# <option value="custom1"><?php _e('Custom1', WCPGSK_DOMAIN) ; ?></option>
-# <option value="custom2"><?php _e('Custom2', WCPGSK_DOMAIN) ; ?></option>
-# <option value="custom3"><?php _e('Custom3', WCPGSK_DOMAIN) ; ?></option>
+# <option value="number"><?php _e('Number', WCPGSK_DOMAIN) ; ?></option>
+# <option value="integer"><?php _e('Integer', WCPGSK_DOMAIN) ; ?></option>
+# <option value="float"><?php _e('Float', WCPGSK_DOMAIN) ; ?></option>
 # wpml-name: a0faef0851b4294c06f2b94bb1cb2044
 msgid "Integer"
 msgstr "número entero"
 
-# <option value="float"><?php _e('Float', WCPGSK_DOMAIN) ; ?></option>
-# <option value="custom1"><?php _e('Custom1', WCPGSK_DOMAIN) ; ?></option>
-# <option value="custom2"><?php _e('Custom2', WCPGSK_DOMAIN) ; ?></option>
+# <option value="password"><?php _e('Password', WCPGSK_DOMAIN) ; ?></option>
+# <option value="number"><?php _e('Number', WCPGSK_DOMAIN) ; ?></option>
+# <option value="integer"><?php _e('Integer', WCPGSK_DOMAIN) ; ?></option>
 # wpml-name: b2ee912b91d69b435159c7c3f6df7f5f
 msgid "Number"
 msgstr "Número"
@@ -554,149 +666,149 @@ msgstr "Número"
 msgid "Time"
 msgstr "Hora"
 
-# <option value="number"><?php _e('Number', WCPGSK_DOMAIN) ; ?></option>
-# <option value="integer"><?php _e('Integer', WCPGSK_DOMAIN) ; ?></option>
-# <option value="float"><?php _e('Float', WCPGSK_DOMAIN) ; ?></option>
+# <option value="email"><?php _e('Email validation', WCPGSK_DOMAIN) ; ?></option>
+# <option value="date"><?php _e('Date', WCPGSK_DOMAIN) ; ?></option>
+# <option value="time"><?php _e('Time', WCPGSK_DOMAIN) ; ?></option>
 # wpml-name: 44749712dbec183e983dcd78a7736c41
 msgid "Date"
 msgstr "Fecha"
 
-# <option value="time"><?php _e('Time', WCPGSK_DOMAIN) ; ?></option>
-# <option value="number"><?php _e('Number', WCPGSK_DOMAIN) ; ?></option>
-# <option value="integer"><?php _e('Integer', WCPGSK_DOMAIN) ; ?></option>
+# <option value="none"><?php _e('No validation', WCPGSK_DOMAIN) ; ?></option>
+# <option value="email"><?php _e('Email validation', WCPGSK_DOMAIN) ; ?></option>
+# <option value="date"><?php _e('Date', WCPGSK_DOMAIN) ; ?></option>
 # wpml-name: 90668cbb85d609369d97ae274d18470d
 msgid "Email validation"
 msgstr "Validación correo electrónico"
 
-# <option value="date"><?php _e('Date', WCPGSK_DOMAIN) ; ?></option>
-# <option value="time"><?php _e('Time', WCPGSK_DOMAIN) ; ?></option>
-# <option value="number"><?php _e('Number', WCPGSK_DOMAIN) ; ?></option>
+# <select for="wcpgsk_add_validate">
+# <option value="none"><?php _e('No validation', WCPGSK_DOMAIN) ; ?></option>
+# <option value="email"><?php _e('Email validation', WCPGSK_DOMAIN) ; ?></option>
 # wpml-name: 70f451b5842c508ed014234e03bc6020
 msgid "No validation"
 msgstr "Sin validación"
 
-# </td>
-# <td>
-# <select for="wcpgsk_add_validate">
+# <td class="label">
+# <label><?php _e('Validation', WCPGSK_DOMAIN) ; ?></label>
+#
 # wpml-name: 13148717f8faa9037f37d28971dfc219
 msgid "Validation"
 msgstr "Validación"
 
-# </td>
-# <td>
-# <input type="text" for="wcpgsk_add_size" value="" />
+# <td class="label">
+# <label><?php _e('Size', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: 6f6cb72d544962fa333e2e34ce64f719
 msgid "Size"
 msgstr "Tamaño"
 
-# </td>
-# <td>
-# <input type="text" for="wcpgsk_add_mindays" value="" />
+# <label><?php _e('Minimum offset in days', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
+#
 # wpml-name: e5eb275597332a7b57ce591fa53badcd
 msgid "Value has to be a number"
 msgstr "El valor tiene que ser un número"
 
-#
-# </td>
-# <td>
+# <td class="label">
+# <label><?php _e('Maximum characters', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
 # wpml-name: 46c468a9653131e7513f5bd5c6a3db4b
 msgid "Maximum characters"
 msgstr "Máximo de carácteres"
 
-# </td>
-# </tr>
-#
+# <option value="radio"><?php _e('As radio buttons', WCPGSK_DOMAIN) ; ?></option>
+# <option value="checkbox"><?php _e('As checkboxes', WCPGSK_DOMAIN) ; ?></option>
+# </select>
 # wpml-name: cd7043f723dc3ab6d7558b447b00b09b
 msgid "As checkboxes"
 msgstr "Como casillas"
 
-# </select>
-# </td>
-# </tr>
+# <option value="select"><?php _e('As select list', WCPGSK_DOMAIN) ; ?></option>
+# <option value="radio"><?php _e('As radio buttons', WCPGSK_DOMAIN) ; ?></option>
+# <option value="checkbox"><?php _e('As checkboxes', WCPGSK_DOMAIN) ; ?></option>
 # wpml-name: 9a4a2a279f0a9689c7b1213c909fe182
 msgid "As radio buttons"
 msgstr "Como casillas de selección"
 
-# <option value="checkbox"><?php _e('As checkboxes', WCPGSK_DOMAIN) ; ?></option>
-# </select>
-# </td>
+# <select for="wcpgsk_add_presentation">
+# <option value="select"><?php _e('As select list', WCPGSK_DOMAIN) ; ?></option>
+# <option value="radio"><?php _e('As radio buttons', WCPGSK_DOMAIN) ; ?></option>
 # wpml-name: a441d3f1527fe2bc7e383ede8f676976
 msgid "As select list"
 msgstr "Como desplegable"
 
-# </td>
-# <td>
-# <select for="wcpgsk_add_numpres">
+# <td class="label">
+# <label><?php _e('Presentation', WCPGSK_DOMAIN) ; ?></label>
+#
 # wpml-name: c7bc3fddddb62d5b656adc30cea77a55
 msgid "Presentation"
 msgstr "Presentación"
 
-# <td>
-# <ul class="wcpgsk-radio-list radio horizontal"><li><label><input id="wcpgsk_add_multiple_1" for="wcpgsk_add_multiple" value="1" type="radio"><?php _e('Yes', WCPGSK_DOMAIN) ; ?></label></li><li><label><input id="wcpgsk_add_multiple_0" for="wcpgsk_add_multiple" value="0" checked="&quot;checked&quot;" data-checked="&quot;checked&quot;" type="radio"><?php _e('No', WCPGSK_DOMAIN) ; ?></label></li></ul>
+# <td class="label">
+# <label><?php _e('Select multiple values?', WCPGSK_DOMAIN) ; ?></label>
 # </td>
 # wpml-name: eae2cc755261b9e45a0988ffb46bf670
 msgid "Select multiple values?"
 msgstr "Permitir selección de múltiples valores?"
 
-# </tr>
-# <tr class="field_option">
-# <td class="label">
+# <td>
+# <ul class="wcpgsk-radio-list radio horizontal"><li><label><input id="wcpgsk_add_repeat_field_0" for="wcpgsk_add_repeat_field" value="0" type="radio" checked="&quot;checked&quot;" data-checked="&quot;checked&quot;" ><?php _e('No', WCPGSK_DOMAIN) ; ?></label></li><li><label><input id="wcpgsk_add_repeat_field_1" for="wcpgsk_add_repeat_field" value="1" type="radio"><?php _e('Yes', WCPGSK_DOMAIN) ; ?></label></li></ul>
+# </td>
 # wpml-name: bafd7322c6e97d25b6299b5d6fe8920b
 msgid "No"
 msgstr "No"
 
-# </tr>
-# <tr class="field_option">
-# <td class="label">
+# <td>
+# <ul class="wcpgsk-radio-list radio horizontal"><li><label><input id="wcpgsk_add_repeat_field_0" for="wcpgsk_add_repeat_field" value="0" type="radio" checked="&quot;checked&quot;" data-checked="&quot;checked&quot;" ><?php _e('No', WCPGSK_DOMAIN) ; ?></label></li><li><label><input id="wcpgsk_add_repeat_field_1" for="wcpgsk_add_repeat_field" value="1" type="radio"><?php _e('Yes', WCPGSK_DOMAIN) ; ?></label></li></ul>
+# </td>
 # wpml-name: 93cba07454f06a4a960172bbd6e2a435
 msgid "Yes"
 msgstr "Sí"
 
-# <td>
-# <ul class="wcpgsk-radio-list radio horizontal"><li><label><input id="wcpgsk_add_allow_null_1" for="wcpgsk_add_allow_null" value="1" type="radio"><?php _e('Yes', WCPGSK_DOMAIN) ; ?></label></li><li><label><input id="wcpgsk_add_allow_null_0" for="wcpgsk_add_allow_null" value="0" checked="&quot;checked&quot;" data-checked="&quot;checked&quot;" type="radio"><?php _e('No', WCPGSK_DOMAIN) ; ?></label></li></ul>
+# <td class="label">
+# <label><?php _e('Allow Null?', WCPGSK_DOMAIN) ; ?></label>
 # </td>
 # wpml-name: 92b7dd7223e5a79bc4df347d63619618
 msgid "Allow Null?"
 msgstr "Permitir seleccionar nada?"
 
-# <td>
-# <textarea rows="3" for="wcpgsk_add_selected" class="textarea" defaultValue="" placeholder=""></textarea>
+# <label><?php _e('Default Value', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Specify default values, one per line.', WCPGSK_DOMAIN) ; ?></p>
 # </td>
 # wpml-name: d5be8d56d3ea03f269a2f2848fa42666
 msgid "Specify default values, one per line."
 msgstr "Especificar valores predeterminados, uno por línea"
 
+# <label><?php _e('Default Value', WCPGSK_DOMAIN) ; ?></label>
+# <p><?php _e('Specify default values, one per line.', WCPGSK_DOMAIN) ; ?></p>
 # </td>
-# <td>
-# <textarea rows="3" for="wcpgsk_add_selected" class="textarea" defaultValue="" placeholder=""></textarea>
 # wpml-name: 6b66a61fa66288a9a7ad6474d2e686ec
 msgid "Default Value"
 msgstr "Valor predeterminado"
 
-# <p><strong>jazz : Charles Mingus<br>blues : John Lee Hooker</strong></p>
-# </td>
-# <td>
+# <p><?php _e('Enter each option on a new line.', WCPGSK_DOMAIN) ; ?>
+# <br /><?php _e('You can specify value and label for each option like this:', WCPGSK_DOMAIN) ; ?>
+# </p>
 # wpml-name: 7fd081bd5cf848cd6d8beed1d4915bc4
 msgid "You can specify value and label for each option like this:"
 msgstr "Puede especificar el valor y la etiqueta de la siguiente manera:"
 
-# </p>
-# <p><strong>jazz : Charles Mingus<br>blues : John Lee Hooker</strong></p>
-# </td>
+# <label><?php _e('Options', WCPGSK_DOMAIN) ; ?>*</label>
+# <p><?php _e('Enter each option on a new line.', WCPGSK_DOMAIN) ; ?>
+# <br /><?php _e('You can specify value and label for each option like this:', WCPGSK_DOMAIN) ; ?>
 # wpml-name: 308853380ecde1ca283354b37a043aab
 msgid "Enter each option on a new line."
 msgstr "Ponga posibles selecciones una por línea"
 
-# <br /><?php _e('You can specify value and label for each option like this:', WCPGSK_DOMAIN) ; ?>
-# </p>
-# <p><strong>jazz : Charles Mingus<br>blues : John Lee Hooker</strong></p>
+# <td class="label">
+# <label><?php _e('Options', WCPGSK_DOMAIN) ; ?>*</label>
+# <p><?php _e('Enter each option on a new line.', WCPGSK_DOMAIN) ; ?>
 # wpml-name: dae8ace18bdcbcc6ae5aece263e14fe8
 msgid "Options"
 msgstr "Opciones"
 
-# </div>
+# ?>
+# <div id="wcpgsk_dialog_form_container" title="<?php _e('Configure your custom field', WCPGSK_DOMAIN) ; ?>">
 #
-# <div id="wcpgsk_dialog_form_select" title="Configure Select Field" class="wcpgsk_dialog_forms">
 # wpml-name: b099eaa2bdc706236227a2daa2267cb0
 msgid "Configure your custom field"
 msgstr "Configure su campo personalizado"
@@ -729,16 +841,16 @@ msgstr "Tipo"
 msgid "Display"
 msgstr "Colocación"
 
-# <th><?php _e('Required Field', WCPGSK_DOMAIN);  ?></th>
-# <th><?php _e('Show in Order', WCPGSK_DOMAIN);  ?></th>
-# <th class="wcpgsk_replace"><?php _e('Label', WCPGSK_DOMAIN);  ?></th>
+# <th class="wcpgsk_replace"><?php _e('Placeholder', WCPGSK_DOMAIN);  ?></th>
+# <th class="wcpgsk_replace"><?php _e('Display', WCPGSK_DOMAIN);  ?></th>
+# <th class="wcpgsk_replace"><?php _e('Type', WCPGSK_DOMAIN);  ?></th>
 # wpml-name: ce54062ceef4c131c32c6668f1fae7e9
 msgid "Show in Order"
 msgstr "Mostrar en la petición"
 
 # <th><?php _e('Remove Field', WCPGSK_DOMAIN);  ?></th>
 # <th><?php _e('Required Field', WCPGSK_DOMAIN);  ?></th>
-# <th><?php _e('Show in Order', WCPGSK_DOMAIN);  ?></th>
+# <th><?php _e('Hide in Emails/Receipts', WCPGSK_DOMAIN);  ?></th>
 # wpml-name: 09737938747269600702609ab170f2f5
 msgid "Required Field"
 msgstr "Campo obligatorio"
@@ -834,9 +946,9 @@ msgstr "Si quiere permitir que se sigan comprando variaciones de productos aunqu
 msgid "Treat variation items like individual (different) product items when counting items in cart"
 msgstr "Se deben tratar las variaciones de productos como productos individuales independientes en el carrito"
 
+# <tr>
+# <td><?php _e('Treat variation items like individual (different) product items when counting items in cart', WCPGSK_DOMAIN); ?>:</td>
 # <td>
-# <span class="description"><?php _e('You can specify the maximum of items allowed in woocommerce customer carts. If you leave this blank 3 products will be the default limit.', WCPGSK_DOMAIN); ?></span>
-# </td>
 # wpml-name: 5d7d380d7c6c1429b02a42f04b808f3e
 msgid "You can specify the maximum of items allowed in woocommerce customer carts. If you leave this blank 3 products will be the default limit."
 msgstr "Puede especificar el máximo de artículos diferentes que pueden encontrarse en un carrito. Si no especifica nada aquí el máximo se establece en 3."
@@ -848,9 +960,9 @@ msgstr "Puede especificar el máximo de artículos diferentes que pueden encontr
 msgid "Maximum cart items"
 msgstr "Máximo de artículos en el carrito"
 
+# <tr>
+# <td><?php _e('Maximum cart items', WCPGSK_DOMAIN); ?>:</td>
 # <td>
-# <span class="description"><?php esc_attr(_e('You can specify the minimum of items allowed in woocommerce customer carts for wholesale purposes. If you leave this blank 1 product will be the default limit. Please be aware that you have to set the maximum to the same or a higher limit. This value will be automatically adjusted to assure store operations.', WCPGSK_DOMAIN)); ?></span>
-# </td>
 # wpml-name: 129eb8f8bb88f73ed654644deb3ca75e
 msgid "You can specify the minimum of items allowed in woocommerce customer carts for wholesale purposes. If you leave this blank 1 product will be the default limit. Please be aware that you have to set the maximum to the same or a higher limit. This value will be automatically adjusted to assure store operations."
 msgstr "Puede especificar el mínimo de artículos diferentes necesarios que se precisa para un carrito válido. Si deja vacío este campo, el valor se pone en 1. Debe procurar que el valor para el máximo de artículos diferentes del carrito equivale o supere el mínimo. Si los valores para mínimo y máximo de artículos son inconsistentes, se adaptan los valores automáticamente."
@@ -946,16 +1058,16 @@ msgstr "Nombre de la configuración"
 msgid "Settings saved."
 msgstr "Configuración guardada."
 
-# 'tooltippersonalization' => '',
-# 'mindate' => 2,
-# 'maxdate' => 450,
+# 'serviceformmerge' => 'woocommerce_before_order_notes',
+# 'sharedtitle' => __('Additional Information', WCPGSK_DOMAIN),
+# 'sharedformmerge' => 'woocommerce_after_checkout_billing_form',
 # wpml-name: 092bf78f9c97ba171b8232ddff585392
 msgid "Additional Information"
 msgstr "Información adicional"
 
-# 'sharedtitle' => __('Additional Information', WCPGSK_DOMAIN),
-# 'sharedformmerge' => 'woocommerce_after_checkout_billing_form',
-# 'tooltippersonalization' => '',
+# 'cartitemforms' => 1,
+# 'servicetitle' => __('Service data', WCPGSK_DOMAIN),
+# 'serviceformmerge' => 'woocommerce_before_order_notes',
 # wpml-name: 546246c6c352b55e2907c52a86d10468
 msgid "Service data"
 msgstr "Fecha servicio"
@@ -967,36 +1079,36 @@ msgstr "Fecha servicio"
 msgid "Placeholder"
 msgstr "Marcador de posición"
 
-# <th><?php _e('Show in Order', WCPGSK_DOMAIN);  ?></th>
+# <th><?php _e('Hide in Emails/Receipts', WCPGSK_DOMAIN);  ?></th>
 # <th class="wcpgsk_replace"><?php _e('Label', WCPGSK_DOMAIN);  ?></th>
 # <th class="wcpgsk_replace"><?php _e('Placeholder', WCPGSK_DOMAIN);  ?></th>
 # wpml-name: b021df6aac4654c454f46c77646e745f
 msgid "Label"
 msgstr "Etiqueta"
 
-#
-# $combine = array();
-# foreach($_POST as $key => $val) {
+# <th><?php _e('Hide in Emails/Receipts', WCPGSK_DOMAIN);  ?></th>
+# <th class="wcpgsk_replace"><?php _e('Label', WCPGSK_DOMAIN);  ?></th>
+# <th class="wcpgsk_replace"><?php _e('Placeholder', WCPGSK_DOMAIN);  ?></th>
 # wpml-name: 6b13df7fe4285d05ae9cce39267d3267
 msgid "You have to supply a validation email for"
 msgstr "Tiene que facilitar un email para validar el siguiente "
 
-# $woocommerce->add_error(  '<strong>' . __('You have to supply a validation email for', 'woocommerce-poor-guys-swiss-knife') . ': ' . $_POST[ 'billing_email' ] . '</strong>');
-# }
-#
+# if ($_POST[ 'billing_email' ] && $_POST[ 'billing_email_validator' ] && strtolower($_POST[ 'billing_email' ]) != strtolower($_POST[ 'billing_email_validator' ]))
+# $woocommerce->add_error(  '<strong>' . __('Email addresses do not match', WCPGSK_DOMAIN) . ': ' . $_POST[ 'billing_email' ] . ' : ' . (empty($_POST[ 'billing_email_validator' ]) ? __('Missing validation email', WCPGSK_DOMAIN) : $_POST[ 'billing_email_validator' ]) . '</strong>');
+# elseif ($_POST[ 'billing_email' ] && !$_POST[ 'billing_email_validator' ])
 # wpml-name: f62593830af4b71a7f3efeff5ba6747a
 msgid "Missing validation email"
 msgstr "El correo electrónico para la validación falta"
 
-# $woocommerce->add_error(  '<strong>' . __('You have to supply a validation email for', 'woocommerce-poor-guys-swiss-knife') . ': ' . $_POST[ 'billing_email' ] . '</strong>');
-# }
-#
+# if ($_POST[ 'billing_email' ] && $_POST[ 'billing_email_validator' ] && strtolower($_POST[ 'billing_email' ]) != strtolower($_POST[ 'billing_email_validator' ]))
+# $woocommerce->add_error(  '<strong>' . __('Email addresses do not match', WCPGSK_DOMAIN) . ': ' . $_POST[ 'billing_email' ] . ' : ' . (empty($_POST[ 'billing_email_validator' ]) ? __('Missing validation email', WCPGSK_DOMAIN) : $_POST[ 'billing_email_validator' ]) . '</strong>');
+# elseif ($_POST[ 'billing_email' ] && !$_POST[ 'billing_email_validator' ])
 # wpml-name: c4a604392807c6aa453fab31dc89437f
 msgid "Email addresses do not match"
 msgstr "Los correos electrónicos no coinciden"
 
-# ?>
-# <div id="wcpgsk_dialog_form_container" title="<?php _e('Configure your custom field', WCPGSK_DOMAIN) ; ?>">
+# do_action( 'wcpgsk_settings_page_dialogs_one', $options );
+# $validateTip = __('Required form fields are marked with *.', WCPGSK_DOMAIN);
 #
 # wpml-name: 13171210231dc2ccceb6bc02fea0cef7
 msgid "Required form fields are marked with *."
@@ -1023,23 +1135,23 @@ msgstr "Configuración Paso por caja"
 msgid "Individual items can be personalized by Woocommerce Rich Guys Swiss Knife during checkout."
 msgstr "Puede personalizar cada producto en la cesta durante el paso por caja con WooCommerce Rich Guys Swiss Knife."
 
-# 'grouped' => __('The min and max quantity values only have effect if you enable quantity input for a given product type.', WCPGSK_DOMAIN),
+# 'grouped' => __('The min and max quantity values only have effect if you enable quantity input for a given product type. To disable this functionality you can set this value to 0.', WCPGSK_DOMAIN),
 # 'external' => __('To squizze out more of WooCommerce you may want to upgrade to WooCommerce Rich Guys Swiss Knife :-).', WCPGSK_DOMAIN),
 # 'simple' => __('Individual items can be personalized by Woocommerce Rich Guys Swiss Knife during checkout.', WCPGSK_DOMAIN));
 # wpml-name: b5a690dcf6a368f5a80b6182cbca2b70
 msgid "To squizze out more of WooCommerce you may want to upgrade to WooCommerce Rich Guys Swiss Knife :-)."
 msgstr "Para sacar aún más provecho de su instalación WooCommerce, puede hacer un upgrade a WooCommerce Rich Guys Swiss Knife :-)."
 
-# 'variable' => __('Please, you should not confuse product quantity and the allowed maximum and minimum of individual items in a cart.', WCPGSK_DOMAIN),
-# 'grouped' => __('The min and max quantity values only have effect if you enable quantity input for a given product type.', WCPGSK_DOMAIN),
+# 'grouped' => __('The min and max quantity values only have effect if you enable quantity input for a given product type. To disable this functionality you can set this value to 0.', WCPGSK_DOMAIN),
 # 'external' => __('To squizze out more of WooCommerce you may want to upgrade to WooCommerce Rich Guys Swiss Knife :-).', WCPGSK_DOMAIN),
+# 'simple' => __('Individual items can be personalized by Woocommerce Rich Guys Swiss Knife during checkout.', WCPGSK_DOMAIN));
 # wpml-name: 12b54d8ef694946902e87bb91808381b
 msgid "The min and max quantity values only have effect if you enable quantity input for a given product type."
 msgstr "La configuración para cantidades mínimas y máximas solamente tiene efecto, si habilita el campo para determinar la cantidad para los diferentes tipos de producto."
 
 # $product_types = array('variation' => __('Set the minimum and maximum quantities allowed for each item that a customer can add to his/her cart', WCPGSK_DOMAIN),
 # 'variable' => __('Please, you should not confuse product quantity and the allowed maximum and minimum of individual items in a cart.', WCPGSK_DOMAIN),
-# 'grouped' => __('The min and max quantity values only have effect if you enable quantity input for a given product type.', WCPGSK_DOMAIN),
+# 'grouped' => __('The min and max quantity values only have effect if you enable quantity input for a given product type. To disable this functionality you can set this value to 0.', WCPGSK_DOMAIN),
 # wpml-name: ff401d01f0ad93d7a5faf30f3c9c79b7
 msgid "Please, you should not confuse product quantity and the allowed maximum and minimum of individual items in a cart."
 msgstr "No debe confundir la cantidad de un producto con el mínimo requirido o el máximo permitido de productos individuales en la cesta."
@@ -1121,16 +1233,16 @@ msgstr "Guardar cambios"
 msgid "Shop Settings"
 msgstr "Configuración Tienda"
 
-# $shipping_fields = array();
-# $field_order = 1;
-# $checkout_fields = $woocommerce->countries->get_address_fields( $woocommerce->countries->get_base_country(), 'shipping_' );
+# $defchecked = __('Default: checked', WCPGSK_DOMAIN);
+# $defunchecked = __('Default: unchecked', WCPGSK_DOMAIN);
+# $options = get_option( 'wcpgsk_settings' );
 # wpml-name: d7d92a1c046a6d19dd9574a75529f856
 msgid "Default: unchecked"
 msgstr "Por defecto: no activado"
 
-# $options = get_option( 'wcpgsk_settings' );
-# $shipping_fields = array();
-# $field_order = 1;
+# global $woocommerce;
+# $defchecked = __('Default: checked', WCPGSK_DOMAIN);
+# $defunchecked = __('Default: unchecked', WCPGSK_DOMAIN);
 # wpml-name: 07233e6a63c0f56d0335cbf54d00e9a9
 msgid "Default: checked"
 msgstr "Por defecto: activado"
@@ -1170,8 +1282,8 @@ msgstr "Tienda"
 msgid "Select more products from the shop"
 msgstr "Seleccione más productos en la tienda"
 
-#
-# $woocommerce->add_error( sprintf( __( 'You still have not reached the minimum amount of %s items required for your cart!', WCPGSK_DOMAIN ), $allowed )  );
+# // Sets error message.
+# $woocommerce->add_message( sprintf( __( 'You still have not reached the minimum amount of %s items required for your cart!', WCPGSK_DOMAIN ), $allowed ) );
 # $woocommerce->set_messages();
 # wpml-name: e95ef26bba3f3a91f6e12612a7d7ce74
 msgid "You still have not reached the minimum amount of %s items required for your cart!"
@@ -1192,7 +1304,7 @@ msgid "Remove products from the cart"
 msgstr "Quite productos de su carrito"
 
 # // Sets error message.
-# $woocommerce->add_error( sprintf( __( 'You have reached the maximum amount of %s items allowed for your cart!', WCPGSK_DOMAIN ), $allowed ) );
+# $woocommerce->add_message( sprintf( __( 'You have reached the maximum amount of %s items allowed for your cart!', WCPGSK_DOMAIN ), $allowed ) );
 # $woocommerce->set_messages();
 # wpml-name: 5e4bf2049fb245d488209b7a6d3015f4
 msgid "You have reached the maximum amount of %s items allowed for your cart!"
@@ -1219,7 +1331,7 @@ msgstr "Patrocinadores:"
 msgid "A gallery, exposition and portfolio theme with built-in support for WooCommerce"
 msgstr "Un tema para galerías, exposiciones y portfolios con soporte integrado para WooCommerce"
 
-# <ul>
+# <li><a href="http://takebarcelona.com/woocommerce-rich-guys-swiss-knife/">WooCommerce Rich Guys Swiss Knife</a> - <em><?php _e("The big brother of WooCommerce Poor Guys Swiss Knife", WCPGSK_DOMAIN); ?></em></li>
 # <li><a href="http://takebarcelona.com/tessa-authorship/">Tessa Authorship</a> - <em><?php _e("User independent authorship reflection for WordPress", WCPGSK_DOMAIN); ?></em></li>
 # <li><a href="http://takebarcelona.com/tessa-theme">Tessa</a> - <em><?php _e("A gallery, exposition and portfolio theme with built-in support for WooCommerce", WCPGSK_DOMAIN); ?></em></li>
 # wpml-name: 1777c1393e4688532f6db199638d751a

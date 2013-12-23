@@ -5,6 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Checks for standard configured actions and filters and attaches these actions and filters
  *
  */
+global $wcpgsk_options;
 
 add_filter( 'woocommerce_add_to_cart_validation', 'wcpgsk_maxitems_in_cart', 10, 3 );
 add_filter( 'woocommerce_update_cart_validation', 'wcpgsk_minitems_in_cart', 1, 4 );
@@ -12,9 +13,9 @@ add_filter( 'woocommerce_is_sold_individually', 'wcpgsk_check_qty_config', 10, 2
 add_filter( 'woocommerce_quantity_input_max', 'wcpgsk_qtyselector_max', 10, 2 );
 add_filter( 'woocommerce_quantity_input_min', 'wcpgsk_qtyselector_min', 10, 2 );
 add_filter( 'woocommerce_quantity_input_args', 'wcpgsk_qty_input_args', 10, 2 );
-add_filter('single_add_to_cart_text', 'wcpgsk_single_cart_button_text', 10, 2);
-add_filter('add_to_cart_text', 'wcpgsk_cart_button_text', 10, 1);
-add_action('woocommerce_after_checkout_form','wcpgsk_after_checkout_form', 10, 1);
+add_filter( 'single_add_to_cart_text', 'wcpgsk_single_cart_button_text', 10, 2 );
+add_filter( 'add_to_cart_text', 'wcpgsk_cart_button_text', 10, 1 );
+add_action( 'woocommerce_after_checkout_form','wcpgsk_after_checkout_form', 10, 1 );
 
 add_action( 'woocommerce_after_cart_item_quantity_update', 'wcpgsk_after_cart_item_quantity_update', 10, 2 );
 add_filter( 'woocommerce_add_cart_item', 'wcpgsk_add_cart_item', 10, 2 );
@@ -30,19 +31,19 @@ function wcpgsk_add_cart_item( $cart_item_data, $cart_item_key ) {
 	$product = get_product($product_id);
 	$quantity = $cart_item_data['quantity'];
 	
+	$maxqty = isset($options['cart']['maxqty_' . $product->product_type]) ? $options['cart']['maxqty_' . $product->product_type] : 0;
+	$minqty = isset($options['cart']['minqty_' . $product->product_type]) ? $options['cart']['minqty_' . $product->product_type] : 0;
 	
-	$maxqty = isset($options['cart']['maxqty_' . $product->product_type]) ? $options['cart']['maxqty_' . $product->product_type] : 1;
-	$minqty = isset($options['cart']['minqty_' . $product->product_type]) ? $options['cart']['minqty_' . $product->product_type] : 1;
-	
-	if ($quantity < $minqty) :
+	if ($minqty > 0 && $quantity < $minqty) :
 		$cart_item_data['quantity'] = $minqty;
-		$woocommerce->add_message( __( 'You have to buy a minimum quantity. We have set the minimum quantity for you.', WCPGSK_DOMAIN ) );
+		$woocommerce->add_message( sprintf( __( 'You have to buy a minimum quantity. We have set the required minimum of %s as quantity for you.', WCPGSK_DOMAIN ), $minqty ) );
 		$woocommerce->set_messages();		
-	elseif ($quantity > $maxqty) :
+	elseif ($maxqty > 0 && $quantity > $maxqty) :
 		$cart_item_data['quantity'] = $maxqty;
-		$woocommerce->add_message( __( 'You cannot buy more than the allowed maximum quantity. We have set the maximum quantity for you.', WCPGSK_DOMAIN ) );
+		$woocommerce->add_message( sprintf(__( 'You cannot buy more than the allowed maximum quantity. We have set the allowed maximum of %s as quantity for you.', WCPGSK_DOMAIN ), $maxqty ) );
 		$woocommerce->set_messages();
 	endif;
+
 	
 	return $cart_item_data;
 }
@@ -51,22 +52,21 @@ function wcpgsk_add_cart_item( $cart_item_data, $cart_item_key ) {
 if ( !function_exists('wcpgsk_after_cart_item_quantity_update') ) {
 function wcpgsk_after_cart_item_quantity_update( $cart_item_key, $quantity ) {
 	global $woocommerce;
-	$valid = true;
 	$options = get_option( 'wcpgsk_settings' );
 	$product_id = $woocommerce->cart->cart_contents[$cart_item_key]['product_id'];
 	$variation_id = $woocommerce->cart->cart_contents[$cart_item_key]['variation_id'];
 	$product = get_product($product_id);
 	
-	$maxqty = isset($options['cart']['maxqty_' . $product->product_type]) ? $options['cart']['maxqty_' . $product->product_type] : 1;
-	$minqty = isset($options['cart']['minqty_' . $product->product_type]) ? $options['cart']['minqty_' . $product->product_type] : 1;
-	if ($quantity < $minqty) :
+	$maxqty = isset($options['cart']['maxqty_' . $product->product_type]) ? $options['cart']['maxqty_' . $product->product_type] : 0;
+	$minqty = isset($options['cart']['minqty_' . $product->product_type]) ? $options['cart']['minqty_' . $product->product_type] : 0;
+	if ($minqty > 0 && $quantity < $minqty) :
 		$woocommerce->cart->cart_contents[$cart_item_key]['quantity'] = $minqty;
-		$woocommerce->add_message( __( 'You have to buy a minimum quantity. We have set the minimum quantity for you.', WCPGSK_DOMAIN ) );
+		$woocommerce->add_message( sprintf( __( 'You have to buy a minimum quantity. We have set the required minimum of %s as quantity for you.', WCPGSK_DOMAIN ), $minqty ) );
 		$woocommerce->set_messages();
 		
-	elseif ($quantity > $maxqty) :
+	elseif ($maxqty > 0 && $quantity > $maxqty) :
 		$woocommerce->cart->cart_contents[$cart_item_key]['quantity'] = $maxqty;
-		$woocommerce->add_message( __( 'You cannot buy more than the allowed maximum quantity. We have set the maximum quantity for you.', WCPGSK_DOMAIN ) );
+		$woocommerce->add_message( sprintf(__( 'You cannot buy more than the allowed maximum quantity. We have set the allowed maximum of %s as quantity for you.', WCPGSK_DOMAIN ), $maxqty ) );
 		$woocommerce->set_messages();
 	endif;
 }
@@ -80,10 +80,10 @@ function wcpgsk_maxitems_in_cart( $valid, $product_id, $quantity ) {
 	$options = get_option( 'wcpgsk_settings' );
 	
 	$cartItems = sizeof( $woocommerce->cart->cart_contents );
-	$allowed = $options['cart']['maxitemscart'];
+	$allowed = isset($options['cart']['maxitemscart']) && $options['cart']['maxitemscart'] != 0 ? $options['cart']['maxitemscart'] : 0;
 	
 	//check cart items count and diminish if more than one variation for a product exists
-	if ($options['cart']['variationscountasproduct'] == 0) {	
+	if ( $allowed > 0 && isset($options['cart']['variationscountasproduct']) && $options['cart']['variationscountasproduct'] == 0) {	
 		$varproducts = array();
 		foreach($woocommerce->cart->cart_contents as $i => $values) {
 			$key = $values['product_id'];
@@ -96,9 +96,9 @@ function wcpgsk_maxitems_in_cart( $valid, $product_id, $quantity ) {
 		if (!empty($varproducts)) $cartItems = $cartItems - array_sum($varproducts);
 	}
 	
-	if ( $cartItems >= $allowed ) {
+	if ( $allowed > 0 && $cartItems >= $allowed ) {
  		// Sets error message.
-		$woocommerce->add_message( __( 'You have reached the maximum amount of items allowed for your cart!', WCPGSK_DOMAIN ) );
+		$woocommerce->add_message( sprintf( __( 'You have reached the maximum amount of %s items allowed for your cart!', WCPGSK_DOMAIN ), $allowed ) );
 		$woocommerce->set_messages();
 		$valid = false;
 		$cart_url = $woocommerce->cart->get_cart_url();
@@ -121,11 +121,10 @@ function wcpgsk_minitems_in_cart( $valid, $cart_item_key, $values, $quantity ) {
 
 	//$cartItems = $woocommerce->cart->get_cart_contents_count(); //counts quantities as well and not only items
 	$cartItems = sizeof( $woocommerce->cart->cart_contents );
+	$allowed = isset($options['cart']['minitemscart']) && $options['cart']['minitemscart'] != 0 ? $options['cart']['minitemscart'] : 0;
 	
-	$allowed = $options['cart']['minitemscart'];
-
 	//check cart items count and diminish if more than one variation for a product exists
-	if ($options['cart']['variationscountasproduct'] == 0) {	
+	if ($allowed > 1 && isset($options['cart']['variationscountasproduct']) && $options['cart']['variationscountasproduct'] == 0) {	
 		$varproducts = array();
 		foreach($woocommerce->cart->cart_contents as $i => $values) {
 			$key = $values['product_id'];
@@ -140,7 +139,7 @@ function wcpgsk_minitems_in_cart( $valid, $cart_item_key, $values, $quantity ) {
 	
 	if ($allowed > 1 && $allowed > $cartItems ) {
  		// Sets error message.
-		$woocommerce->add_message( __( 'You still have not reached the minimum amount of items required for your cart!', WCPGSK_DOMAIN ) );
+		$woocommerce->add_message( sprintf( __( 'You still have not reached the minimum amount of %s items required for your cart!', WCPGSK_DOMAIN ), $allowed ) );
 		$woocommerce->set_messages();
 		$valid = false;
 		
@@ -189,11 +188,11 @@ function wcpgsk_check_qty_config( $return, $product ) {
 
 if ( !function_exists('wcpgsk_qtyselector_max') ) {
 function wcpgsk_qtyselector_max( $whatever, $product ) {
-	global $wcpgsksession;
+	global $wcpgsk_session;
 	$options = get_option( 'wcpgsk_settings' );
-	$maxqty = isset($options['cart']['maxqty_' . $product->product_type]) ? $options['cart']['maxqty_' . $product->product_type] : 1;
-	if ($maxqty == 0) {
-		$maxqty = $wcpgsk_session->qtyargs['max_value'];;
+	$maxqty = isset($options['cart']['maxqty_' . $product->product_type]) && $options['cart']['maxqty_' . $product->product_type] != 0 ? $options['cart']['maxqty_' . $product->product_type] : '';
+	if ($maxqty == '' && isset($wcpgsk_session->qtyargs['max_value']) ) {
+		$maxqty = $wcpgsk_session->qtyargs['max_value'];
 	}
 	return $maxqty;
 }
@@ -201,10 +200,10 @@ function wcpgsk_qtyselector_max( $whatever, $product ) {
 
 if ( !function_exists('wcpgsk_qtyselector_min') ) {
 function wcpgsk_qtyselector_min( $whatever, $product ) {
-	global $wcpgsksession;
+	global $wcpgsk_session;
 	$options = get_option( 'wcpgsk_settings' );
-	$minqty = isset($options['cart']['minqty_' . $product->product_type]) ? $options['cart']['minqty_' . $product->product_type] : 1;
-	if ($minqty == 0) {
+	$minqty = isset($options['cart']['minqty_' . $product->product_type]) && $options['cart']['minqty_' . $product->product_type] != 0 ? $options['cart']['minqty_' . $product->product_type] : '';
+	if ($minqty == '' && isset($wcpgsk_session->qtyargs['min_value']) ) {
 		$minqty = $wcpgsk_session->qtyargs['min_value'];
 	}
 	return $minqty;
@@ -272,6 +271,7 @@ function wcpgsk_single_cart_button_text($label, $ptype) {
 }
 
 //Payment gateways
+$wcpgsk_options = get_option('wcpgsk_settings');
 if ( isset($wcpgsk_options['process']['paymentgateways']) && 1 == ($wcpgsk_options['process']['paymentgateways'])) :
 	require_once ABSPATH . WPINC . '/pluggable.php';;
 	require_once dirname(dirname(__FILE__)).'/woocommerce/classes/class-wc-payment-gateways.php';
@@ -348,8 +348,8 @@ function wcpgsk_after_checkout_form($checkout) {
 		<p><span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span><?php _e('Please check the fields marked with a red border. The values do not pass validation.' , WCPGSK_DOMAIN); ?></p>		
 	</div>
 	<?php
-
 	$options = get_option( 'wcpgsk_settings' );
+
 	wp_enqueue_script( 'jquery-ui-dialog' );
 	wp_enqueue_script( 'jquery-ui-datepicker' );
 	wp_enqueue_script( 'jquery-ui-slider' );
@@ -366,24 +366,6 @@ function wcpgsk_after_checkout_form($checkout) {
 	wp_enqueue_style( 'jquery-ui-timepicker-addon', plugins_url('/assets/css/jquery-ui-timepicker-addon.css', __FILE__) , '', '', false);
 
 	echo '<script language="javascript">';
-	if ($options['checkoutform']['enabletooltips'] == 1) :
-		echo 'jQuery(function() {
-				jQuery( document ).tooltip({
-					position: {
-						my: "center bottom-20",
-						at: "center top",
-						using: function( position, feedback ) {
-							jQuery( this ).css( position );
-							jQuery( "<div>" )
-							.addClass( "arrow" )
-							.addClass( feedback.vertical )
-							.addClass( feedback.horizontal )
-							.appendTo( this );
-						}
-					}
-				});
-			});';
-	endif;
 
 	echo 'jQuery(document).ready(function(){
 			jQuery("#cartitemfields").tabs();
@@ -555,7 +537,7 @@ function wcpgsk_after_checkout_form($checkout) {
 				$select.remove();
 			});
 		});
-	</script>';
+	</script><!--unit test after checkout end-->';
 }
 
 }

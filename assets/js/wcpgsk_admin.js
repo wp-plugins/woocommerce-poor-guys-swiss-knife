@@ -349,24 +349,6 @@ jQuery(document).ready(function() {
 			jQuery(this).find('#wcpgsk_error_message').html(jQuery(this).dialog('option', 'errormsg'));
 		}
 	});
-
-	jQuery( "#wcpgsk_dialog-confirm-del-fieldset" ).dialog({
-		autoOpen: false,
-		resizable: false,
-		height:240,
-		modal: true,
-		draggable: false,
-		buttons: {
-			"Ok": function() {
-				jQuery( this ).dialog( "close" );
-				callback_del_fieldset(jQuery(this).dialog( 'option', 'fieldset'));
-			},
-			Cancel: function() {
-				jQuery( this ).dialog( "close" );
-				callback_del_fieldset(false);
-			}
-		}
-	});
 	
 	jQuery( "#wcpgsk_dialog_form_container" ).dialog({
 		autoOpen: false,

@@ -77,6 +77,7 @@ if ( ! class_exists ( 'WCPGSK_About' ) ) {
 					<h3 style="padding:5px;"><span><?php _e("Check out these themes and plugins too:", WCPGSK_DOMAIN); ?></span></h3>
 					<div class="inside">
 						<ul>
+							<li><a href="http://takebarcelona.com/woocommerce-rich-guys-swiss-knife/">WooCommerce Rich Guys Swiss Knife</a> - <em><?php _e("The big brother of WooCommerce Poor Guys Swiss Knife", WCPGSK_DOMAIN); ?></em></li>
 							<li><a href="http://takebarcelona.com/tessa-authorship/">Tessa Authorship</a> - <em><?php _e("User independent authorship reflection for WordPress", WCPGSK_DOMAIN); ?></em></li>
 							<li><a href="http://takebarcelona.com/tessa-theme">Tessa</a> - <em><?php _e("A gallery, exposition and portfolio theme with built-in support for WooCommerce", WCPGSK_DOMAIN); ?></em></li>
 						</ul>

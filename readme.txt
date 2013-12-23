@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender
 Requires at least: 3.1
 Tested up to: 3.8
-Stable tag: 1.4.2
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,7 +24,7 @@ WooCommerce Poor Guys Swiss Knife has been developed in cooperation with [Nicest
 
 From version 1.3 onwards captured data in the context of billing and shipping custom fields will display as additional billing and shipping information on order receipt page and emails.
 
-WooCommerce Poor Guys Swiss Knife includes, starting with v.1.4.0 the possibility to enable confirmation fields, useful in the context of email and password fields, for instance.
+WooCommerce Poor Guys Swiss Knife includes, starting with v.1.4.0 the possibility to enable confirmation fields, useful in the context of added email and password custom fields, for instance. The standard email validation field for the email field supplied by WooCommerce within the billing section has to be activated like before.
 
 Now includes translations for German and Spanish.
 
@@ -134,6 +134,9 @@ Yes, you can configure your added checkout form fields to show up in the adminis
 
 If you add item customization forms using WooCommerce Rich Guys Swiss Knife your data will show up in your order inside the administration as well.
 
+= My custom field data does not show up anymore in emails and receipts. How can I fix this? =
+You have to reconfigure what was formerly "Show in order". From version 1.5.0 onwards you have to hide the data. This is easier as the user and you expects his data to be visible by default.
+
 == Screenshots ==
 
 1. Settings Page WooCommerce Poor Guys Swiss Knife.
@@ -141,6 +144,16 @@ If you add item customization forms using WooCommerce Rich Guys Swiss Knife your
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.5.0 =
+
+* Min and Max input for items in cart and individual item quantities can now be turned off setting 0 or nothing in the administration. All Min and Max values will default to 0
+* Allow to set title for additional billing and shipping data for order receipts and emails
+* Display data for custom field data of sub-type password as a series of * in order receipts, emails and validation on submit
+* Minor code revisions as result of running unit tests on both WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife 
+* Fix compatitibility problem of ajax add to cart when WooCommerce Rich Guys Swiss Knife is active
+* Switched behaviour "Show in Order" to "Hide in Emails/Receipts" as this is more compliant with user interface expectations. This makes it necessary to reconfigure your custom fields, but only if you do not want to show a custom field, sorry.
+* Compatibility tests to prepare launch of WooCommerce Rich Guys Swiss Knife
 
 = 1.4.2 =
 

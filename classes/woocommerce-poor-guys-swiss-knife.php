@@ -60,9 +60,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 
 			add_filter( 'woocommerce_load_order_data', array($this, 'wcpgsk_load_order_data'), 5,  1);
 			add_action( 'woocommerce_checkout_init', array($this, 'wcpgsk_checkout_init'), 10, 1 );
-			
-			//@TODO: We could offer an option to configure the billing and shipping formatted address
-			
+						
 			add_action( 'woocommerce_email_after_order_table', array($this, 'wcpgsk_email_after_order_table') );// $order, false, true );
 			add_action( 'woocommerce_order_details_after_order_table', array($this, 'wcpgsk_order_details_after_order_table'), 10, 1 );
 			
@@ -85,7 +83,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$allowed = $options['cart']['maxitemscart'];
 			
 			//check cart items count and diminish if more than one variation for a product exists
-			if ($options['cart']['variationscountasproduct'] == 0) {	
+			if ($allowed > 0 && isset($options['cart']['variationscountasproduct']) && $options['cart']['variationscountasproduct'] == 0) {	
 				$varproducts = array();
 				foreach($woocommerce->cart->cart_contents as $i => $values) {
 					$key = $values['product_id'];
@@ -97,7 +95,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				if (!empty($varproducts)) $cartItems = $cartItems - array_sum($varproducts);
 			}
 			
-			if ( $cartItems > $allowed ) :
+			if ($allowed > 0 && $cartItems > $allowed ) :
 				$woocommerce->clear_messages();
 				// Sets error message.
 				$woocommerce->add_error( sprintf( __( 'You have reached the maximum amount of %s items allowed for your cart!', WCPGSK_DOMAIN ), $allowed ) );
@@ -111,7 +109,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				$allowed = $options['cart']['minitemscart'];
 
 				//check cart items count and diminish if more than one variation for a product exists
-				if ($options['cart']['variationscountasproduct'] == 0) {	
+				if ($allowed > 1 && isset($options['cart']['variationscountasproduct']) && $options['cart']['variationscountasproduct'] == 0) {	
 					$varproducts = array();
 					foreach($woocommerce->cart->cart_contents as $i => $values) {
 						$key = $values['product_id'];
@@ -201,7 +199,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					?>
 					<td valign="top" width="50%">
 
-						<h3><?php _e( 'Additional billing data', 'woocommerce' ); ?></h3>
+						<?php if ( !empty($options['checkoutform']['morebillingtitle']) ) : ?>
+						<h3><?php _e( $options['checkoutform']['morebillingtitle'], 'woocommerce' ); ?></h3>
+						<?php endif; ?>
 
 						<p>
 						<?php 
@@ -222,8 +222,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					?>
 
 					<td valign="top" width="50%">
-
-						<h3><?php _e( 'Additional shipping data', 'woocommerce' ); ?></h3>
+						<?php if ( !empty($options['checkoutform']['moreshippingtitle']) ) : ?>
+						<h3><?php _e( $options['checkoutform']['moreshippingtitle'], 'woocommerce' ); ?></h3>
+						<?php endif; ?>
 
 						<p>
 						<?php 
@@ -263,7 +264,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					?>
 					<td valign="top" width="50%">
 
-						<h3><?php _e( 'Additional billing data', 'woocommerce' ); ?></h3>
+						<?php if ( !empty($options['checkoutform']['morebillingtitle']) ) : ?>
+						<h3><?php _e( $options['checkoutform']['morebillingtitle'], 'woocommerce' ); ?></h3>
+						<?php endif; ?>
 
 						<p>
 						<?php 
@@ -284,9 +287,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					?>
 
 					<td valign="top" width="50%">
-
-						<h3><?php _e( 'Additional shipping data', 'woocommerce' ); ?></h3>
-
+						<?php if ( !empty($options['checkoutform']['moreshippingtitle']) ) : ?>
+						<h3><?php _e( $options['checkoutform']['moreshippingtitle'], 'woocommerce' ); ?></h3>
+						<?php endif; ?>
 						<p>
 						<?php 
 							foreach ($shipping_fields as $key => $field) :
@@ -332,7 +335,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			foreach ($checkout_fields as $key => $field) :
 				$checkout_fields[$key]['order'] = ((!empty($options['woofields']['order_' . $key]) && ctype_digit($options['woofields']['order_' . $key])) ? $options['woofields']['order_' . $key] : $field_order);
 				$checkout_fields[$key]['required'] = ((isset($options['woofields']['required_' . $key])) ? $options['woofields']['required_' . $key] : $checkout_fields[$key]['required']);
-				$checkout_fields[$key]['showorder'] = ((isset($options['woofields']['showorder_' . $key])) ? $options['woofields']['showorder_' . $key] : 0);
+				$checkout_fields[$key]['hideorder'] = ((isset($options['woofields']['hideorder_' . $key])) ? $options['woofields']['hideorder_' . $key] : 0);
 				if (!isset($configField['label'])) $configField['label'] = __($checkout_fields[$key]['label'], WCPGSK_DOMAIN);				
 				$field_order++;
 			endforeach;
@@ -342,10 +345,17 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			foreach ($checkout_fields as $key => $field) : 
 				//$fieldLabel = $field['displaylabel'];
 				$fieldkey = str_replace('billing_', '', $key);
-				if ($key != 'billing_email_validator' && $field['showorder'] == 1 && $key != 'billing_phone' && $key != 'billing_email') :
-					if ($options['woofields']['billing'][$key]['custom_' . $key]) :
+				if ($key != 'billing_email_validator' && $field['hideorder'] == 0 && $key != 'billing_phone' && $key != 'billing_email') :
+					if ( isset($options['woofields'][$fortype][$key]['custom_' . $key]) && $options['woofields'][$fortype][$key]['custom_' . $key]) :
 						$configField['label'] = __($checkout_fields[$key]['label'], WCPGSK_DOMAIN);
-						$configField['captured'] = $order->$key;
+						$captured_value = $order->$key;
+						if ( isset($options['woofields']['settings_' . $key]) ) :
+							$params = $this->explodeParameters($options['woofields']['settings_' . $key]);
+							if ( isset($params) && isset($params['validate']) && !empty($params['validate']) && $params['validate'] == 'password' ) :
+								$captured_value = '*******';
+							endif;
+						endif;
+						$configField['captured'] = $captured_value;
 						$captured_fields[$fieldkey] = $configField;
 					endif;
 				endif;
@@ -399,7 +409,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$defunchecked = __('Default: unchecked', WCPGSK_DOMAIN);
 			
 			
-			$wcpgsk_options['process']['fastcheckoutbtn'] = isset($wcpgsk_options['process']['fastcheckoutbtn']) ? $wcpgsk_options['process']['fastcheckoutbtn'] : '';
+			$options['process']['fastcheckoutbtn'] = isset($options['process']['fastcheckoutbtn']) ? $options['process']['fastcheckoutbtn'] : '';
 			echo '<div class="wrap">';
 			// icon for settings
 			echo '<div id="icon-themes" class="icon32"><br></div>';
@@ -494,19 +504,19 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							<tr>
 								<td><?php _e('Minimum cart items', WCPGSK_DOMAIN); ?>:</td>
 								<td>
-									<input name="wcpgsk_settings[cart][minitemscart]" type="text" value="<?php if (!empty($options['cart']['minitemscart'])) echo esc_attr( $options['cart']['minitemscart'] ); ?>" size="2" class="regular-text" />
+									<input name="wcpgsk_settings[cart][minitemscart]" type="text" value="<?php if (isset($options['cart']['minitemscart'])) echo esc_attr( $options['cart']['minitemscart'] ); ?>" size="2" class="regular-text" />
 								</td>
 								<td>
-									<span class="description"><?php esc_attr(_e('You can specify the minimum of items allowed in woocommerce customer carts for wholesale purposes. If you leave this blank 1 product will be the default limit. Please be aware that you have to set the maximum to the same or a higher limit. This value will be automatically adjusted to assure store operations.', WCPGSK_DOMAIN)); ?></span>
+									<span class="description"><?php esc_attr(_e('You can specify the minimum of items allowed in woocommerce customer carts for wholesale purposes. If you leave this blank 0 (=option deactivated) will be established. Please be aware that you have to set the maximum to the same or a higher limit. This value will be automatically adjusted to assure store operations.', WCPGSK_DOMAIN)); ?></span>
 								</td>
 							</tr>
 							<tr>
 								<td><?php _e('Maximum cart items', WCPGSK_DOMAIN); ?>:</td>
 								<td>
-									<input name="wcpgsk_settings[cart][maxitemscart]" type="text" value="<?php if (!empty($options['cart']['maxitemscart'])) echo esc_attr( $options['cart']['maxitemscart'] ); ?>" size="2" class="regular-text" />
+									<input name="wcpgsk_settings[cart][maxitemscart]" type="text" value="<?php if (isset($options['cart']['maxitemscart'])) echo esc_attr( $options['cart']['maxitemscart'] ); ?>" size="2" class="regular-text" />
 								</td>
 								<td>
-									<span class="description"><?php _e('You can specify the maximum of items allowed in woocommerce customer carts. If you leave this blank 3 products will be the default limit.', WCPGSK_DOMAIN); ?></span>
+									<span class="description"><?php _e('You can specify the maximum of items allowed in woocommerce customer carts. If you leave this blank 0 (=option deactivated) will be established.', WCPGSK_DOMAIN); ?></span>
 								</td>
 							</tr>
 							<tr>
@@ -555,16 +565,19 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						<?php
 							$product_types = array('variation' => __('Set the minimum and maximum quantities allowed for each item that a customer can add to his/her cart', WCPGSK_DOMAIN),
 								'variable' => __('Please, you should not confuse product quantity and the allowed maximum and minimum of individual items in a cart.', WCPGSK_DOMAIN),
-								'grouped' => __('The min and max quantity values only have effect if you enable quantity input for a given product type.', WCPGSK_DOMAIN),
+								'grouped' => __('The min and max quantity values only have effect if you enable quantity input for a given product type. To disable this functionality you can set this value to 0.', WCPGSK_DOMAIN),
 								'external' => __('To squizze out more of WooCommerce you may want to upgrade to WooCommerce Rich Guys Swiss Knife :-).', WCPGSK_DOMAIN),
 								'simple' => __('Individual items can be personalized by Woocommerce Rich Guys Swiss Knife during checkout.', WCPGSK_DOMAIN));
 							foreach($product_types as $type => $descr) :
+								$minqty = !empty($options['cart']['minqty_' . $type]) ? $options['cart']['minqty_' . $type] : 0;
+								$maxqty = !empty($options['cart']['maxqty_' . $type]) ? $options['cart']['maxqty_' . $type] : 0;
+								
 						?>
 							<tr>
 								<td><?php _e('Min/Max quantity <strong>' . $type . ' products', WCPGSK_DOMAIN); ?></strong>:</td>
 								<td>
-									<input name="wcpgsk_settings[cart][minqty_<?php echo $type ; ?>]" type="text" value="<?php if (!empty($options['cart']['minqty_' . $type])) echo esc_attr( $options['cart']['minqty_' . $type] ); ?>" size="2" class="wcpgsk_textfield_short" /> |
-									<input name="wcpgsk_settings[cart][maxqty_<?php echo $type ; ?>]" type="text" value="<?php if (!empty($options['cart']['maxqty_' . $type])) echo esc_attr( $options['cart']['maxqty_' . $type] ) ; ?>" size="2" class="wcpgsk_textfield_short" />
+									<input name="wcpgsk_settings[cart][minqty_<?php echo $type ; ?>]" type="text" value="<?php echo $minqty; ?>" size="2" class="wcpgsk_textfield_short" /> |
+									<input name="wcpgsk_settings[cart][maxqty_<?php echo $type ; ?>]" type="text" value="<?php echo $maxqty ; ?>" size="2" class="wcpgsk_textfield_short" />
 								</td>
 								<td>
 									<span class="description"><?php echo $descr ; ?></span>
@@ -611,6 +624,24 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									<span class="description"><?php _e('For date fields you can specify a maximum offset in number of days.', WCPGSK_DOMAIN); ?></span>
 								</td>
 							</tr>
+							<tr>
+								<td><?php _e('Additional billing fields title', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[checkoutform][morebillingtitle]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['checkoutform']['morebillingtitle'])) echo esc_attr( $options['checkoutform']['morebillingtitle'] ); ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('You can set the additional billing information section title used in emails and order receipts. If you leave this field empty the section title will be omitted.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td><?php _e('Additional shipping fields title', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[checkoutform][moreshippingtitle]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['checkoutform']['moreshippingtitle'])) echo esc_attr( $options['checkoutform']['moreshippingtitle'] ); ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('You can set the additional shipping information section title used in emails and order receipts. If you leave this field empty the section title will be omitted.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
 						
 							<tr>
 								<td><?php _e('Add billing email validator', WCPGSK_DOMAIN); ?>:</td>
@@ -643,7 +674,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									<th><?php _e('Field Name', WCPGSK_DOMAIN);  ?></th>
 									<th><?php _e('Remove Field', WCPGSK_DOMAIN);  ?></th>		
 									<th><?php _e('Required Field', WCPGSK_DOMAIN);  ?></th>
-									<th><?php _e('Show in Order', WCPGSK_DOMAIN);  ?></th>
+									<th><?php _e('Hide in Emails/Receipts', WCPGSK_DOMAIN);  ?></th>
 									<th class="wcpgsk_replace"><?php _e('Label', WCPGSK_DOMAIN);  ?></th>
 									<th class="wcpgsk_replace"><?php _e('Placeholder', WCPGSK_DOMAIN);  ?></th>
 									<th class="wcpgsk_replace"><?php _e('Display', WCPGSK_DOMAIN);  ?></th>
@@ -686,7 +717,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 										//before required defreq
 										$checkout_fields[$key]['defreq'] = ((isset($checkout_fields[$key]['required']) && $checkout_fields[$key]['required'] == 1) ? $defchecked : $defunchecked);
 										$checkout_fields[$key]['required'] = ((isset($options['woofields']['required_' . $key])) ? $options['woofields']['required_' . $key] : $checkout_fields[$key]['required']);
-										$checkout_fields[$key]['showorder'] = ((isset($options['woofields']['showorder_' . $key])) ? $options['woofields']['showorder_' . $key] : 0);
+										$checkout_fields[$key]['hideorder'] = ((isset($options['woofields']['hideorder_' . $key])) ? $options['woofields']['hideorder_' . $key] : 0);
 										$checkout_fields[$key]['type'] = ((isset($options['woofields']['type_' . $key]) && !empty($options['woofields']['type_' . $key])) ? $options['woofields']['type_' . $key] : ((!empty($checkout_fields[$key]['type'])) ? $checkout_fields[$key]['type'] : 'text') );
 										
 										$checkout_fields[$key]['classsel'] = ((isset($options['woofields']['class_' . $key]) && !empty($options['woofields']['class_' . $key])) ? $options['woofields']['class_' . $key] : ((isset($checkout_fields[$key]['class'])) ? $checkout_fields[$key]['class'][0] : 'form-row-wide') );
@@ -723,13 +754,13 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 										</td>
 										<td><input name="wcpgsk_settings[woofields][remove_<?php echo $field['fieldkey']; ?>]" type="hidden" value="0" />
 											<input name="wcpgsk_settings[woofields][remove_<?php echo $field['fieldkey']; ?>]" type="checkbox" class="removes_<?php echo $section ;?>" value="1" 
-											<?php if (  1 == ($options['woofields']['remove_' . $field['fieldkey']]) ) echo 'checked="checked"'; ?>   /></td>
+											<?php if ( isset($options['woofields']['remove_' . $field['fieldkey']]) && 1 == ($options['woofields']['remove_' . $field['fieldkey']]) ) echo 'checked="checked"'; ?>   /></td>
 										<td><input name="wcpgsk_settings[woofields][required_<?php echo $field['fieldkey']; ?>]" type="hidden" value="0" />
 											<input name="wcpgsk_settings[woofields][required_<?php echo $field['fieldkey']; ?>]" type="checkbox" class="required_<?php echo $section ;?>" value="1" <?php if (  1 == $field['required'] ) echo "checked='checked'"; ?> />
 											<small> <?php echo $field['defreq']; ?></small>
 										</td>
-										<td><input name="wcpgsk_settings[woofields][showorder_<?php echo $field['fieldkey']; ?>]" type="hidden" value="0" />
-											<input name="wcpgsk_settings[woofields][showorder_<?php echo $field['fieldkey']; ?>]" type="checkbox" class="showorder_<?php echo $section ;?>" value="1" <?php if (  1 == $field['showorder'] ) echo "checked='checked'"; ?> />
+										<td><input name="wcpgsk_settings[woofields][hideorder_<?php echo $field['fieldkey']; ?>]" type="hidden" value="0" />
+											<input name="wcpgsk_settings[woofields][hideorder_<?php echo $field['fieldkey']; ?>]" type="checkbox" class="hideorder_<?php echo $section ;?>" value="1" <?php if (  1 == $field['hideorder'] ) echo "checked='checked'"; ?> />
 										</td>
 										<td><input type="text" name="wcpgsk_settings[woofields][label_<?php echo $field['fieldkey']; ?>]" class="wcpgsk_textfield" 
 											value="<?php echo esc_attr( $field['label'] ); ?>" /></td>
@@ -778,8 +809,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 										<td><input convert="wcpgsk_settings[woofields][required_<?php echo $custom; ?>]" type="hidden" value="0" />
 											<input convert="wcpgsk_settings[woofields][required_<?php echo $custom; ?>]" type="checkbox" class="required_<?php echo $section ;?>" value="1" />
 										</td>
-										<td><input convert="wcpgsk_settings[woofields][showorder_<?php echo $custom; ?>]" type="hidden" value="0" />
-											<input convert="wcpgsk_settings[woofields][showorder_<?php echo $custom; ?>]" type="checkbox" class="showorder_<?php echo $section ;?>" value="1" />
+										<td><input convert="wcpgsk_settings[woofields][hideorder_<?php echo $custom; ?>]" type="hidden" value="0" />
+											<input convert="wcpgsk_settings[woofields][hideorder_<?php echo $custom; ?>]" type="checkbox" class="hideorder_<?php echo $section ;?>" value="1" />
 										</td>
 										<td><input type="text" convert="wcpgsk_settings[woofields][label_<?php echo $custom; ?>]" class="wcpgsk_textfield" value="<?php echo $newField; ?>" /></td>
 										<td><input type="text" convert="wcpgsk_settings[woofields][placeholder_<?php echo $custom; ?>]" class="wcpgsk_textfield" value="<?php echo $newField; ?>" /></td>
@@ -1138,7 +1169,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			
 			<?php
 			echo '</div>';
-			
+			echo '<!--unit test options page end-->';
 			
 		}
 		
@@ -1169,12 +1200,14 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			global $woocommerce;
 			//$wcpgsk_options = get_option( 'wcpgsk_settings' );
 			
-			if (empty($input['cart']['minitemscart']) || !ctype_digit($input['cart']['minitemscart'])) $input['cart']['minitemscart'] = 1;
-			if (empty($input['cart']['maxitemscart']) || !ctype_digit($input['cart']['maxitemscart'])) $input['cart']['maxitemscart'] = 3;
+			if ( empty($input['cart']['minitemscart']) ) $input['cart']['minitemscart'] = 0;
+			if ( !ctype_digit($input['cart']['minitemscart']) ) $input['cart']['minitemscart'] = 0;
+			if ( empty($input['cart']['maxitemscart'] ) ) $input['cart']['maxitemscart'] = 0;
+			if ( !ctype_digit($input['cart']['maxitemscart']) ) $input['cart']['maxitemscart'] = 0;
 
 			$mincart = $input['cart']['minitemscart'];
 			$maxcart = $input['cart']['maxitemscart'];
-			if ($mincart > $maxcart) $input['cart']['minitemscart'] = 1;
+			if ($mincart > $maxcart && $maxcart > 0) $input['cart']['minitemscart'] = 1;
 			
 			//@todo:could be a string, but not vital
 			if (empty($input['checkoutform']['mindate']) || !ctype_digit($input['checkoutform']['mindate'])) $input['checkoutform']['mindate'] = 2;
@@ -1198,13 +1231,13 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			
 			$product_types = array('variation', 'variable', 'grouped', 'external', 'simple');
 			foreach($product_types as $type) :
-				if (empty($input['cart']['maxqty_' . $type]) || !ctype_digit($input['cart']['maxqty_' . $type])) $input['cart']['maxqty_' . $type] = 1;
-				if (empty($input['cart']['minqty_' . $type]) || !ctype_digit($input['cart']['minqty_' . $type])) $input['cart']['minqty_' . $type] = 1;
-				//assure consistent settings
-				//if ($input['cart']['maxqty_' . $type] == 0) $input['cart']['minqty_' . $type] = 0;
-				//if ($input['cart']['minqty_' . $type] == 0) $input['cart']['maxqty_' . $type] = 0;		
-				if ($input['cart']['minqty_' . $type] > $input['cart']['maxqty_' . $type]) $input['cart']['minqty_' . $type] = 1;
-				//set quantity input field visibility to none for given type
+				if ( empty($input['cart']['maxqty_' . $type]) ) $input['cart']['maxqty_' . $type] = 0;
+				if ( !ctype_digit($input['cart']['maxqty_' . $type]) ) $input['cart']['maxqty_' . $type] = 0;
+				
+				if ( empty($input['cart']['minqty_' . $type]) ) $input['cart']['minqty_' . $type] = 0;
+				if ( !ctype_digit($input['cart']['minqty_' . $type]) ) $input['cart']['minqty_' . $type] = 0;
+				//very basic consistency check for quantity settings
+				if ( $input['cart']['minqty_' . $type] > $input['cart']['maxqty_' . $type] && $input['cart']['maxqty_' . $type] > 0 ) $input['cart']['minqty_' . $type] = 1;
 				if ($input['cart']['maxqty_' . $type] == 1) $input['cart'][$type . 'productnoqty'] = 1;
 			endforeach;
 			$input = apply_filters('wcpgsk_validate_settings', $input);
@@ -1225,7 +1258,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$options['woofields']['label_billing_email_validator'] = !empty($options['woofields']['label_billing_email_validator']) ? $options['woofields']['label_billing_email_validator'] : '';
 			$options['woofields']['placehoder_billing_email_validator'] = !empty($options['woofields']['placehoder_billing_email_validator']) ? $options['woofields']['placehoder_billing_email_validator'] : '';
 			$options['woofields']['required_billing_email_validator'] = isset($options['woofields']['required_billing_email_validator']) ? $options['woofields']['required_billing_email_validator'] : 1;
-			if ($options['checkoutform']['billingemailvalidator'] == 1) {
+			if (isset($options['checkoutform']['billingemailvalidator']) && $options['checkoutform']['billingemailvalidator'] == 1) {
 				$fields['billing_email_validator'] = array(
 					'type'				=> 'text',
 					'label' 			=> __( $options['woofields']['label_billing_email_validator'], WCPGSK_DOMAIN ),
@@ -1281,6 +1314,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$defunchecked = __('Default: unchecked', WCPGSK_DOMAIN);
 
 			foreach ($checkout_fields as $key => $field) :
+				$checkout_fields[$key]['required'] = isset( $checkout_fields[$key]['required'] ) ?  $checkout_fields[$key]['required'] : 0;
 				$checkout_fields[$key]['label'] = !empty($checkout_fields[$key]['label']) ? $checkout_fields[$key]['label'] : '';
 				$checkout_fields[$key]['placeholder'] = !empty($checkout_fields[$key]['placeholder']) ? $checkout_fields[$key]['placeholder'] : '';
 				$checkout_fields[$key]['fieldkey'] = $key;
@@ -1291,7 +1325,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				//before required defreq
 				$checkout_fields[$key]['defreq'] = ((isset($checkout_fields[$key]['required']) && $checkout_fields[$key]['required'] == 1) ? $defchecked : $defunchecked);
 				$checkout_fields[$key]['required'] = ((isset($options['woofields']['required_' . $key])) ? $options['woofields']['required_' . $key] : $checkout_fields[$key]['required']);
-				$checkout_fields[$key]['showorder'] = ((isset($options['woofields']['showorder_' . $key])) ? $options['woofields']['showorder_' . $key] : 0);
+				$checkout_fields[$key]['hideorder'] = ((isset($options['woofields']['hideorder_' . $key])) ? $options['woofields']['hideorder_' . $key] : 0);
 				$checkout_fields[$key]['type'] = ((!empty($options['woofields']['type_' . $key])) ? $options['woofields']['type_' . $key] : ((!empty($checkout_fields[$key]['type'])) ? $checkout_fields[$key]['type'] : 'text') );
 				$checkout_fields[$key]['classsel'] = ((!empty($options['woofields']['class_' . $key])) ? $options['woofields']['class_' . $key] : ((isset($checkout_fields[$key]['class'])) ? $checkout_fields[$key]['class'][0] : 'form-row-wide') );
 				$checkout_fields[$key]['settings'] = ((!empty($options['woofields']['settings_' . $key])) ? $options['woofields']['settings_' . $key] : '' );
@@ -1304,9 +1338,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				//$fieldLabel = $field['displaylabel'];
 				$fieldkey = str_replace('billing_', '', $key);
 				if (isset($fields[$fieldkey])): 
+					//@TODO: this will never return nothing as $fields does not hold any keys according to $fieldkey
 					$billing_fields[$fieldkey] = $fields[$fieldkey];
 				else:
-					if ($key != 'billing_email_validator' && $field['showorder'] == 1) :
+					if ($key != 'billing_email_validator' && $field['hideorder'] == 0) :
 						if ($options['woofields']['billing'][$key]['custom_' . $key]) :
 							$configField = $this->createCustomStandardField($key, 'billing', $options['woofields']['type_' . $key]);
 							if (isset($configField['class'])) unset($configField['class']);
@@ -1319,10 +1354,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							if (!isset($configField['label'])) $configField['label'] = __($checkout_fields[$key]['label'], WCPGSK_DOMAIN);
 							
 							//show select values as text in this case
-							if ($configField['type'] == 'select') $configField['type'] = 'text';
+							if ( !empty($configField['type']) && $configField['type'] == 'select' ) $configField['type'] = 'text';
 							//textarea is not recognized by woocommerce in order billing address context
-							if ($configField['type'] == 'textarea') $configField['type'] = 'text';
-							if ($field['showorder'] == 1)
+							if ( !empty($configField['type']) && $configField['type'] == 'textarea' ) $configField['type'] = 'text';
+							if ($field['hideorder'] == 0)
 								$configField['show'] = true;
 							else
 								$configField['show'] = false;
@@ -1355,6 +1390,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$field_order = 1;
 
 			foreach ($checkout_fields as $key => $field) :
+				$checkout_fields[$key]['required'] = isset( $checkout_fields[$key]['required'] ) ?  $checkout_fields[$key]['required'] : 0;
 				$checkout_fields[$key]['label'] = !empty($checkout_fields[$key]['label']) ? $checkout_fields[$key]['label'] : '';
 				$checkout_fields[$key]['placeholder'] = !empty($checkout_fields[$key]['placeholder']) ? $checkout_fields[$key]['placeholder'] : '';
 
@@ -1366,7 +1402,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				//before required defreq
 				$checkout_fields[$key]['defreq'] = ((isset($checkout_fields[$key]['required']) && $checkout_fields[$key]['required'] == 1) ? $defchecked : $defunchecked);
 				$checkout_fields[$key]['required'] = ((isset($options['woofields']['required_' . $key])) ? $options['woofields']['required_' . $key] : $checkout_fields[$key]['required']);
-				$checkout_fields[$key]['showorder'] = ((isset($options['woofields']['showorder_' . $key])) ? $options['woofields']['showorder_' . $key] : 0);
+				$checkout_fields[$key]['hideorder'] = ((isset($options['woofields']['hideorder_' . $key])) ? $options['woofields']['hideorder_' . $key] : 0);
 				$checkout_fields[$key]['type'] = ((!empty($options['woofields']['type_' . $key])) ? $options['woofields']['type_' . $key] : ((!empty($checkout_fields[$key]['type'])) ? $checkout_fields[$key]['type'] : 'text') );
 				
 				$checkout_fields[$key]['classsel'] = ((!empty($options['woofields']['class_' . $key])) ? $options['woofields']['class_' . $key] : ((isset($checkout_fields[$key]['class'])) ? $checkout_fields[$key]['class'][0] : 'form-row-wide') );
@@ -1395,10 +1431,11 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 
 							if (!isset($configField['label'])) $configField['label'] = __($checkout_fields[$key]['label'], WCPGSK_DOMAIN);
 							//show select values as text in this case
-							if ($configField['type'] == 'select') $configField['type'] = 'text';
+							//show select values as text in this case
+							if ( !empty($configField['type']) && $configField['type'] == 'select' ) $configField['type'] = 'text';
 							//textarea is not recognized by woocommerce in order billing address context
-							if ($configField['type'] == 'textarea') $configField['type'] = 'text';
-							if ($field['showorder'] == 1)
+							if ( !empty($configField['type']) && $configField['type'] == 'textarea' ) $configField['type'] = 'text';
+							if ($field['hideorder'] == 0)
 								$configField['show'] = true;
 							else
 								$configField['show'] = false;
@@ -1414,7 +1451,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		}
 
 		/**
-		 * Our filter for shipping fields.
+		 * Our filter for billing fields.
 		 *
 		 * @access public
 		 * @param array $fields
@@ -1509,6 +1546,14 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			return $fields;
 		}
 		
+		/**
+		 * Our filter for shipping fields.
+		 *
+		 * @access public
+		 * @param array $fields
+		 * @since 1.1.0
+		 * @return array $fields (processed)
+		 */						
 		public function wcpgsk_checkout_fields_shipping($fields) {
 			global $woocommerce;
 			$options = get_option( 'wcpgsk_settings' );
@@ -1598,10 +1643,18 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			return $fields;
 		}
 				
+		/**
+		 * Process form data supplied via the checkout form.
+		 *
+		 * @access public
+		 * @since 1.1.0
+		 * @modified 1.5.0
+		 * @return Raise errors and adjust values if necessary
+		 */						
 		public function wcpgsk_checkout_process() {
 			global $woocommerce;
-			global $wcpgsksession;
-			$wcpgsksession->post = $_POST;
+			global $wcpgs_ksession;
+			$wcpgsk_session->post = $_POST;
 			$options = get_option( 'wcpgsk_settings' );
 			
 			if (isset($options['checkoutform']['billingemailvalidator']) && $options['checkoutform']['billingemailvalidator'] == 1) {
@@ -1616,7 +1669,18 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				if ( strpos($key, '_wcpgsk_repeater') !== false ) :
 					$testkey = str_replace('_wcpgsk_repeater', '', $key);
 					if ( $_POST[$key] != $_POST[$testkey] ) :
-						$woocommerce->add_error(  '<strong>' . sprintf(__('You have to validate the value <em style="color:red">%s</em> correctly! Please check your input.', WCPGSK_DOMAIN), $_POST[ $testkey ]) . '</strong>');
+						$captured_value = $_POST[ $testkey ];
+						if ( isset($options['woofields']['settings_' . $testkey]) ) :
+							$params = $this->explodeParameters($options['woofields']['settings_' . $testkey]);
+							if ( isset($params) && isset($params['validate']) && !empty($params['validate']) && $params['validate'] == 'password' ) :
+								$captured_value = '*******';
+							endif;
+						endif;
+						$forLabel = '';
+						if ( isset($options['woofields']['label_' . $testkey]) && !empty($options['woofields']['label_' . $testkey]) ) :
+							$forLabel = __($options['woofields']['label_' . $testkey], WCPGSK_DOMAIN);
+						endif;
+						$woocommerce->add_error(  '<strong>' . sprintf(__('You have to validate the value <em style="color:red">%s</em> for %s correctly! Please check your input.', WCPGSK_DOMAIN), $captured_value, $forLabel ) . '</strong>');
 					
 					endif;
 					unset($_POST[$key]);
@@ -2025,7 +2089,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			return $params;
 		}
 
-		private function explodeAttribute($param) {
+		public function explodeAttribute($param) {
 			$params = array();
 
 			if ($param) {
@@ -2081,8 +2145,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 * @since 1.1.0
 		 * @return void
 		 */
-		public function wcpgsk_admin_scripts( $hook_suffix) {
-			//echo( 'Hook suffix: ' . $hook_suffix);
+		public function wcpgsk_admin_scripts( $hook_suffix ) {
 			if ( $hook_suffix == 'woocommerce_page_wcpgsk' ) {
 
 				if(!wp_script_is('jquery-ui-accordion', 'queue')){
@@ -2120,10 +2183,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 * @since 1.1.0
 		 * @return void
 		 */
-		public function activation () {
+		public function activation() {
 			$this->register_plugin_version();
 			global $wcpgsk_options;
-			//add_option( 'wcpgsk_settings', $wcpgsk_options );
 			$this->wcpgsk_initial_settings();			
 		} // End activation()
 
