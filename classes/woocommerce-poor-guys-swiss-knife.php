@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * WooCommercePoorGuysSwissKnife Main Class
  *
  * @class 		WCPGSK_Main
- * @version		1.1
+ * @version		1.2
  * @package		WooCommerce-Poor-Guys-Swiss-Knife/Classes
  * @category	Class
  * @author 		Uli Hake
@@ -63,7 +63,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						
 			add_action( 'woocommerce_email_after_order_table', array($this, 'wcpgsk_email_after_order_table') );// $order, false, true );
 			add_action( 'woocommerce_order_details_after_order_table', array($this, 'wcpgsk_order_details_after_order_table'), 10, 1 );
-			
+			add_filter( 'woocommerce_address_to_edit', array($this, 'wcpgsk_address_to_edit'), 10, 1 );
 		}
 
 		/**
@@ -1245,6 +1245,28 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			return $input;
 		}
 		
+		/**
+		 * Our filter for customer editing billing and shipping address.
+		 *
+		 * @access public
+		 * @param array $address
+		 * @since 1.5.1
+		 * @return array $address (processed)
+		 */						
+		public function wcpgsk_address_to_edit($address) {
+			$options = get_option( 'wcpgsk_settings' );
+			foreach ($address as $key => $field) :
+				if ( isset($options['woofields']['remove_' . $key]) && $options['woofields']['remove_' . $key] == 1) :
+					$address[$key]['custom_attributes'] = array('style' => 'display:none');
+					$address[$key]['label'] = '';
+					$address[$key]['required'] = false;
+				endif;
+			endforeach;
+		
+		
+			return $address;
+		}
+
 		/**
 		 * Our filter to add billing fields.
 		 *
