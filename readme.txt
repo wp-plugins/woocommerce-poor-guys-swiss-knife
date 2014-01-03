@@ -149,6 +149,7 @@ You have to reconfigure what was formerly "Show in order". From version 1.5.0 on
 
 * Remove/hide fields according to configuration for logged-in customers who wish to edit their billing or shipping address 
 
+
 = 1.5.0 =
 
 * Min and Max input for items in cart and individual item quantities can now be turned off setting 0 or nothing in the administration. All Min and Max values will default to 0
