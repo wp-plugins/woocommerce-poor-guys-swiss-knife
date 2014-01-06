@@ -1,7 +1,7 @@
 === WooCommerce Poor Guys Swiss Knife ===
 Contributors: ulih
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KJ4K2X953H8CC
-Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender
+Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation
 Requires at least: 3.1
 Tested up to: 3.8
 Stable tag: 1.5.1
@@ -25,6 +25,8 @@ WooCommerce Poor Guys Swiss Knife has been developed in cooperation with [Nicest
 From version 1.3 onwards captured data in the context of billing and shipping custom fields will display as additional billing and shipping information on order receipt page and emails.
 
 WooCommerce Poor Guys Swiss Knife includes, starting with v.1.4.0 the possibility to enable confirmation fields, useful in the context of added email and password custom fields, for instance. The standard email validation field for the email field supplied by WooCommerce within the billing section has to be activated like before.
+
+The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more tools to your swiss knife like custom fields on a per product and per variation basis for checkout forms and a lot more.
 
 Now includes translations for German and Spanish.
 
@@ -100,6 +102,15 @@ You need to upgrade to WooCommerce Rich Guys Swiss Knife to add personalization 
 
 Find instructions under "Other Notes"
 
+= More Tools =
+
+More Tools for your WooCommerce Swiss Knife are available with the Rich Guys Swiss Knife for WooCommerce. Here's a selection of some of the features offered by WooCommerce Rich Guys Swiss Knife:
+
+* Item personalization during checkout
+* Custom fields on a per product and per variation basis using item personalization options
+* Bulk operations for variations
+* Variation Extender which allows to attach virtual variations meaningful to customers and to map these variations back to a more reduced set of internal variations. This allows you to overcome the resource (runtime) and management limits that most e-commerce stores show in the context of variable products.
+
 == Upgrade Notice ==
 
 Automatic updates should work without problems, but, like always, backup your site and you'll feel better.
@@ -134,8 +145,11 @@ Yes, you can configure your added checkout form fields to show up in the adminis
 
 If you add item customization forms using WooCommerce Rich Guys Swiss Knife your data will show up in your order inside the administration as well.
 
-= My custom field data does not show up anymore in emails and receipts. How can I fix this? =
+= My custom field data does not show up in emails and receipts. How can I fix this? =
 You have to reconfigure what was formerly "Show in order". From version 1.5.0 onwards you have to hide the data. This is easier as the user and you expects his data to be visible by default.
+
+= Can I reconfigure the WooCommerce standard fields? =
+Yes, you can change the required status, label and placeholders or even remove the built-in WooCommerce fields, but please test your changes. Especially the email field as well as the country selection can be vital for the correct functioning of your WooCommerce instance.
 
 == Screenshots ==
 
