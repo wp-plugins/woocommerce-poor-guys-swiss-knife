@@ -64,6 +64,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			add_action( 'woocommerce_email_after_order_table', array($this, 'wcpgsk_email_after_order_table') );// $order, false, true );
 			add_action( 'woocommerce_order_details_after_order_table', array($this, 'wcpgsk_order_details_after_order_table'), 10, 1 );
 			add_filter( 'woocommerce_address_to_edit', array($this, 'wcpgsk_address_to_edit'), 10, 1 );
+			add_action( 'woocommerce_after_template_part', array($this, 'wcpgsk_after_template_part'), 10, 4 ); //$template_name, $template_path, $located, $args );
+			
 		}
 
 		/**
@@ -1252,21 +1254,64 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 * @param array $address
 		 * @since 1.5.1
 		 * @return array $address (processed)
+		 * @TODO elaborate on this and billing and shipping custom fields, WooCommerce needs the country field present but nothing else... We have ways to improve this.
 		 */						
 		public function wcpgsk_address_to_edit($address) {
+			global $woocommerce;
 			$options = get_option( 'wcpgsk_settings' );
+			$field_order = 1;	
 			foreach ($address as $key => $field) :
+				$address[$key]['order'] = ((!empty($options['woofields']['order_' . $key]) && ctype_digit($options['woofields']['order_' . $key])) ? $options['woofields']['order_' . $key] : $field_order);			
+				
 				if ( isset($options['woofields']['remove_' . $key]) && $options['woofields']['remove_' . $key] == 1) :
 					$address[$key]['custom_attributes'] = array('style' => 'display:none');
 					$address[$key]['label'] = '';
 					$address[$key]['required'] = false;
+				elseif ( $key == 'billing_email_validator' ) :
+					$address[$key]['custom_attributes'] = array('style' => 'display:none');
+					$address[$key]['label'] = '';
+					$address[$key]['required'] = false;
+				else :
+					if ( isset($options['woofields']['label_' . $key]) ) :	
+						$address[$key]['label'] = __( $options['woofields']['label_' . $key], WCPGSK_DOMAIN );
+					endif;
+					if ( isset($options['woofields']['placeholder_' . $key]) ) :	
+						$address[$key]['placeholder'] = __( $options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN );
+					endif;
+					if ( isset($options['woofields']['required_' . $key]) ) :
+						$address[$key]['required'] = ((isset($options['woofields']['required_' . $key])) ? $options['woofields']['required_' . $key] : ( isset($address[$key]['required']) ? $address[$key]['required'] : false ) );
+					endif;
+					//if (!empty($options['woofields']['class_' . $key])) {
+					if (!empty($address[$key]['class']) && is_array($address[$key]['class'])) :
+						$address[$key]['class'][0] = 'form-row-wide';
+					else :
+						$address[$key]['class'] = array ('form-row-wide');
+					endif;
 				endif;
+				$field_order++;				
 			endforeach;
-		
-		
+			
+			uasort($address, array($this, "compareFieldOrder"));						
 			return $address;
 		}
 
+		
+		/**
+		 * Assure that templates provide our WCPGSK Funtionality correctly.
+		 *
+		 * @access public
+		 * @param string $template_name
+		 * @param string $template_path
+		 * @param string $located
+		 * @param mixed $args
+		 * @since 1.5.2
+		 * @return array $fields (processed)
+		 */						
+		function wcpgsk_after_template_part( $template_name, $template_path, $located, $args ) {
+			if ( $template_name == 'myaccount/form-edit-address.php' ) :
+				wcpgsk_after_checkout_form($template_name);
+			endif;
+		}
 		/**
 		 * Our filter to add billing fields.
 		 *
@@ -1478,6 +1523,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 * @access public
 		 * @param array $fields
 		 * @since 1.1.0
+		 * @modified 1.5.2
 		 * @return array $fields (processed)
 		 */						
 		public function wcpgsk_checkout_fields_billing($fields) {
@@ -1533,10 +1579,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							$orderfields[$repkey] = $this->createCustomStandardFieldClone($key, 'billing', $options['woofields']['type_' . $key]);
 
 							//set all our other data
-							//woocommerce changed?
-							//if ($options['woofields']['billing'][$key]['custom_' . $key])
-							//	$orderfields[$key] = createCustomStandardField($key, 'billing', $options['woofields']['type_' . $key]);			
-							if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) unset($orderfields[$repkey]['required']);
+							//unset required for repeater fields as this collides with WooCommerce
+							if ( isset($orderfields[$repkey]['required']) ) unset($orderfields[$repkey]['required']);
 							//check if repeater field
 						
 							$orderfields[$repkey]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
@@ -1631,9 +1675,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 
 							//set all our other data
 							//woocommerce changed?
-							//if ($options['woofields']['shipping'][$key]['custom_' . $key])
-							//	$orderfields[$key] = createCustomStandardField($key, 'shipping', $options['woofields']['type_' . $key]);			
-							if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) unset($orderfields[$repkey]['required']);
+							//unset required for repeater fields as this collides with WooCommerce
+							if ( isset($orderfields[$repkey]['required']) ) unset($orderfields[$repkey]['required']);
 							//check if repeater field
 						
 							$orderfields[$repkey]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';

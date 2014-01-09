@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation
 Requires at least: 3.1
 Tested up to: 3.8
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -104,12 +104,13 @@ Find instructions under "Other Notes"
 
 = More Tools =
 
-More Tools for your WooCommerce Swiss Knife are available with the Rich Guys Swiss Knife for WooCommerce. Here's a selection of some of the features offered by WooCommerce Rich Guys Swiss Knife:
+More Tools for your WooCommerce Swiss Knife are available with the Rich Guys Swiss Knife for WooCommerce:
 
 * Item personalization during checkout
-* Custom fields on a per product and per variation basis using item personalization options
+* Custom fields on a per product and per variation basis using Item personalization options
 * Bulk operations for variations
 * Variation Extender which allows to attach virtual variations meaningful to customers and to map these variations back to a more reduced set of internal variations. This allows you to overcome the resource (runtime) and management limits that most e-commerce stores show in the context of variable products.
+
 
 == Upgrade Notice ==
 
@@ -127,7 +128,7 @@ With WooCommerce Poor Guys Swiss Knife you can support:
 * Number (as simple numeric input or ranges)
 * Select (with subtypes of checkboxes, radio buttons or single or multiple select boxes)
 
-With WooCommerce Poor Guys Swiss Knife you have more or less 11 diferent custom field types available.
+With WooCommerce Poor Guys Swiss Knife you have 11 diferent custom field types available or directly or via the configuration of the main types.
 
 = Does Poor Guys Swiss Knife limit options for selects or other custom fields = 
 Not in any way. You can add as many options as you like. You can also add as many custom fields as you like.
@@ -159,10 +160,15 @@ Yes, you can change the required status, label and placeholders or even remove t
  
 == Changelog ==
 
+= 1.5.2 =
+
+* Fix a problem for repeater fields when original field has required attribute. Required for repeater fields collides with WooCommerce as the repeater field validates but is not present in the field range as we add it as a "virtual" field only present during checkout with our own validation
+* Add WooCommerce Version check to assure 2.0+ versions of WooCommerce
+* Enhancements for billing and shipping forms for logged-in customers which edit their addresses via "Edit my address". Fields presented respect now most of the settings for checkout forms.
+
 = 1.5.1 =
 
 * Remove/hide fields according to configuration for logged-in customers who wish to edit their billing or shipping address 
-
 
 = 1.5.0 =
 

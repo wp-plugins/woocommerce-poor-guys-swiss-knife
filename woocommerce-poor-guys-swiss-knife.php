@@ -7,7 +7,7 @@
  * Contributor: ulih
  * Author: Uli Hake
  * Author URI: http://takebarcelona.com/authorship/uli-hake
- * Version: 1.5.1
+ * Version: 1.5.2
  * @package WordPress
  * @subpackage WooCommerce Poor Guys Swiss Knife
  * @author Uli Hake
@@ -36,6 +36,9 @@ $wcpgsk_name = 'WooCommerce Poor Guys Swiss Knife';
 // Define plugin text domain
 if ( !defined('WCPGSK_DOMAIN') ) :
 	define('WCPGSK_DOMAIN', 'wcpgsk');
+endif;
+if ( !defined('WCPGSK_NAME') ) :
+	define('WCPGSK_NAME', 'WooCommerce Poor Guys Swiss Knife');
 endif;
 if ( !defined('WCPGSK_SLUG') ) :
 	define( 'WCPGSK_SLUG', 'woocommerce-poor-guys-swiss-knife' );
@@ -74,22 +77,44 @@ function wcpgsk_plugin_activation_message() {
 }
 }
 
-global $wcpgsk, $wcpgsk_about, $wcpgsk_options, $wcpgsk_session;	
-//only continue loading
-if ( $wcpgsk_woocommerce_active ) {
-	$wcpgsk_options = get_option('wcpgsk_settings', true);
-	require_once( 'classes/woocommerce-poor-guys-swiss-knife.php' );
-	require_once( 'classes/woocommerce-poor-guys-swiss-knife-about.php' );	
-	require_once( 'wcpgsk-af.php' );
-	if ( !is_admin() ) :
-		add_action( 'plugins_loaded', 'wcpgsk_load_wcsession_helper' );
-	endif;
-	//load into our global
-	$wcpgsk = new WCPGSK_Main( __FILE__ );
-	$wcpgsk->version = '1.5.1';	
-} else {
-	return;
+//Check if WooCommerce is available and place a admin message if not
+if ( ! function_exists('wcpgsk_woocommerce_version_message') ) {
+function wcpgsk_woocommerce_version_message() {
+	//step out with message
+	$html = '<div class="error">';
+		$html .= '<p>';
+			$html .= __( 'You need at least WooCommerce 2.0+ before you can use <strong>' . WCPGSK_NAME . '</strong>', WCPGSK_DOMAIN );
+		$html .= '</p>';
+	$html .= '</div><!-- /.updated -->';
+	echo $html;	
 }
+}
+
+add_action( 'woocommerce_init', 'wcpgsk_init' );
+if ( !function_exists('wcpgsk_load_wcsession_helper') ) {
+function wcpgsk_init() {
+	global $wcpgsk, $wcpgsk_about, $wcpgsk_options, $wcpgsk_session, $wcpgsk_woocommerce_active;	
+	//only continue loading
+	if ( $wcpgsk_woocommerce_active && version_compare( WOOCOMMERCE_VERSION, "2.0" ) >= 0 ) {
+		$wcpgsk_options = get_option('wcpgsk_settings', true);
+		require_once( 'classes/woocommerce-poor-guys-swiss-knife.php' );
+		require_once( 'classes/woocommerce-poor-guys-swiss-knife-about.php' );	
+		require_once( 'wcpgsk-af.php' );
+		if ( !is_admin() ) :
+			add_action( 'plugins_loaded', 'wcpgsk_load_wcsession_helper' );
+		endif;
+		//load into our global
+		$wcpgsk = new WCPGSK_Main( __FILE__ );
+		$wcpgsk->version = '1.5.2';	
+	} elseif ( version_compare( WOOCOMMERCE_VERSION, "2.0" ) < 0 ) {
+		add_action( 'admin_notices', 'wcpgsk_woocommerce_version_message', 0 ) ;	
+		return;
+	} else {
+		return;
+	}
+}
+}
+
 if ( !function_exists('wcpgsk_load_wcsession_helper') ) {
 function wcpgsk_load_wcsession_helper() {
 	global $wcpgsk_name, $wcpgsk_session;
