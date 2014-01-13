@@ -61,10 +61,21 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			add_filter( 'woocommerce_load_order_data', array($this, 'wcpgsk_load_order_data'), 5,  1);
 			add_action( 'woocommerce_checkout_init', array($this, 'wcpgsk_checkout_init'), 10, 1 );
 						
-			add_action( 'woocommerce_email_after_order_table', array($this, 'wcpgsk_email_after_order_table') );// $order, false, true );
+			add_action( 'woocommerce_email_after_order_table', array($this, 'wcpgsk_email_after_order_table') );
 			add_action( 'woocommerce_order_details_after_order_table', array($this, 'wcpgsk_order_details_after_order_table'), 10, 1 );
 			add_filter( 'woocommerce_address_to_edit', array($this, 'wcpgsk_address_to_edit'), 10, 1 );
-			add_action( 'woocommerce_after_template_part', array($this, 'wcpgsk_after_template_part'), 10, 4 ); //$template_name, $template_path, $located, $args );
+			add_action( 'woocommerce_after_template_part', array($this, 'wcpgsk_after_template_part'), 10, 4 );
+			
+			add_filter( 'woocommerce_process_myaccount_field_billing_postcode', array($this, 'wcpgsk_process_myaccount_field_billing_postcode'), 99, 1 );
+			add_filter( 'woocommerce_process_myaccount_field_shipping_postcode', array($this, 'wcpgsk_process_myaccount_field_shipping_postcode'), 99, 1 );
+
+			add_filter( 'woocommerce_order_formatted_billing_address', array($this, 'wcpgsk_order_formatted_billing_address'), 99 );
+			add_filter( 'woocommerce_order_formatted_shipping_address', array($this, 'wcpgsk_order_formatted_shipping_address'), 99 );
+
+			add_filter( 'woocommerce_user_column_billing_address', array($this, 'wcpgsk_order_formatted_billing_address'), 99 );
+			add_filter( 'woocommerce_user_column_shipping_address', array($this, 'wcpgsk_order_formatted_shipping_address'), 99 );
+
+			add_filter( 'woocommerce_customer_meta_fields', array($this, 'wcpgsk_customer_meta_fields'), 99 );
 			
 		}
 
@@ -310,16 +321,6 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			<?php
 		}
 		
-		/**
-		 * Update our formatted address.
-		 *
-		 * @access public
-		 * @since 1.3.0
-		 * @output Settings page
-		 */		
-		public function wcpgsk_formatted_address_replacements($formatted, $args) {
-			return $formatted;	
-		}
 		
 		/**
 		 * Update our order billing address.
@@ -365,17 +366,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			return $captured_fields;	
 		}
 
-		/**
-		 * Update our order shipping address.
-		 *
-		 * @access public
-		 * @since 1.3.0
-		 * @output Settings page
-		 */		
-		public function wcpgsk_order_formatted_shipping_address($address, $order) {
-			return $address;
-		}
-		
+				
 		/**
 		 * Our Admin Settings Page.
 		 *
@@ -1267,6 +1258,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					$address[$key]['custom_attributes'] = array('style' => 'display:none');
 					$address[$key]['label'] = '';
 					$address[$key]['required'] = false;
+
 				elseif ( $key == 'billing_email_validator' ) :
 					$address[$key]['custom_attributes'] = array('style' => 'display:none');
 					$address[$key]['label'] = '';
@@ -1297,6 +1289,106 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 
 		
 		/**
+		 * Filter fields for admin user page.
+		 *
+		 * @access public
+		 * @param array $show_fields
+		 * @since 1.5.3
+		 * @return array $show_fields (processed)
+		 */						
+		public function wcpgsk_customer_meta_fields($show_fields) {
+			global $woocommerce;
+			$options = get_option( 'wcpgsk_settings' );
+			$field_order = 1;	
+			$address = $show_fields['billing']['fields'];
+			foreach ($address as $key => $field) :
+				$address[$key]['order'] = ((!empty($options['woofields']['order_' . $key]) && ctype_digit($options['woofields']['order_' . $key])) ? $options['woofields']['order_' . $key] : $field_order);			
+				if ( isset($options['woofields']['remove_' . $key]) && $options['woofields']['remove_' . $key] == 1) :
+					unset($address[$key]);
+				endif;
+				$field_order++;				
+			endforeach;
+			
+			uasort($address, array($this, "compareFieldOrder"));						
+			$show_fields['billing']['fields'] = $address;
+
+			$field_order = 1;	
+			$address = $show_fields['shipping']['fields'];
+			foreach ($address as $key => $field) :
+				$address[$key]['order'] = ((!empty($options['woofields']['order_' . $key]) && ctype_digit($options['woofields']['order_' . $key])) ? $options['woofields']['order_' . $key] : $field_order);			
+				if ( isset($options['woofields']['remove_' . $key]) && $options['woofields']['remove_' . $key] == 1) :
+					unset($address[$key]);
+				endif;
+				$field_order++;				
+			endforeach;
+			
+			uasort($address, array($this, "compareFieldOrder"));						
+
+			$show_fields['shipping']['fields'] = $address;
+			return $show_fields;
+		}
+		
+		/**
+		 * Handle zip/postcode if postcode field has been removed.
+		 *
+		 * @access public
+		 * @param string $postval
+		 * @since 1.5.3
+		 * @return string $postval (processed)
+		 */						
+		public function wcpgsk_process_myaccount_field_billing_postcode($postval) {
+			$options = get_option( 'wcpgsk_settings' );
+			if ( isset($options['woofields']['remove_billing_postcode']) && $options['woofields']['remove_billing_postcode'] == 1 && isset($_POST['billing_country']) && !empty($_POST['billing_country']) ) :
+				$country = $_POST['billing_country'];
+				switch ( $country ) :
+					case "GB" :
+						$postval = 'bfpo0000';
+					break;
+					case "US" :
+						$postval = '00000-0000';
+					break;
+					case "CH" :
+						$postval = '0000';
+					break;
+					default:
+						$postval = '0000';
+					break;
+				endswitch;
+			endif;
+			return $postval;
+		}
+		
+		/**
+		 * Handle zip/postcode if postcode field has been removed.
+		 *
+		 * @access public
+		 * @param string $postval
+		 * @since 1.5.3
+		 * @return string $postval (processed)
+		 */						
+		public function wcpgsk_process_myaccount_field_shipping_postcode($postval) {
+			$options = get_option( 'wcpgsk_settings' );
+			if ( isset($options['woofields']['remove_shipping_postcode']) && $options['woofields']['remove_shipping_postcode'] == 1 && isset($_POST['shipping_country']) && !empty($_POST['shipping_country']) ) :
+				$country = $_POST['shipping_country'];
+				switch ( $country ) :
+					case "GB" :
+						$postval = 'bfpo0000';
+					break;
+					case "US" :
+						$postval = '00000-0000';
+					break;
+					case "CH" :
+						$postval = '0000';
+					break;
+					default:
+						$postval = '0000';
+					break;
+				endswitch;
+			endif;
+			return $postval;
+		}
+		
+		/**
 		 * Assure that templates provide our WCPGSK Funtionality correctly.
 		 *
 		 * @access public
@@ -1312,6 +1404,91 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				wcpgsk_after_checkout_form($template_name);
 			endif;
 		}
+		
+		/**
+		 * Update our order shipping address.
+		 *
+		 * @access public
+		 * @since 1.5.3
+		 * @output Settings page
+		 */		
+		public function wcpgsk_order_formatted_shipping_address($address) {
+			global $woocommerce;
+			$options = get_option( 'wcpgsk_settings' );
+			$field_order = 1;
+			$new_address = array();
+			if ( !isset($address['first_name']) ) $address['first_name'] = '';
+			if ( !isset($address['last_name']) ) $address['last_name'] = '';
+			if ( !isset($address['company']) ) $address['company'] = '';
+			if ( !isset($address['address_1']) ) $address['address_1'] = '';
+			if ( !isset($address['address_2']) ) $address['address_2'] = '';
+			if ( !isset($address['city']) ) $address['city'] = '';
+			if ( !isset($address['state']) ) $address['state'] = '';
+			if ( !isset($address['postcode']) ) $address['postcode'] = '';
+			if ( !isset($address['country']) ) $address['country'] = '';
+			
+			foreach ($address as $key => $field) :
+				$keycheck = 'shipping_' . $key;
+				
+				if ( isset($options['woofields']['remove_' . $keycheck]) && $options['woofields']['remove_' . $keycheck] == 1) :
+					$new_address[$key]['order'] = ((!empty($options['woofields']['order_' . $keycheck]) && ctype_digit($options['woofields']['order_' . $keycheck])) ? $options['woofields']['order_' . $keycheck] : $field_order);			
+					$new_address[$key]['value'] = '';
+				else :
+					$new_address[$key]['order'] = ((!empty($options['woofields']['order_' . $keycheck]) && ctype_digit($options['woofields']['order_' . $keycheck])) ? $options['woofields']['order_' . $keycheck] : $field_order);			
+					$new_address[$key]['value'] = $address[$key];
+				endif;
+				$field_order++;				
+			endforeach;			
+			uasort($new_address, array($this, "compareFieldOrder"));
+			$address = array();
+			foreach ($new_address as $key => $field) :
+				$address[$key] = $new_address[$key]['value'];
+			endforeach;
+			return $address;
+		}
+		
+		/**
+		 * Update our order billing address.
+		 *
+		 * @access public
+		 * @since 1.5.3
+		 * @output Settings page
+		 */		
+		public function wcpgsk_order_formatted_billing_address($address) {
+			global $woocommerce;
+			$options = get_option( 'wcpgsk_settings' );
+			$field_order = 1;
+			$new_address = array();
+			if ( !isset($address['first_name']) ) $address['first_name'] = '';
+			if ( !isset($address['last_name']) ) $address['last_name'] = '';
+			if ( !isset($address['company']) ) $address['company'] = '';
+			if ( !isset($address['address_1']) ) $address['address_1'] = '';
+			if ( !isset($address['address_2']) ) $address['address_2'] = '';
+			if ( !isset($address['city']) ) $address['city'] = '';
+			if ( !isset($address['state']) ) $address['state'] = '';
+			if ( !isset($address['postcode']) ) $address['postcode'] = '';
+			if ( !isset($address['country']) ) $address['country'] = '';
+			
+			foreach ($address as $key => $field) :
+				$keycheck = 'billing_' . $key;
+				
+				if ( isset($options['woofields']['remove_' . $keycheck]) && $options['woofields']['remove_' . $keycheck] == 1) :
+					$new_address[$key]['order'] = ((!empty($options['woofields']['order_' . $keycheck]) && ctype_digit($options['woofields']['order_' . $keycheck])) ? $options['woofields']['order_' . $keycheck] : $field_order);			
+					$new_address[$key]['value'] = '';
+				else :
+					$new_address[$key]['order'] = ((!empty($options['woofields']['order_' . $keycheck]) && ctype_digit($options['woofields']['order_' . $keycheck])) ? $options['woofields']['order_' . $keycheck] : $field_order);			
+					$new_address[$key]['value'] = $address[$key];
+				endif;
+				$field_order++;				
+			endforeach;			
+			uasort($new_address, array($this, "compareFieldOrder"));
+			$address = array();
+			foreach ($new_address as $key => $field) :
+				$address[$key] = $new_address[$key]['value'];
+			endforeach;
+			return $address;
+		}
+		
 		/**
 		 * Our filter to add billing fields.
 		 *
@@ -1341,6 +1518,16 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					$fields[$customkey] = $this->createCustomStandardField($customkey, 'billing', $options['woofields']['type_' . $customkey]);
 				}
 			}
+			$field_order = 1;
+			foreach ($fields as $key => $field) :
+				$fields[$key]['order'] = ((!empty($options['woofields']['order_' . $key]) && ctype_digit($options['woofields']['order_' . $key])) ? $options['woofields']['order_' . $key] : $field_order);			
+			
+				if ( isset($options['woofields']['remove_' . $key]) && $options['woofields']['remove_' . $key] == 1) :
+					$fields[$key]['required'] = false;
+				endif;
+				$field_order++;
+			endforeach;
+			uasort($fields, array($this, "compareFieldOrder"));						
 			return $fields;
 		}
 
@@ -1360,6 +1547,17 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					$fields[$customkey] = $this->createCustomStandardField($customkey, 'shipping', $options['woofields']['type_' . $customkey]);
 				}
 			}
+			$field_order = 1;
+			foreach ($fields as $key => $field) :
+				$fields[$key]['order'] = ((!empty($options['woofields']['order_' . $key]) && ctype_digit($options['woofields']['order_' . $key])) ? $options['woofields']['order_' . $key] : $field_order);			
+				if ( isset($options['woofields']['remove_' . $key]) && $options['woofields']['remove_' . $key] == 1) :
+					$fields[$key]['required'] = false;
+				endif;
+				$field_order++;
+			endforeach;
+			uasort($fields, array($this, "compareFieldOrder"));						
+			
+			
 			return $fields;
 		}
 		
