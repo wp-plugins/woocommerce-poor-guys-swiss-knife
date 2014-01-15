@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation
 Requires at least: 3.1
 Tested up to: 3.8
-Stable tag: 1.5.3
+Stable tag: 1.5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,11 @@ Yes, you can change the required status, label and placeholders or even remove t
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.5.4 =
+
+* Usage of internal woocommerce 2.0 session object instead of helper class
+* Prevent warning message depending on php configurations by checking object first and recreating it if necessary.
 
 = 1.5.3 =
 

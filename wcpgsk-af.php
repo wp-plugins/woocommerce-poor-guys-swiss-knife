@@ -211,9 +211,19 @@ function wcpgsk_qtyselector_min( $whatever, $product ) {
 }
 
 if ( !function_exists('wcpgsk_qty_input_args') ) {
+ /**
+ * @changed 1.5.4 to avoid warnings in some php contexts
+ * @TODO: revision of this all as the whole process is not meaningful due to some other changes
+ */
 function wcpgsk_qty_input_args($args, $product) {
-	global $wcpgsk_session;
-	$wcpgsk_session->qtyargs = $args;
+	global $wcpgsk_session, $woocommerce;
+	
+	if ( !isset($wcpgsk_session) ) :
+		$wcpgsk_session = $woocommerce->session;
+	endif;
+	if ( isset($wcpgsk_session) && isset($args) && !empty($args) ) :	
+		$wcpgsk_session->qtyargs = $args;
+	endif;
 	return $args;
 }
 }
