@@ -43,6 +43,13 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				add_filter( 'plugin_action_links_'. plugin_basename($this->file), array($this, 'wcpgsk_admin_plugin_actions'), -10 );
 				add_action( 'admin_menu', array($this, 'wcpgsk_admin_menu') );				
 				$wcpgsk_about = new WCPGSK_About( $this->file );
+				//add_action( 'add_meta_boxes', array($this, 'wcpgsk_add_meta_box_minmaxstep'), 10 );
+				add_action( 'woocommerce_product_write_panel_tabs', array( $this, 'wcpgsk_product_write_panel_tab' ), 99 );
+				add_action( 'woocommerce_product_write_panels',     array( $this, 'wcpgsk_product_write_panels' ), 99 );
+				add_action( 'woocommerce_process_product_meta', array( $this, 'wcpgsk_process_product_meta' ), 99);
+				add_action( 'woocommerce_process_product_meta_variable', array( $this, 'wcpgsk_process_product_meta' ), 99);
+
+				
 			endif;
 			
 			//billing and shipping filters
@@ -79,6 +86,143 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			
 		}
 
+		/**
+		 * Register Product Tab for Min/Max/Step Configuration for Simple and Variable products
+		 *
+		 * @access public
+		 * @since 1.6.0
+		 * @echo html
+		 */
+		public function wcpgsk_product_write_panel_tab() {
+			global $post;
+			$options = get_option( 'wcpgsk_settings' );
+			if ( isset($options['cart']['minmaxstepproduct']) && $options['cart']['minmaxstepproduct'] == 1 ) :			
+				if ( $terms = wp_get_object_terms( $post->ID, 'product_type' ) )
+					$product_type = sanitize_title( current( $terms )->name );
+				else
+					$product_type = 'simple';			
+				if ( $product_type === 'simple' || $product_type === 'variable' ) :
+					echo "<li class=\"wcpgsk_product_tab\"><a class=\"icon16 icon-media\" href=\"#wcpgsk_data_tab\">" . __( 'Product Cart Quantities', WCPGSK_DOMAIN ) . "</a></li>";
+				endif;
+			endif;
+		}
+		
+		/**
+		 * Product Tab Content for Min/Max/Step Configuration for Simple and Variable products
+		 *
+		 * @access public
+		 * @since 1.6.0
+		 * @echo html
+		 */
+		public function wcpgsk_product_write_panels() {
+			global $post;
+			$options = get_option( 'wcpgsk_settings' );
+			if ( isset($options['cart']['minmaxstepproduct']) && $options['cart']['minmaxstepproduct'] == 1 ) :
+			
+				// the product
+				if ( $terms = wp_get_object_terms( $post->ID, 'product_type' ) )
+					$product_type = sanitize_title( current( $terms )->name );
+				else
+					$product_type = 'simple';
+				if ( $product_type === 'simple' || $product_type === 'variable' ) :	
+					/*
+					$minqty   = get_post_meta( $post->ID, '_wcpgsk_minqty',  true );
+					$maxqty   = get_post_meta( $post->ID, '_wcpgsk_maxqty',  true );
+					$stepqty  = get_post_meta( $post->ID, '_wcpgsk_stepqty',     true );
+					$minqty = isset($minqty) && !empty($minqty) ? $minqty : 0;
+					$maxqty = isset($maxqty) && !empty($maxqty) ? $maxqty : 0;
+					$stepqty = isset($stepqty) && !empty($stepqty) ? $stepqty : 0;
+					*/
+					$style = 'width:125px;padding:5px 5px 5px 5px;font-size:inherit !important;font-family:inherit !important;font-face:inherit !important;line-height: 18px !important;';
+					$style_before = 'height:auto !important;vertical-align:sub;padding: 0 3px 0 0 !important;font:400 20px/1 dashicons !important;line-height: 18px !important;content:"\f204";';
+					$active_style = '';					
+					?>
+					<style type="text/css">
+						#woocommerce-product-data ul.product_data_tabs li.wcpgsk_product_tab a { <?php echo $style; ?> }
+						#woocommerce-product-data ul.product_data_tabs li.wcpgsk_product_tab a:hover { <?php echo $style; ?> }
+						#woocommerce-product-data ul.product_data_tabs li.wcpgsk_product_tab a:before { <?php echo $style_before; ?> }
+						<?php echo $active_style; ?>
+					</style>
+					<div id="wcpgsk_data_tab" class="panel wc-metaboxes-wrapper woocommerce_options_panel">
+					<?php
+						woocommerce_wp_checkbox( array( 'id' => '_wcpgsk_selectqty', 'label' => __( 'Quantity Selector', WCPGSK_DOMAIN ), 'description' => __( 'Convert quantity input to selector based on quantity configuration.', WCDLM_DOMAIN ) ) );
+					
+						woocommerce_wp_text_input( array( 'id' => '_wcpgsk_minqty', 'type' => 'numeric', 'label' => __( 'Minimum Quantity', WCPGSK_DOMAIN ), 'desc_tip' => true, 'description' => __( 'Please specify an integer value. 0 deactivates the option.', WCPGSK_DOMAIN ), 'custom_attributes' => array('style' => 'width:40%' ) ) );
+						woocommerce_wp_text_input( array( 'id' => '_wcpgsk_maxqty', 'type' => 'numeric', 'label' => __( 'Maximum Quantity', WCPGSK_DOMAIN ), 'desc_tip' => true, 'description' => __( 'Please specify an integer value. Should be equal or higher than minimum value or 0. 0 deactivates the option.', WCPGSK_DOMAIN ), 'custom_attributes' => array('style' => 'width:40%' ) ) );
+						woocommerce_wp_text_input( array( 'id' => '_wcpgsk_stepqty', 'type' => 'numeric', 'label' => __( 'Increment Quantity', WCPGSK_DOMAIN ), 'desc_tip' => true, 'description' => __( 'Please specify an integer value for increment steps. Please assure consistency with minimum and maximum value. 0 deactivates the option.', WCPGSK_DOMAIN ), 'custom_attributes' => array('style' => 'width:40%' ) ) );
+					?>
+					</div>
+					<?php
+				endif;
+			endif;
+		}
+
+		/**
+		 * Store WCPGSK Min/Max/Step configuration data for the product
+		 *
+		 * @access public
+		 * @since 1.6.0
+		 * @return void
+		 */
+		public function wcpgsk_process_product_meta( $post_id ) {
+			global $woocommerce, $wpdb;
+			$options = get_option( 'wcpgsk_settings' );
+			if ( isset($options['cart']['minmaxstepproduct']) && $options['cart']['minmaxstepproduct'] == 1 ) :
+			
+				if (WP_DEBUG) {
+					//trigger_error(sprintf(__("The 'label' and 'id' values of the 'args' parameter of '%s::%s()' are required", WCPGSK_DOMAIN), $_POST['_wcpgsk_minqty'], $post_id));
+					//die();
+				}
+				$minqty = 0;
+				$maxqty = 0;
+				$stepqty = 0;
+				if ( isset( $_POST['_wcpgsk_minqty'] ) && is_numeric($_POST['_wcpgsk_minqty']) ) :
+					$minqty = intval($_POST['_wcpgsk_minqty']) ;
+				endif;
+				if ( isset( $_POST['_wcpgsk_maxqty'] ) && is_numeric($_POST['_wcpgsk_maxqty']) ) :
+					$maxqty = intval($_POST['_wcpgsk_maxqty']) ;
+				endif;
+				if ( isset( $_POST['_wcpgsk_stepqty'] ) && is_numeric($_POST['_wcpgsk_stepqty']) ) :
+					$stepqty = intval($_POST['_wcpgsk_stepqty']) ;
+				endif;
+				
+				if ($minqty > $maxqty && $maxqty > 0) $minqty = 1;
+				if ($maxqty < $minqty) $maxqty = 0;
+				//if ($stepqty < $minqty && $maxqty !== 0) $maxqty = 0;
+				/*
+				if ( $stepqty > 0 ) :
+					$stepval = ( $max_qty - $minqty ) % $stepqty;
+					if ( $stepval < 0 ) :
+						$stepqty = 0;
+					endif;
+				endif;
+				*/
+				if ( isset( $_POST['_wcpgsk_selectqty'] ) && $_POST['_wcpgsk_selectqty'] == 'yes' ) :
+					update_post_meta( $post_id, '_wcpgsk_selectqty', 'yes' );
+				else :
+					update_post_meta( $post_id, '_wcpgsk_selectqty', 'no' );
+				endif;
+				update_post_meta( $post_id, '_wcpgsk_minqty', $minqty );
+				update_post_meta( $post_id, '_wcpgsk_maxqty', $maxqty );
+				update_post_meta( $post_id, '_wcpgsk_stepqty', $stepqty );
+			endif;
+		}
+/*
+		function gcf($a, $b) { 
+	return ( $b == 0 ) ? ($a):( gcf($b, $a % $b) ); 
+}
+function lcm($a, $b) { 
+	return ( $a / gcf($a,$b) ) * $b; 
+}
+function lcm_nums($ar) {
+	if (count($ar) > 1) {
+		$ar[] = lcm( array_shift($ar) , array_shift($ar) );
+		return lcm_nums( $ar );
+	} else {
+		return $ar[0];
+	}
+}
+*/	
 		/**
 		 * Check for minimum and maximum items in cart and if they fulfill the settings.
 		 * and raise error and message if rules are not fulfilled, otherwise clear messages
@@ -270,7 +414,6 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$shipping_fields = $this->wcpgsk_additional_data($order, 'shipping');
 			?>
 			<table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0">
-
 				<tr>
 					<?php 
 					if ( isset($billing_fields) && !empty($billing_fields) ) : 
@@ -493,7 +636,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							</tr>
 						</thead>
 						<tbody>
-							<?php do_action( 'wcpgsk_settings_cart_before', $options ); ?>
+							<?php do_action( 'wcpgsk_settings_cart_before', $options ); ?>							
 							<tr>
 								<td><?php _e('Minimum cart items', WCPGSK_DOMAIN); ?>:</td>
 								<td>
@@ -522,6 +665,17 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									<span class="description"><?php _e('If you want to allow users to buy the maximum of variations allowed, even if the the product maximum is reached, do not check this option. Minimum handling takes this into account, too.', WCPGSK_DOMAIN); ?></span>
 								</td>
 							</tr>
+							<tr>
+								<td><?php _e('Allow min/max/step configuration on per product basis', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[cart][minmaxstepproduct]" type="hidden" value="0" />
+									<input name="wcpgsk_settings[cart][minmaxstepproduct]" type="checkbox" value="1" <?php if (  1 == ($options['cart']['minmaxstepproduct'])) echo "checked='checked'"; ?> />
+								</td>
+								<td>
+									<span class="description"><?php _e('If you want to configure minimum/maximum and steps for item quantities, enable this checkbox. Individual product settings take precedence over the following global settings.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							
 							<tr>
 								<td><?php _e('Switch off quantity input', WCPGSK_DOMAIN); ?>:</td>
 								<td>
@@ -564,13 +718,15 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							foreach($product_types as $type => $descr) :
 								$minqty = !empty($options['cart']['minqty_' . $type]) ? $options['cart']['minqty_' . $type] : 0;
 								$maxqty = !empty($options['cart']['maxqty_' . $type]) ? $options['cart']['maxqty_' . $type] : 0;
+								$stepqty = !empty($options['cart']['stepqty_' . $type]) ? $options['cart']['stepqty_' . $type] : 0;
 								
 						?>
 							<tr>
-								<td><?php _e('Min/Max quantity <strong>' . $type . ' products', WCPGSK_DOMAIN); ?></strong>:</td>
+								<td><?php _e('Min/Max/Step quantity <strong>' . $type . ' products', WCPGSK_DOMAIN); ?></strong>:</td>
 								<td>
 									<input name="wcpgsk_settings[cart][minqty_<?php echo $type ; ?>]" type="text" value="<?php echo $minqty; ?>" size="2" class="wcpgsk_textfield_short" /> |
-									<input name="wcpgsk_settings[cart][maxqty_<?php echo $type ; ?>]" type="text" value="<?php echo $maxqty ; ?>" size="2" class="wcpgsk_textfield_short" />
+									<input name="wcpgsk_settings[cart][maxqty_<?php echo $type ; ?>]" type="text" value="<?php echo $maxqty ; ?>" size="2" class="wcpgsk_textfield_short" /> |
+									<input name="wcpgsk_settings[cart][stepqty_<?php echo $type ; ?>]" type="text" value="<?php echo $stepqty ; ?>" size="2" class="wcpgsk_textfield_short" />
 								</td>
 								<td>
 									<span class="description"><?php echo $descr ; ?></span>
@@ -1226,6 +1382,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			foreach($product_types as $type) :
 				if ( empty($input['cart']['maxqty_' . $type]) ) $input['cart']['maxqty_' . $type] = 0;
 				if ( !ctype_digit($input['cart']['maxqty_' . $type]) ) $input['cart']['maxqty_' . $type] = 0;
+
+				if ( empty($input['cart']['stepqty_' . $type]) ) $input['cart']['stepqty_' . $type] = 0;
+				if ( !ctype_digit($input['cart']['stepqty_' . $type]) ) $input['cart']['stepqty_' . $type] = 0;
 				
 				if ( empty($input['cart']['minqty_' . $type]) ) $input['cart']['minqty_' . $type] = 0;
 				if ( !ctype_digit($input['cart']['minqty_' . $type]) ) $input['cart']['minqty_' . $type] = 0;
@@ -2486,6 +2645,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					'label'  => __( 'Label', WCPGSK_DOMAIN ),
 					'placeholder' => __( 'Placeholder', WCPGSK_DOMAIN ))),
 				'cart' => array( 
+					'minmaxstepproduct' => 0,
 					'minitemscart' => 1,
 					'maxitemscart' => 3,
 					'minvariationperproduct' => 1,

@@ -1,10 +1,10 @@
 === WooCommerce Poor Guys Swiss Knife ===
 Contributors: ulih
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KJ4K2X953H8CC
-Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation
+Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation
 Requires at least: 3.1
 Tested up to: 3.8
-Stable tag: 1.5.4
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,8 @@ WooCommerce Poor Guys Swiss Knife has been developed in cooperation with [Nicest
 From version 1.3 onwards captured data in the context of billing and shipping custom fields will display as additional billing and shipping information on order receipt page and emails.
 
 WooCommerce Poor Guys Swiss Knife includes, starting with v.1.4.0 the possibility to enable confirmation fields, useful in the context of added email and password custom fields, for instance. The standard email validation field for the email field supplied by WooCommerce within the billing section has to be activated like before.
+
+With version 1.6.0 minimum, maximum and incremental steps for product quantities can be defined globally for product types (simple, variable, etc.) and on a per product basis which allows better adaptation according to store necessities.
 
 The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more tools to your swiss knife like custom fields on a per product and per variation basis for checkout forms and a lot more.
 
@@ -49,7 +51,8 @@ You need to upgrade to WooCommerce Rich Guys Swiss Knife to use Variation Overlo
 
 * Minimum and maximum of allowed cart items (not to confuse quantities of individual items or products)
 * Turn of quantity input specifically for product types (simple, variable, grouped, etc.)
-* Set minimum and maximum for quantities required or allowed for individual products in the context of product types (simple, variable, variations, etc.)
+* Activate min/max/step settings for individual products (configuration for values available on edit page for simple and variable products)
+* Set minimum and maximum and incremental steps for quantities required or allowed in the context of product types (simple, variable, variations, etc.)
 
 = Checkout Settings =
 
@@ -159,6 +162,13 @@ Yes, you can change the required status, label and placeholders or even remove t
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.6.0 =
+
+* Added global incremental step setting to existing min and max settings 
+* Added Min/Max/Step configuration on a per product basis
+* Quantity input can be converted to select for individual products (simple or variable) based on the settings for min/max/step of the product
+* Add configuration tab to simple and variable products for min/max and incremental steps for quantities
 
 = 1.5.4 =
 
