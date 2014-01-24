@@ -1912,7 +1912,12 @@ function lcm_nums($ar) {
 					//woocommerce changed?
 					//if ($options['woofields']['billing'][$key]['custom_' . $key])
 					//	$orderfields[$key] = createCustomStandardField($key, 'billing', $options['woofields']['type_' . $key]);			
-					if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) unset($orderfields[$key]['required']);
+					if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) :
+						unset($orderfields[$key]['required']);
+					elseif (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] == 1) :
+						$orderfields[$key]['required'] = true;
+					endif;
+					
 					//check if repeater field
 				
 					$orderfields[$key]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
@@ -2006,8 +2011,11 @@ function lcm_nums($ar) {
 					//woocommerce changed?
 					//if ($options['woofields']['shipping'][$key]['custom_' . $key])
 					//	$orderfields[$key] = createCustomStandardField($key, 'shipping', $options['woofields']['type_' . $key]);			
-					if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) unset($orderfields[$key]['required']);
-					//check if repeater field
+					if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) :
+						unset($orderfields[$key]['required']);
+					elseif (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] == 1) :
+						$orderfields[$key]['required'] = true;
+					endif;
 				
 					$orderfields[$key]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
 					//set the order data
