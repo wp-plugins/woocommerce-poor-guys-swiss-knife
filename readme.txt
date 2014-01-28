@@ -121,6 +121,10 @@ Automatic updates should work without problems, but, like always, backup your si
 
 == Frequently Asked Questions ==
 
+= After installation labels and placeholder do not show up. What can I do? = 
+Please save the WooCommerce Poor Guys Swiss Knife Settings page (WooCommerce -> WooCommerce Poor Guys Swiss Knife) at least once.
+(We will address this problem within an update in 2014/02.)
+
 = What field types does WooCommerce Poor Guys Swiss Knife support = 
 With WooCommerce Poor Guys Swiss Knife you can support:
 
