@@ -48,8 +48,6 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				add_action( 'woocommerce_product_write_panels',     array( $this, 'wcpgsk_product_write_panels' ), 99 );
 				add_action( 'woocommerce_process_product_meta', array( $this, 'wcpgsk_process_product_meta' ), 99);
 				add_action( 'woocommerce_process_product_meta_variable', array( $this, 'wcpgsk_process_product_meta' ), 99);
-
-				
 			endif;
 			
 			//billing and shipping filters
@@ -207,22 +205,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				update_post_meta( $post_id, '_wcpgsk_stepqty', $stepqty );
 			endif;
 		}
-/*
-		function gcf($a, $b) { 
-	return ( $b == 0 ) ? ($a):( gcf($b, $a % $b) ); 
-}
-function lcm($a, $b) { 
-	return ( $a / gcf($a,$b) ) * $b; 
-}
-function lcm_nums($ar) {
-	if (count($ar) > 1) {
-		$ar[] = lcm( array_shift($ar) , array_shift($ar) );
-		return lcm_nums( $ar );
-	} else {
-		return $ar[0];
-	}
-}
-*/	
+
 		/**
 		 * Check for minimum and maximum items in cart and if they fulfill the settings.
 		 * and raise error and message if rules are not fulfilled, otherwise clear messages
@@ -1453,6 +1436,7 @@ function lcm_nums($ar) {
 		 * @access public
 		 * @param array $show_fields
 		 * @since 1.5.3
+		 * @changed 1.6.2
 		 * @return array $show_fields (processed)
 		 */						
 		public function wcpgsk_customer_meta_fields($show_fields) {
@@ -1464,7 +1448,17 @@ function lcm_nums($ar) {
 				$address[$key]['order'] = ((!empty($options['woofields']['order_' . $key]) && ctype_digit($options['woofields']['order_' . $key])) ? $options['woofields']['order_' . $key] : $field_order);			
 				if ( isset($options['woofields']['remove_' . $key]) && $options['woofields']['remove_' . $key] == 1) :
 					unset($address[$key]);
+				else :
+					if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
+						$address[$key]['label'] = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+					elseif ( empty($options['woofields']['label_' . $key]) ) :
+						$address[$key]['label'] = '';
+					endif;
+					if ( isset($options['woofields']['placeholder_' . $key]) && !empty($options['woofields']['placeholder_' . $key]) ) :
+						$address[$key]['description'] = __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN);
+					endif;
 				endif;
+				
 				$field_order++;				
 			endforeach;
 			
@@ -1477,6 +1471,15 @@ function lcm_nums($ar) {
 				$address[$key]['order'] = ((!empty($options['woofields']['order_' . $key]) && ctype_digit($options['woofields']['order_' . $key])) ? $options['woofields']['order_' . $key] : $field_order);			
 				if ( isset($options['woofields']['remove_' . $key]) && $options['woofields']['remove_' . $key] == 1) :
 					unset($address[$key]);
+				else :
+					if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
+						$address[$key]['label'] = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+					elseif ( empty($options['woofields']['label_' . $key]) ) : 
+						$address[$key]['label'] = '';
+					endif;
+					if ( isset($options['woofields']['placeholder_' . $key]) && !empty($options['woofields']['placeholder_' . $key]) ) :
+						$address[$key]['description'] = __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN);
+					endif;				
 				endif;
 				$field_order++;				
 			endforeach;
@@ -2643,52 +2646,73 @@ function lcm_nums($ar) {
 		 * Initial settings for our plugin
 		 * @access public
 		 * @since 1.1.0
+		 * @changed 1.6.2 add wcpgsk default settings for billing and shipping fields
 		 * @return void
 		 */		
 		private function wcpgsk_initial_settings() {
-			
+			global $woocommerce;
 			//@TODO check what we need in light version
-			$defaults = array( 
-				'wcpgsk_forms' => array( array(
-					'label'  => __( 'Label', WCPGSK_DOMAIN ),
-					'placeholder' => __( 'Placeholder', WCPGSK_DOMAIN ))),
-				'cart' => array( 
-					'minmaxstepproduct' => 0,
-					'minitemscart' => 1,
-					'maxitemscart' => 3,
-					'minvariationperproduct' => 1,
-					'maxvariationperproduct' => 1,
-					'maxqty_variation' => 0,
-					'minqty_variation' => 0,
-					'maxqty_variable' => 0,
-					'minqty_variable' => 0,
-					'maxqty_grouped' => 0,
-					'minqty_grouped' => 0,
-					'maxqty_external' => 0,
-					'minqty_external' => 0,
-					'maxqty_simple' => 0,
-					'minqty_simple' => 0),
-				'checkoutform' => array(
-					'cartitemforms' => 1,
-					'servicetitle' => __('Service data', WCPGSK_DOMAIN),
-					'serviceformmerge' => 'woocommerce_before_order_notes',
-					'sharedtitle' => __('Additional Information', WCPGSK_DOMAIN),
-					'sharedformmerge' => 'woocommerce_after_checkout_billing_form',
-					'tooltippersonalization' => '',
-					'mindate' => 2,
-					'maxdate' => 450,
-					'enabletooltips' => 1,
-					'enabletimesliders' => 1),
-				'variations' => array(
-					'extendattributes' => 1,
-					'sortextendattributes' => 1),
-				'process' => array(
-					'fastcheckoutbtn' => '',
-					'fastcart' => 0,
-					'fastcheckout' => 0,
-					'paymentgatways' => 0),
-				);
-			add_option( 'wcpgsk_settings', apply_filters( 'wcpgsk_defaults', $defaults ) );
+			if ( !get_option('wcpgsk_settings') ) :
+				$defaults = array( 
+					'wcpgsk_forms' => array( array(
+						'label'  => __( 'Label', WCPGSK_DOMAIN ),
+						'placeholder' => __( 'Placeholder', WCPGSK_DOMAIN ))),
+					'cart' => array( 
+						'minmaxstepproduct' => 0,
+						'minitemscart' => 1,
+						'maxitemscart' => 3,
+						'minvariationperproduct' => 1,
+						'maxvariationperproduct' => 1,
+						'maxqty_variation' => 0,
+						'minqty_variation' => 0,
+						'maxqty_variable' => 0,
+						'minqty_variable' => 0,
+						'maxqty_grouped' => 0,
+						'minqty_grouped' => 0,
+						'maxqty_external' => 0,
+						'minqty_external' => 0,
+						'maxqty_simple' => 0,
+						'minqty_simple' => 0,
+						'variationscountasproduct' => 0,
+						'variationproductnoqty' => 0,
+						'variableproductnoqty' => 0,
+						'groupedproductnoqty' => 0,
+						'externalproductnoqty' => 0,
+						'simpleproductnoqty' => 0),
+					'checkoutform' => array(
+						'cartitemforms' => 1,
+						'servicetitle' => __('Service data', WCPGSK_DOMAIN),
+						'serviceformmerge' => 'woocommerce_before_order_notes',
+						'sharedtitle' => __('Additional Information', WCPGSK_DOMAIN),
+						'sharedformmerge' => 'woocommerce_after_checkout_billing_form',
+						'tooltippersonalization' => '',
+						'billingemailvalidator' => 0,
+						'mindate' => 2,
+						'maxdate' => 450,
+						'enabletooltips' => 1,
+						'enabletimesliders' => 1),
+					'variations' => array(
+						'extendattributes' => 1,
+						'sortextendattributes' => 1),
+					'process' => array(
+						'fastcheckoutbtn' => '',
+						'fastcart' => 0,
+						'fastcheckout' => 0,
+						'paymentgateways' => 0),
+					);
+				//add default woocommerce billing and shipping field settings to wcpgsk settings to fix the problem of fields not showing up after activation of our plugin
+				$checkout_fields = array_merge($woocommerce->countries->get_address_fields( $woocommerce->countries->get_base_country(), 'billing_' ), $woocommerce->countries->get_address_fields( $woocommerce->countries->get_base_country(), 'shipping_' ));
+				foreach ($checkout_fields as $key => $field) : 
+					$defaults['woofields']['placeholder_' . $key] = isset($checkout_fields[$key]['placeholder']) ? $checkout_fields[$key]['placeholder'] : '';
+					$defaults['woofields']['label_' . $key] = isset($checkout_fields[$key]['label']) ? $checkout_fields[$key]['label'] : '';
+					$defaults['woofields']['required_' . $key] = isset($checkout_fields[$key]['required']) ? $checkout_fields[$key]['required'] : 0;
+					$defaults['woofields']['remove_' . $key] = 0;
+					$defaults['woofields']['class_' . $key] = isset($checkout_fields[$key]['class']) ? $checkout_fields[$key]['class'][0] : 'form-row-wide';				
+					$defaults['woofields']['settings_' . $key] = '';
+				endforeach;
+					
+				add_option( 'wcpgsk_settings', apply_filters( 'wcpgsk_defaults', $defaults ) );
+			endif;
 		}
 		
 		/**

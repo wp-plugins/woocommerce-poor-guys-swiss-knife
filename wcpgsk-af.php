@@ -36,14 +36,15 @@ function wcpgsk_available_variation($variation_data, $product, $variation) {
 
 //@TODO: check if this really avoids loading of woocommerce function with the same name in all circumstances...
 //replace woocommerce function with the same name. As woocommerce checks with "function_exists", this function may load before...
-function woocommerce_quantity_input() {
+function woocommerce_quantity_input( $args = array() ) {
     global $product;
 	$options = get_option( 'wcpgsk_settings' );
 	$product_id = $product->post->ID;		
-	
 	$selectqty = get_post_meta($product_id, '_wcpgsk_selectqty', true);		
 	$ival = apply_filters( 'woocommerce_quantity_input_min', '', $product );
-	if ( empty($ival) || !is_numeric($ival) ) :
+	if ( $product->product_type === 'grouped' ) :
+		$ival = 0;
+	elseif ( empty($ival) || !is_numeric($ival) ) :
 		$ival = 1;
 	endif;
 	$defaults = array(
@@ -54,6 +55,9 @@ function woocommerce_quantity_input() {
 		'step' 		=> apply_filters( 'woocommerce_quantity_input_step', '1', $product ),
 		'style'		=> apply_filters( 'woocommerce_quantity_style', 'float:left; margin-right:10px;', $product )
 	);
+	if ( !empty($args) && isset($args['input_name']) && !empty($args['input_name']) ) :
+		$defaults['input_name'] = $args['input_name'];
+	endif;
 	
 	if ( isset($options['cart']['minmaxstepproduct']) && $options['cart']['minmaxstepproduct'] == 1 && isset($selectqty) && $selectqty == 'yes' ) :
 		$minqty = get_post_meta($product_id, '_wcpgsk_minqty', true);

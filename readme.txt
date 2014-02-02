@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -123,7 +123,7 @@ Automatic updates should work without problems, but, like always, backup your si
 
 = After installation labels and placeholder do not show up. What can I do? = 
 Please save the WooCommerce Poor Guys Swiss Knife Settings page (WooCommerce -> WooCommerce Poor Guys Swiss Knife) at least once.
-(We will address this problem within an update in 2014/02.)
+(Starting with version 1.6.2 it's not necessary anymore to save the WooCommerce Poor Guys Swiss Knife settings after installation and first activation.)
 
 = What field types does WooCommerce Poor Guys Swiss Knife support = 
 With WooCommerce Poor Guys Swiss Knife you can support:
@@ -166,6 +166,13 @@ Yes, you can change the required status, label and placeholders or even remove t
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+
+= 1.6.2 =
+
+* Add basic reflection of configuration settings for label and description (placeholder) for default Billing and Shipping fields to Wordpress User Profiles
+* Fix display problem for default WooCommerce fields after initial plugin activation which required to save the settings of WooCommerce Poor Guys Swiss Knife at least once
+* Fix quantity input for individual products grouped together to display on a grouped product page
 
 = 1.6.1 =
 
