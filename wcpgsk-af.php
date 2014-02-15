@@ -34,10 +34,10 @@ function wcpgsk_available_variation($variation_data, $product, $variation) {
 	return $variation_data;
 }
 
-//@TODO: check if this really avoids loading of woocommerce function with the same name in all circumstances...
-//replace woocommerce function with the same name. As woocommerce checks with "function_exists", this function may load before...
-function woocommerce_quantity_input( $args = array() ) {
-    global $product;
+function woocommerce_quantity_input( $args = array(), $product = null, $echo = true ) {
+	if ( is_null( $product ) )
+		$product = $GLOBALS['product'];
+
 	$options = get_option( 'wcpgsk_settings' );
 	$product_id = $product->post->ID;		
 	$selectqty = get_post_meta($product_id, '_wcpgsk_selectqty', true);		
@@ -58,41 +58,41 @@ function woocommerce_quantity_input( $args = array() ) {
 	if ( !empty($args) && isset($args['input_name']) && !empty($args['input_name']) ) :
 		$defaults['input_name'] = $args['input_name'];
 	endif;
+	$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
 	
 	if ( isset($options['cart']['minmaxstepproduct']) && $options['cart']['minmaxstepproduct'] == 1 && isset($selectqty) && $selectqty == 'yes' ) :
 		$minqty = get_post_meta($product_id, '_wcpgsk_minqty', true);
 		$maxqty = get_post_meta($product_id, '_wcpgsk_maxqty', true);
 		$stepqty = get_post_meta($product_id, '_wcpgsk_stepqty', true);		
 
-		if ( ! empty( $defaults['min_value'] ) )
-			$min = $defaults['min_value'];
+		if ( ! empty( $args['min_value'] ) )
+			$min = $args['min_value'];
 		else $min = $minqty > 0 ? $minqty : '';
 
-		if ( ! empty( $defaults['max_value'] ) )
-			$max = $defaults['max_value'];
+		if ( ! empty( $args['max_value'] ) )
+			$max = $args['max_value'];
 		else $max = $maxqty > 0 ? $maxqty : '';
 
-		if ( ! empty( $defaults['step'] ) )
-			$step = $defaults['step'];
+		if ( ! empty( $args['step'] ) )
+			$step = $args['step'];
 		else $step = $stepqty > 0 ? $stepqty : 1;
 		if ( !empty( $min ) && is_numeric( $min) && !empty( $max ) && is_numeric( $max ) ) :
 			$options = '';
 			for ( $count = $min; $count <= $max; $count = $count+$step ) {
 				$options .= '<option value="' . $count . '">' . $count . '</option>';
 			}
-			echo '<div class="quantity_select" style="' . $defaults['style'] . '"><select name="' . esc_attr( $defaults['input_name'] ) . '" title="' . _x( 'Qty', 'Product quantity input tooltip', 'woocommerce' ) . '" class="qty">' . $options . '</select></div>';
+			echo '<div class="quantity_select" style="' . $args['style'] . '"><select name="' . esc_attr( $args['input_name'] ) . '" title="' . _x( 'Qty', 'Product quantity input tooltip', 'woocommerce' ) . '" class="qty">' . $options . '</select></div>';
 		else :
-			//$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
-			extract( $defaults, EXTR_OVERWRITE );
+			extract( $args, EXTR_OVERWRITE );
 			?>
-				<div class="quantity"><input type="number" step="<?php echo esc_attr( $step ); ?>" <?php if ( is_numeric( $min_value ) ) : ?>min="<?php echo esc_attr( $min_value ); ?>"<?php endif; ?> <?php if ( is_numeric( $max_value ) ) : ?>max="<?php echo esc_attr( $max_value ); ?>"<?php endif; ?> name="<?php echo esc_attr( $input_name ); ?>" value="<?php echo esc_attr( $input_value ); ?>" title="<?php _ex( 'Qty', 'Product quantity input tooltip', 'woocommerce' ) ?>" class="input-text qty text" /></div>
+				<div class="quantity"><input type="number" step="<?php echo esc_attr( $step ); ?>" <?php if ( is_numeric( $min_value ) ) : ?>min="<?php echo esc_attr( $min_value ); ?>"<?php endif; ?> <?php if ( is_numeric( $max_value ) ) : ?>max="<?php echo esc_attr( $max_value ); ?>"<?php endif; ?> name="<?php echo esc_attr( $input_name ); ?>" value="<?php echo esc_attr( $input_value ); ?>" title="<?php _ex( 'Qty', 'Product quantity input tooltip', 'woocommerce' ) ?>" class="input-text qty text" size="4" /></div>
 			<?php
+
 		endif;
 	else :
-		//$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
-		extract( $defaults, EXTR_OVERWRITE );
+		extract( $args, EXTR_OVERWRITE );
 		?>
-			<div class="quantity"><input type="number" step="<?php echo esc_attr( $step ); ?>" <?php if ( is_numeric( $min_value ) ) : ?>min="<?php echo esc_attr( $min_value ); ?>"<?php endif; ?> <?php if ( is_numeric( $max_value ) ) : ?>max="<?php echo esc_attr( $max_value ); ?>"<?php endif; ?> name="<?php echo esc_attr( $input_name ); ?>" value="<?php echo esc_attr( $input_value ); ?>" title="<?php _ex( 'Qty', 'Product quantity input tooltip', 'woocommerce' ) ?>" class="input-text qty text" /></div>
+			<div class="quantity"><input type="number" step="<?php echo esc_attr( $step ); ?>" <?php if ( is_numeric( $min_value ) ) : ?>min="<?php echo esc_attr( $min_value ); ?>"<?php endif; ?> <?php if ( is_numeric( $max_value ) ) : ?>max="<?php echo esc_attr( $max_value ); ?>"<?php endif; ?> name="<?php echo esc_attr( $input_name ); ?>" value="<?php echo esc_attr( $input_value ); ?>" title="<?php _ex( 'Qty', 'Product quantity input tooltip', 'woocommerce' ) ?>" class="input-text qty text" size="4" /></div>
 		<?php
 	endif;
 }
@@ -112,18 +112,18 @@ function wcpgsk_check_cart_items() {
 			$quantity = $values['quantity'];
 			if ( $minqty > 0 && $quantity < $minqty ) :
 				$woocommerce->cart->set_quantity( $cart_item_key, $minqty );
-				$woocommerce->add_message( sprintf( __( 'You have to buy a minimum quantity. We have set the required minimum of %s as quantity for you.', WCPGSK_DOMAIN ), $minqty ) );
-				$woocommerce->set_messages();		
+				wcpgsk_add_message( sprintf( __( 'You have to buy a minimum quantity. We have set the required minimum of %s as quantity for you.', WCPGSK_DOMAIN ), $minqty ) );
+				wcpgsk_set_messages();		
 			elseif ( $maxqty > 0 && $quantity > $maxqty ) :
 				$woocommerce->cart->set_quantity( $cart_item_key, $maxqty );
-				$woocommerce->add_message( sprintf( __( 'You cannot buy more than the allowed quantity for this product. We have set the maximum of %s as quantity for you.', WCPGSK_DOMAIN ), $maxqty ) );
-				$woocommerce->set_messages();		
+				wcpgsk_add_message( sprintf( __( 'You cannot buy more than the allowed quantity for this product. We have set the maximum of %s as quantity for you.', WCPGSK_DOMAIN ), $maxqty ) );
+				wcpgsk_set_messages();		
 			elseif ( $stepqty > 0 && ( $quantity % $stepqty ) > 0 ) :
 				$remainder = $quantity % $stepqty;
 				$newqty = $quantity - $remainder;
 				$woocommerce->cart->set_quantity( $cart_item_key, $newqty );
-				$woocommerce->add_message( sprintf( __( 'You have to buy this product in multiples of %s. We have set the product quantity to the closest lower multiple available.', WCPGSK_DOMAIN ), $stepqty ) );
-				$woocommerce->set_messages();					
+				wcpgsk_add_message( sprintf( __( 'You have to buy this product in multiples of %s. We have set the product quantity to the closest lower multiple available.', WCPGSK_DOMAIN ), $stepqty ) );
+				wcpgsk_set_messages();					
 			endif;
 		endforeach;
 	endif;
@@ -155,12 +155,12 @@ function wcpgsk_add_cart_item( $cart_item_data, $cart_item_key ) {
 	
 	if ($minqty > 0 && $quantity < $minqty) :
 		$cart_item_data['quantity'] = $minqty;
-		$woocommerce->add_message( sprintf( __( 'You have to buy a minimum quantity. We have set the required minimum of %s as quantity for you.', WCPGSK_DOMAIN ), $minqty ) );
-		$woocommerce->set_messages();		
+		wcpgsk_add_message( sprintf( __( 'You have to buy a minimum quantity. We have set the required minimum of %s as quantity for you.', WCPGSK_DOMAIN ), $minqty ) );
+		wcpgsk_set_messages();		
 	elseif ($maxqty > 0 && $quantity > $maxqty) :
 		$cart_item_data['quantity'] = $maxqty;
-		$woocommerce->add_message( sprintf(__( 'You cannot buy more than the allowed maximum quantity. We have set the allowed maximum of %s as quantity for you.', WCPGSK_DOMAIN ), $maxqty ) );
-		$woocommerce->set_messages();
+		wcpgsk_add_message( sprintf(__( 'You cannot buy more than the allowed maximum quantity. We have set the allowed maximum of %s as quantity for you.', WCPGSK_DOMAIN ), $maxqty ) );
+		wcpgsk_set_messages();
 	endif;
 
 	
@@ -193,13 +193,13 @@ function wcpgsk_after_cart_item_quantity_update( $cart_item_key, $quantity ) {
 	
 	if ($minqty > 0 && $quantity < $minqty) :
 		$woocommerce->cart->cart_contents[$cart_item_key]['quantity'] = $minqty;
-		$woocommerce->add_message( sprintf( __( 'You have to buy a minimum quantity. We have set the required minimum of %s as quantity for you.', WCPGSK_DOMAIN ), $minqty ) );
-		$woocommerce->set_messages();
+		wcpgsk_add_message( sprintf( __( 'You have to buy a minimum quantity. We have set the required minimum of %s as quantity for you.', WCPGSK_DOMAIN ), $minqty ) );
+		wcpgsk_set_messages();
 		
 	elseif ($maxqty > 0 && $quantity > $maxqty) :
 		$woocommerce->cart->cart_contents[$cart_item_key]['quantity'] = $maxqty;
-		$woocommerce->add_message( sprintf(__( 'You cannot buy more than the allowed maximum quantity. We have set the allowed maximum of %s as quantity for you.', WCPGSK_DOMAIN ), $maxqty ) );
-		$woocommerce->set_messages();
+		wcpgsk_add_message( sprintf(__( 'You cannot buy more than the allowed maximum quantity. We have set the allowed maximum of %s as quantity for you.', WCPGSK_DOMAIN ), $maxqty ) );
+		wcpgsk_set_messages();
 	endif;
 }
 }
@@ -230,12 +230,12 @@ function wcpgsk_maxitems_in_cart( $valid, $product_id, $quantity ) {
 	
 	if ( $allowed > 0 && $cartItems >= $allowed ) {
  		// Sets error message.
-		$woocommerce->add_message( sprintf( __( 'You have reached the maximum amount of %s items allowed for your cart!', WCPGSK_DOMAIN ), $allowed ) );
-		$woocommerce->set_messages();
+		wcpgsk_add_message( sprintf( __( 'You have reached the maximum amount of %s items allowed for your cart!', WCPGSK_DOMAIN ), $allowed ) );
+		wcpgsk_set_messages();
 		$valid = false;
 		$cart_url = $woocommerce->cart->get_cart_url();
-		$woocommerce->add_message( __('Remove products from the cart', WCPGSK_DOMAIN) . ': <a href="' . $cart_url . '">' . __('Cart', WCPGSK_DOMAIN) . '</a>');
-		$woocommerce->set_messages();
+		wcpgsk_add_message( __('Remove products from the cart', WCPGSK_DOMAIN) . ': <a href="' . $cart_url . '">' . __('Cart', WCPGSK_DOMAIN) . '</a>');
+		wcpgsk_set_messages();
 	}
 	return $valid;
 }
@@ -271,15 +271,15 @@ function wcpgsk_minitems_in_cart( $valid, $cart_item_key, $values, $quantity ) {
 	
 	if ($allowed > 1 && $allowed > $cartItems ) {
  		// Sets error message.
-		$woocommerce->add_message( sprintf( __( 'You still have not reached the minimum amount of %s items required for your cart!', WCPGSK_DOMAIN ), $allowed ) );
-		$woocommerce->set_messages();
+		wcpgsk_add_message( sprintf( __( 'You still have not reached the minimum amount of %s items required for your cart!', WCPGSK_DOMAIN ), $allowed ) );
+		wcpgsk_set_messages();
 		$valid = false;
 		
 		$shop_page_id = woocommerce_get_page_id( 'shop' );
 		//$shop_page_url = get_permalink(icl_object_id($shop_page_id, 'page', false));
 		$shop_page_url = get_permalink($shop_page_id);
-		$woocommerce->add_message( __('Select more products from the shop', WCPGSK_DOMAIN) . ': <a href="' . $shop_page_url . '">' . __('Shop', WCPGSK_DOMAIN) . '</a>');
-		$woocommerce->set_messages();
+		wcpgsk_add_message( __('Select more products from the shop', WCPGSK_DOMAIN) . ': <a href="' . $shop_page_url . '">' . __('Shop', WCPGSK_DOMAIN) . '</a>');
+		wcpgsk_set_messages();
 		
 	}
 	return $valid;
@@ -341,7 +341,6 @@ if ( !function_exists('wcpgsk_qtyselector_min') ) {
 function wcpgsk_qtyselector_min( $whatever, $product ) {
 	global $wcpgsk_session;
 	$options = get_option( 'wcpgsk_settings' );
-	
 	$minqty = isset($options['cart']['minqty_' . $product->product_type]) && $options['cart']['minqty_' . $product->product_type] != 0 ? $options['cart']['minqty_' . $product->product_type] : '';
 	if ( isset($options['cart']['minmaxstepproduct']) && $options['cart']['minmaxstepproduct'] == 1 ) :
 		$product_id = $product->post->ID;		
@@ -448,9 +447,13 @@ function wcpgsk_single_cart_button_text($label, $ptype) {
 $wcpgsk_options = get_option('wcpgsk_settings');
 if ( isset($wcpgsk_options['process']['paymentgateways']) && 1 == ($wcpgsk_options['process']['paymentgateways'])) :
 	require_once ABSPATH . WPINC . '/pluggable.php';;
-	require_once dirname(dirname(__FILE__)).'/woocommerce/classes/class-wc-payment-gateways.php';
-	require_once dirname(dirname(__FILE__)).'/woocommerce/classes/class-wc-cart.php';
-
+	if ( function_exists('WC') ) :
+		require_once dirname(dirname(__FILE__)).'/woocommerce/includes/class-wc-payment-gateways.php';
+		require_once dirname(dirname(__FILE__)).'/woocommerce/includes/class-wc-cart.php';
+	else :
+		require_once dirname(dirname(__FILE__)).'/woocommerce/classes/class-wc-payment-gateways.php';
+		require_once dirname(dirname(__FILE__)).'/woocommerce/classes/class-wc-cart.php';
+	endif; 
 	add_action( 'add_meta_boxes', 'wcpgsk_gateways_meta_box_add' );  
 	if ( !function_exists('wcpgsk_gateways_meta_box_add') ) {
 	function wcpgsk_gateways_meta_box_add()  
@@ -515,7 +518,7 @@ if ( isset($wcpgsk_options['process']['paymentgateways']) && 1 == ($wcpgsk_optio
 	add_filter( 'woocommerce_available_payment_gateways', 'wcpgsk_restrict_payment_gateways' );
 endif;
 
-if ( !function_exists('') ) {
+if ( !function_exists('wcpgsk_after_checkout_form') ) {
 function wcpgsk_after_checkout_form($checkout) {
 	?>
 	<div id="wcpgsk-dialog-validation-errors" title="<?php _e('Validation errors' , WCPGSK_DOMAIN); ?>">
@@ -714,5 +717,51 @@ function wcpgsk_after_checkout_form($checkout) {
 	</script><!--unit test after checkout end-->';
 }
 
+}
+
+/**
+ * Handle functions deprecated in WooCommerce since 2.1.0 for WooCommerce installations < 2.1
+ */
+function wcpgsk_add_error( $error ) {
+	if ( function_exists('WC') && function_exists('wc_add_notice') ) :
+		wc_add_notice( $error, 'error');
+	else :
+		global $woocommerce;
+		$woocommerce->add_error( $error );
+	endif;
+}
+
+function wcpgsk_add_message( $message ) {
+	if ( function_exists('WC') && function_exists('wc_add_notice') ) :
+		wc_add_notice( $message );
+	else :
+		global $woocommerce;
+		$woocommerce->add_message( $message );
+	endif;
+}
+
+function wcpgsk_clear_messages() {
+	if ( function_exists('WC') && function_exists('wc_clear_notices') ) :
+		wc_clear_notices();
+	else :
+		global $woocommerce;
+		$woocommerce->clear_messages();
+	endif;
+}
+
+function wcpgsk_show_messages() {
+	if ( function_exists('WC') && function_exists('wc_print_notices') ) :
+		wc_print_notices();
+	else :
+		global $woocommerce;
+		$woocommerce->show_messages();
+	endif;
+}
+
+function wcpgsk_set_messages() {
+	if ( !function_exists('WC') ) :
+		global $woocommerce;
+		$woocommerce->set_messages();
+	endif;
 }
 

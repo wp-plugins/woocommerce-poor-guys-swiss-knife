@@ -236,13 +236,13 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			}
 			
 			if ($allowed > 0 && $cartItems > $allowed ) :
-				$woocommerce->clear_messages();
+				wcpgsk_clear_messages();
 				// Sets error message.
-				$woocommerce->add_error( sprintf( __( 'You have reached the maximum amount of %s items allowed for your cart!', WCPGSK_DOMAIN ), $allowed ) );
-				$woocommerce->set_messages();
+				wcpgsk_add_error( sprintf( __( 'You have reached the maximum amount of %s items allowed for your cart!', WCPGSK_DOMAIN ), $allowed ) );
+				wcpgsk_set_messages();
 				$cart_url = $woocommerce->cart->get_cart_url();
-				$woocommerce->add_message( __('Remove products from the cart', WCPGSK_DOMAIN) . ': <a href="' . $cart_url . '">' . __('Cart', WCPGSK_DOMAIN) . '</a>');
-				$woocommerce->set_messages();
+				wcpgsk_add_message( __('Remove products from the cart', WCPGSK_DOMAIN) . ': <a href="' . $cart_url . '">' . __('Cart', WCPGSK_DOMAIN) . '</a>');
+				wcpgsk_set_messages();
 				//wp_redirect( get_permalink( woocommerce_get_page_id( 'cart' ) ) );
 				//exit;				
 			else :
@@ -263,21 +263,21 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				
 				if ($allowed > 1 && $allowed > $cartItems ) :
 					// Sets error message.
-					$woocommerce->clear_messages();
+					wcpgsk_clear_messages();
 
-					$woocommerce->add_error( sprintf( __( 'You still have not reached the minimum amount of %s items required for your cart!', WCPGSK_DOMAIN ), $allowed )  );
-					$woocommerce->set_messages();
+					wcpgsk_add_error( sprintf( __( 'You still have not reached the minimum amount of %s items required for your cart!', WCPGSK_DOMAIN ), $allowed )  );
+					wcpgsk_set_messages();
 					$valid = false;
 					
 					$shop_page_id = woocommerce_get_page_id( 'shop' );
 					//$shop_page_url = get_permalink(icl_object_id($shop_page_id, 'page', false));
 					$shop_page_url = get_permalink($shop_page_id);
-					$woocommerce->add_message( __('Select more products from the shop', WCPGSK_DOMAIN) . ': <a href="' . $shop_page_url . '">' . __('Shop', WCPGSK_DOMAIN) . '</a>');
-					$woocommerce->set_messages();
+					wcpgsk_add_message( __('Select more products from the shop', WCPGSK_DOMAIN) . ': <a href="' . $shop_page_url . '">' . __('Shop', WCPGSK_DOMAIN) . '</a>');
+					wcpgsk_set_messages();
 					//wp_redirect( get_permalink( woocommerce_get_page_id( 'shop' ) ) );
 					//exit;								
 				else :
-					$woocommerce->clear_messages();			
+					wcpgsk_clear_messages();			
 				endif;
 			endif;
 		}
@@ -2157,7 +2157,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								if ( $value && $value == 'password' ) :
 									$type = 'password';
 									$validate = array();
-								else :
+								elseif ( !empty($value) ) :
+									$custom_attributes[$key] = $value;
 									$validate = array($value);
 								endif;
 								break;
@@ -2326,7 +2327,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								if ( $value && $value == 'password' ) :
 									$type = 'password';
 									$validate = array();
-								else :
+								elseif ( !empty($value) ) :
+									$custom_attributes[$key] = $value;
 									$validate = array($value);
 								endif;
 								break;

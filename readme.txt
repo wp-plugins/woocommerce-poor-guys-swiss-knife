@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 1.6.2
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -167,6 +167,14 @@ Yes, you can change the required status, label and placeholders or even remove t
  
 == Changelog ==
 
+= 1.7.0 =
+
+* Maintenance release for WooCommerce 2.1.0+
+* Fix problems for Payment Gateways Configuration for WC 2.1+ installations
+* Fix problems for WooCommerce Messages and Errors with WC 2.1+ installations
+* Fix problems with quantity inputs for WC 2.1+ installations
+* Maintain backward compatibility for WC < 2.1 installations
+* Fix validation support for custom fields
 
 = 1.6.2 =
 
