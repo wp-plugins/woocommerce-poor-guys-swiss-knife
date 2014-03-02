@@ -482,3 +482,27 @@ jQuery(document).ready(function() {
 	
 	
 });
+
+function get_locale_fields_form() {
+	var localeCode = jQuery('#wcpgsk_configcountry').val();
+	
+	if (localeCode) {
+		jQuery("#locale_field_form").html("");
+		var data = {
+				action: 'get_locale_field_form',
+				localeCode: localeCode
+		};
+		jQuery.post(ajaxurl, data, function(response)
+		{
+			jQuery("#locale_field_form").html("");
+			jQuery("#locale_field_form").append(response);
+		});
+		//jQuery("#locale_process_form").show();
+		
+	}
+	else {
+		jQuery("#locale_field_form").html("");
+		//jQuery("#locale_process_form").hide();
+				
+	}
+};

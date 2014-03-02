@@ -14,8 +14,17 @@ add_filter( 'woocommerce_quantity_input_max', 'wcpgsk_qtyselector_max', 10, 2 );
 add_filter( 'woocommerce_quantity_input_min', 'wcpgsk_qtyselector_min', 10, 2 );
 add_filter( 'woocommerce_quantity_input_step', 'wcpgsk_quantity_input_step', 10, 2 );
 add_filter( 'woocommerce_quantity_input_args', 'wcpgsk_qty_input_args', 10, 2 );
-add_filter( 'single_add_to_cart_text', 'wcpgsk_single_cart_button_text', 10, 2 );
-add_filter( 'add_to_cart_text', 'wcpgsk_cart_button_text', 10, 1 );
+if ( function_exists('WC') ) :
+	add_filter( 'woocommerce_product_single_add_to_cart_text', 'wcpgsk_product_single_cart_button_text', 10, 2 );
+	add_filter( 'woocommerce_product_add_to_cart_text', 'wcpgsk_product_cart_button_text', 10, 2 );
+else :
+	add_filter( 'single_add_to_cart_text', 'wcpgsk_single_cart_button_text', 10, 2 );
+	add_filter( 'variable_add_to_cart_text', 'wcpgsk_variable_cart_button_text', 10, 1 );
+	add_filter( 'grouped_add_to_cart_text', 'wcpgsk_grouped_cart_button_text', 10, 1 );
+	add_filter( 'external_add_to_cart_text', 'wcpgsk_external_cart_button_text', 10, 1 );
+	add_filter( 'out_of_stock_add_to_cart_text', 'wcpgsk_outofstock_cart_button_text', 10, 1 );
+	add_filter( 'add_to_cart_text', 'wcpgsk_cart_button_text', 10, 1 );
+endif;
 add_action( 'woocommerce_after_checkout_form','wcpgsk_after_checkout_form', 10, 1 );
 
 add_action( 'woocommerce_after_cart_item_quantity_update', 'wcpgsk_after_cart_item_quantity_update', 10, 2 );
@@ -428,8 +437,60 @@ function wcpgsk_cart_button_text($label) {
 	$options = get_option( 'wcpgsk_settings' );
 	$cart_btn_text = ((!empty($options['process']['fastcheckoutbtn'])) ? __($options['process']['fastcheckoutbtn'], WCPGSK_DOMAIN) : $label);
 	if ($cart_btn_text && $cart_btn_text != '')
-		return apply_filters(__('wcpgsk_cart_button_text', WCPGSK_DOMAIN), $cart_btn_text);
-	else return apply_filters('wcpgsk_cart_button_text', __('Add to Cart', WCPGSK_DOMAIN));
+		return $cart_btn_text;
+	else return __('Add to Cart', WCPGSK_DOMAIN);
+}
+}
+
+if ( !function_exists('wcpgsk_grouped_cart_button_text') ) {
+/**
+ * Personalize Add to Cart Button
+ */
+function wcpgsk_grouped_cart_button_text($label) {
+	$options = get_option( 'wcpgsk_settings' );
+	$cart_btn_text = ((!empty($options['process']['viewproductsbtn'])) ? __($options['process']['viewproductsbtn'], WCPGSK_DOMAIN) : $label);
+	if ($cart_btn_text && $cart_btn_text != '')
+		return $cart_btn_text;
+	else return __('View options', WCPGSK_DOMAIN);
+}
+}
+
+if ( !function_exists('wcpgsk_variable_cart_button_text') ) {
+/**
+ * Personalize Add to Cart Button
+ */
+function wcpgsk_variable_cart_button_text($label) {
+	$options = get_option( 'wcpgsk_settings' );
+	$cart_btn_text = ((!empty($options['process']['selectoptionsbtn'])) ? __($options['process']['selectoptionsbtn'], WCPGSK_DOMAIN) : $label);
+	if ($cart_btn_text && $cart_btn_text != '')
+		return $cart_btn_text;
+	else return __('Select options', WCPGSK_DOMAIN);
+}
+}
+
+if ( !function_exists('wcpgsk_external_cart_button_text') ) {
+/**
+ * Personalize Add to Cart Button
+ */
+function wcpgsk_external_cart_button_text($label) {
+	$options = get_option( 'wcpgsk_settings' );
+	$cart_btn_text = ((!empty($options['process']['readmorebtn'])) ? __($options['process']['readmorebtn'], WCPGSK_DOMAIN) : $label);
+	if ($cart_btn_text && $cart_btn_text != '')
+		return $cart_btn_text;
+	else return __('Read more', WCPGSK_DOMAIN);
+}
+}
+
+if ( !function_exists('wcpgsk_outofstock_cart_button_text') ) {
+/**
+ * Personalize Add to Cart Button
+ */
+function wcpgsk_outofstock_cart_button_text($label) {
+	$options = get_option( 'wcpgsk_settings' );
+	$cart_btn_text = ((!empty($options['process']['outofstockbtn'])) ? __($options['process']['outofstockbtn'], WCPGSK_DOMAIN) : $label);
+	if ($cart_btn_text && $cart_btn_text != '')
+		return $cart_btn_text;
+	else return __('Read more', WCPGSK_DOMAIN);
 }
 }
 
@@ -438,8 +499,51 @@ function wcpgsk_single_cart_button_text($label, $ptype) {
 	$options = get_option( 'wcpgsk_settings' );
 	$cart_btn_text = ((!empty($options['process']['fastcheckoutbtn'])) ? __($options['process']['fastcheckoutbtn'], WCPGSK_DOMAIN) : 'Add to Cart');
 	if ($cart_btn_text && $cart_btn_text != '')
-		return apply_filters(__('wcpgsk_cart_button_text', WCPGSK_DOMAIN), $cart_btn_text, $ptype);
-	else return apply_filters('wcpgsk_cart_button_text', __('Add to Cart', WCPGSK_DOMAIN), $ptype);
+		return $cart_btn_text;
+	else return __('Add to Cart', WCPGSK_DOMAIN);
+}
+}
+
+/**
+ * Personalize Add to Cart Button
+ */
+if ( !function_exists('wcpgsk_product_single_cart_button_text') ) {
+function wcpgsk_product_single_cart_button_text($label, $product) {
+	$options = get_option( 'wcpgsk_settings' );
+	$cart_btn_text = $label;
+	if ( $label == __( 'Read more', 'woocommerce' ) ) :
+		$cart_btn_text = ((!empty($options['process']['readmorebtn'])) ? __($options['process']['readmorebtn'], WCPGSK_DOMAIN) : $label);
+	elseif ($label == __( 'Add to cart', 'woocommerce' ) ) :
+		$cart_btn_text = ((!empty($options['process']['fastcheckoutbtn'])) ? __($options['process']['fastcheckoutbtn'], WCPGSK_DOMAIN) : $label);
+	elseif ($label == __( 'Buy product', 'woocommerce' ) ) :
+		$cart_btn_text = ((!empty($options['process']['buyproductbtn'])) ? __($options['process']['buyproductbtn'], WCPGSK_DOMAIN) : $label);
+	elseif ($label == __( 'View products', 'woocommerce' ) ) :
+		$cart_btn_text = ((!empty($options['process']['viewproductsbtn'])) ? __($options['process']['viewproductsbtn'], WCPGSK_DOMAIN) : $label);
+	elseif ($label == __( 'Select options', 'woocommerce' ) ) :
+		$cart_btn_text = ((!empty($options['process']['selectoptionsbtn'])) ? __($options['process']['selectoptionsbtn'], WCPGSK_DOMAIN) : $label);
+	endif;
+	
+	return $cart_btn_text;
+}
+}
+
+if ( !function_exists('wcpgsk_product_cart_button_text') ) {
+function wcpgsk_product_cart_button_text($label, $product) {
+	$options = get_option( 'wcpgsk_settings' );
+	$cart_btn_text = $label;
+	if ( $label == __( 'Read more', 'woocommerce' ) ) :
+		$cart_btn_text = ((!empty($options['process']['readmorebtn'])) ? __($options['process']['readmorebtn'], WCPGSK_DOMAIN) : $label);
+	elseif ($label == __( 'Add to cart', 'woocommerce' ) ) :
+		$cart_btn_text = ((!empty($options['process']['fastcheckoutbtn'])) ? __($options['process']['fastcheckoutbtn'], WCPGSK_DOMAIN) : $label);
+	elseif ($label == __( 'Buy product', 'woocommerce' ) ) :
+		$cart_btn_text = ((!empty($options['process']['buyproductbtn'])) ? __($options['process']['buyproductbtn'], WCPGSK_DOMAIN) : $label);
+	elseif ($label == __( 'View products', 'woocommerce' ) ) :
+		$cart_btn_text = ((!empty($options['process']['viewproductsbtn'])) ? __($options['process']['viewproductsbtn'], WCPGSK_DOMAIN) : $label);
+	elseif ($label == __( 'Select options', 'woocommerce' ) ) :
+		$cart_btn_text = ((!empty($options['process']['selectoptionsbtn'])) ? __($options['process']['selectoptionsbtn'], WCPGSK_DOMAIN) : $label);
+	endif;
+	
+	return $cart_btn_text;
 }
 }
 

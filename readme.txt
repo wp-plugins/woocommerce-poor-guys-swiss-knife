@@ -1,10 +1,10 @@
 === WooCommerce Poor Guys Swiss Knife ===
 Contributors: ulih
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KJ4K2X953H8CC
-Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation
+Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 1.7.0
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,7 +30,10 @@ With version 1.6.0 minimum, maximum and incremental steps for product quantities
 
 The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more tools to your swiss knife like custom fields on a per product and per variation basis for checkout forms and a lot more.
 
-Now includes translations for German and Spanish.
+= What's new? =
+	
+* Now includes translations for German, Portuguese and Spanish.
+* WooCommerce Checkout Localization Management for core WooCommerce Fields
 
 == Usage ==
 
@@ -58,6 +61,12 @@ You need to upgrade to WooCommerce Rich Guys Swiss Knife to use Variation Overlo
 
 * Configure default offset and maximum offset for date fields you add to your checkout forms (can be overwritten in the configuration of each date field)
 * Add a billing email validator field to the billing section to assure that the user does not misspell his email
+
+= WooCommerce Checkout Localization =
+
+* Let WooCommerce handle localization configuration for core address fields: address_1, address_2, state, postcode, city
+* Decide which fields will be localized when customer switches billing or shipping country and which will use your base configuration
+* Configure behaviour of localized fields for every single country
  
 = Checkout Billing and Shipping Form Sections =
 
@@ -166,6 +175,15 @@ Yes, you can change the required status, label and placeholders or even remove t
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.8.0 =
+
+* Second maintenance release for WooCommerce 2.1+
+* Implement configuration localization for address, postcode, state and city fields
+* Fix and improve button label handling for WooCommerce 2.1+
+* Fix problems with quantity inputs for WC 2.1+ installations
+* Fix problems with asterisks and labels for fields that support localization
+* Brazilian Portuguese Translation
 
 = 1.7.0 =
 
@@ -283,3 +301,6 @@ To family and friends for support
 
 == Collaboration ==
 Whoever wants to work or share his translations, welcome. We will provide i18n po and mo files soon. Thank you! Bugs reports, suggestions and feedback are highly appreciated. Translations for Spanish and German and Catalan will follow.
+
+== Credits ==
+@samirbridi for the Brazilian Portuguese translation

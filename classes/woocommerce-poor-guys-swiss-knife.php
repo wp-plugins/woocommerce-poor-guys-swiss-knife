@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * WooCommercePoorGuysSwissKnife Main Class
  *
  * @class 		WCPGSK_Main
- * @version		1.2
+ * @version		1.3
  * @package		WooCommerce-Poor-Guys-Swiss-Knife/Classes
  * @category	Class
  * @author 		Uli Hake
@@ -48,6 +48,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				add_action( 'woocommerce_product_write_panels',     array( $this, 'wcpgsk_product_write_panels' ), 99 );
 				add_action( 'woocommerce_process_product_meta', array( $this, 'wcpgsk_process_product_meta' ), 99);
 				add_action( 'woocommerce_process_product_meta_variable', array( $this, 'wcpgsk_process_product_meta' ), 99);
+				add_action('wp_ajax_get_locale_field_form', array($this, 'get_locale_field_form_callback'));	
+
 			endif;
 			
 			//billing and shipping filters
@@ -60,7 +62,15 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 
 			add_filter( 'woocommerce_checkout_fields' , array($this, 'wcpgsk_checkout_fields_billing'), 10, 1 );
 			add_filter( 'woocommerce_checkout_fields' , array($this, 'wcpgsk_checkout_fields_shipping'), 10, 1 );
-
+			if ( function_exists('WC') ) :
+				add_filter( 'wc_address_i18n_params', array($this, 'wcpgsk_address_i18n_params'), 10, 1 );//$this->locale['default'] );
+				//bind late to allow other plugins to add their fields
+				add_filter( 'woocommerce_country_locale_field_selectors', array($this, 'wcpgsk_country_locale_field_selectors'), 99, 1);
+			else :
+				add_filter( 'woocommerce_params', array($this, 'wcpgsk_address_i18n_params'), 10, 1 );// $woocommerce_params )			
+			endif;
+			
+			
 			add_action( 'woocommerce_checkout_process', array($this, 'wcpgsk_checkout_process') );
 
 			add_filter( 'woocommerce_load_order_data', array($this, 'wcpgsk_load_order_data'), 5,  1);
@@ -102,6 +112,164 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				if ( $product_type === 'simple' || $product_type === 'variable' ) :
 					echo "<li class=\"wcpgsk_product_tab\"><a class=\"icon16 icon-media\" href=\"#wcpgsk_data_tab\">" . __( 'Product Cart Quantities', WCPGSK_DOMAIN ) . "</a></li>";
 				endif;
+			endif;
+		}
+		
+		
+		/**
+		 * Helper function: mimics 2.1.x for 2.0.x installations and calls +2.1 function directly if available
+		 *
+		 * 
+		 * @access public
+		 * @since 1.7.1
+		 * @return array of localizable fields 
+		 */
+		public function wcpgsk_get_country_locale_field_selectors() {
+			if ( function_exists('WC') ) :
+				return WC()->countries->get_country_locale_field_selectors();
+			else :
+				//we need this for internal usage... on the frontend fields are hardcode in WC < 2.1 into js
+				$locale_fields = array (
+					'address_1'	=> '#billing_address_1_field, #shipping_address_1_field',
+					'address_2'	=> '#billing_address_2_field, #shipping_address_2_field',
+					'state'		=> '#billing_state_field, #shipping_state_field',
+					'postcode'	=> '#billing_postcode_field, #shipping_postcode_field',
+					'city'		=> '#billing_city_field, #shipping_city_field'
+				);
+				//@TODO: Do we really want to filter in WC < 2.1?
+				return apply_filters( 'woocommerce_country_locale_field_selectors', $locale_fields );
+			endif;
+		}
+
+		/**
+		 * Helper function: not really necessary...
+		 *
+		 * @access public
+		 * @since 1.7.1
+		 * @return array localization config
+		 */
+		public function wcpgsk_get_country_locale() {
+			if ( function_exists('WC') ) :
+				return WC()->countries->get_country_locale();
+			else :
+				global $woocommerce;
+				return $woocommerce->countries->get_country_locale();
+			endif;
+		}
+		
+		/**
+		 * Helper function: not really necessary...
+		 *
+		 * @access public
+		 * @since 1.7.1
+		 * @return array of allowed countries
+		 */
+		public function wcpgsk_get_allowed_countries() {
+			if ( function_exists('WC') ) :
+				return WC()->countries->get_allowed_countries();
+			else :
+				global $woocommerce;
+				return $woocommerce->countries->get_allowed_countries();
+			endif;
+		}
+		
+		/**
+		 * Locale field form
+		 *
+		 * @access public
+		 * @since 1.7.1
+		 * @echo html
+		 */		 
+		public function get_locale_field_form_callback() {
+			$jsfields = $this->wcpgsk_get_country_locale_field_selectors(); //WC()->countries->get_country_locale_field_selectors();
+			$localedata = $this->wcpgsk_get_country_locale(); //WC()->countries->get_country_locale();
+			$locale = get_option('wcpgsk_locale');
+			$localeCode = $_POST['localeCode'];
+			
+			if ( $localeCode ) :
+				?>
+				<tr>
+				<td colspan="3">
+				<input name="wcpgsk_settings[locale][countrycode]" type="hidden" value="<?php echo $localeCode; ?>" />
+				</td>
+				</tr>
+				<?php
+				$localepostcode = isset($localedata[$localeCode]) && isset($localedata[$localeCode]['postcode_before_city']) ? ( $localedata[$localeCode]['postcode_before_city'] ? '1' : '0' ) : ( isset($localedata['default']['postcode_before_city']) && $localedata['default']['postcode_before_city'] ? '1' : '0' );
+				$locale[$localeCode]['postcode_before_city'] = isset($locale[$localeCode]['postcode_before_city']) ? $locale[$localeCode]['postcode_before_city'] : $localepostcode;
+				foreach ($jsfields as $field => $fieldids) :
+					$localelabel = isset($localedata[$localeCode]) && isset($localedata[$localeCode][$field]) && isset($localedata[$localeCode][$field]['label']) ? $localedata[$localeCode][$field]['label'] : ( isset($localedata['default'][$field]['label']) ? $localedata['default'][$field]['label'] : '' );
+					$locale[$localeCode]['label_' . $field] = isset($locale[$localeCode]['label_' . $field]) ? $locale[$localeCode]['label_' . $field] : $localelabel;
+
+					$localeplaceholder = isset($localedata[$localeCode]) && isset($localedata[$localeCode][$field]) && isset($localedata[$localeCode][$field]['placeholder']) ? $localedata[$localeCode][$field]['placeholder'] : ( isset($localedata['default'][$field]['placeholder']) ? $localedata['default'][$field]['placeholder'] : '' );
+					$locale[$localeCode]['placeholder_' . $field] = isset($locale[$localeCode]['placeholder_' . $field]) ? $locale[$localeCode]['placeholder_' . $field] : $localeplaceholder;
+
+					$localerequired = isset($localedata[$localeCode]) && isset($localedata[$localeCode][$field]) && isset($localedata[$localeCode][$field]['required']) ? ( $localedata[$localeCode][$field]['required'] ? '1' : '0' ) : ( isset($localedata['default'][$field]['required']) && $localedata['default'][$field]['required'] ? '1' : '0' );
+					$locale[$localeCode]['required_' . $field] = isset($locale[$localeCode]['required_' . $field]) ? $locale[$localeCode]['required_' . $field] : $localerequired;
+					if ( $field !== 'state' ) :
+						$localehidden = isset($localedata[$localeCode]) && isset($localedata[$localeCode][$field]) && isset($localedata[$localeCode][$field]['hidden']) ? ( $localedata[$localeCode][$field]['hidden'] ? '1' : '0' ) : ( isset($localedata['default'][$field]['hidden']) && $localedata['default'][$field]['hidden'] ? '1' : '0' );
+						$locale[$localeCode]['hidden_' . $field] = isset($locale[$localeCode]['hidden_' . $field]) ? $locale[$localeCode]['hidden_' . $field] : $localehidden;
+					endif;
+
+					
+				?>
+				<tr>
+					<td><?php echo $field; ?></td>
+					<td>
+						<input name="wcpgsk_settings[locale][required_<?php echo $field; ?>]" type="hidden" value="0" />
+						<input name="wcpgsk_settings[locale][required_<?php echo $field; ?>]" type="checkbox" value="1" <?php if ( isset($locale[$localeCode]['required_' . $field]) && 1 == ($locale[$localeCode]['required_' . $field])) echo "checked='checked'"; ?> />
+					</td>
+					<td>
+						<span class="description"><?php echo __('Required status for ', WCPGSK_DOMAIN) . ' ' . $field; ?></span>
+					</td>
+				</tr>
+				<?php if ( $field != 'state' ) : ?>
+				<tr>
+					<td><?php echo $field; ?></td>
+					<td>
+						<input name="wcpgsk_settings[locale][hidden_<?php echo $field; ?>]" type="hidden" value="0" />
+						<input name="wcpgsk_settings[locale][hidden_<?php echo $field; ?>]" type="checkbox" value="1" <?php if ( isset($locale[$localeCode]['hidden_' . $field]) && 1 == ($locale[$localeCode]['hidden_' . $field])) echo "checked='checked'"; ?> />
+					</td>
+					<td>
+						<span class="description"><?php echo __('Hidden status for ', WCPGSK_DOMAIN) . ' ' . $field; ?></span>
+					</td>
+				</tr>
+				<?php endif; ?>
+				<tr>
+					<td><?php echo $field; ?></td>
+					<td>
+						<input name="wcpgsk_settings[locale][label_<?php echo $field; ?>]" value="<?php if (isset($locale[$localeCode]['label_' . $field]) ) echo $locale[$localeCode]['label_' . $field]; ?>" class="regular-text" />
+					</td>
+					<td>
+						<span class="description"><?php echo __('Label for ', WCPGSK_DOMAIN) . ' ' . $field; ?></span>
+					</td>
+				</tr>
+				<tr>
+					<td><?php echo $field; ?></td>
+					<td>
+						<input name="wcpgsk_settings[locale][placeholder_<?php echo $field; ?>]" value="<?php if (isset($locale[$localeCode]['placeholder_' . $field]) ) echo $locale[$localeCode]['placeholder_' . $field]; ?>" class="regular-text" />
+					</td>
+					<td>
+						<span class="description"><?php echo __('Placeholder for ', WCPGSK_DOMAIN) . ' ' . $field; ?></span>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3"><hr /></td>
+				</tr>
+				<?php
+				endforeach;
+				?>
+				<tr>
+					<td><?php echo __('Post/Zip Code Placement', WCPGSK_DOMAIN); ?></td>
+					<td>
+						<input name="wcpgsk_settings[locale][postcode_before_city]" type="hidden" value="0" />
+						<input name="wcpgsk_settings[locale][postcode_before_city]" type="checkbox" value="1" <?php if ( isset($locale[$localeCode]['postcode_before_city']) && 1 == ($locale[$localeCode]['postcode_before_city'])) echo "checked='checked'"; ?> />
+					</td>
+					<td>
+						<span class="description"><?php echo __('Post/Zip code before city', WCPGSK_DOMAIN); ?></span>
+					</td>
+				</tr>
+				
+				<?php
 			endif;
 		}
 		
@@ -511,11 +679,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			// read options values
 			$options = get_option( 'wcpgsk_settings' );
 			if( isset($_POST[ $hidden_field_name ]) && $_POST[ $hidden_field_name ] == 'Y' ) {
-				// Save the posted value in the database
+				// Save the posted values in the database
 				update_option( 'wcpgsk_settings', $options );
-			?>
-				<div class="updated"><p><strong><?php _e('Settings saved.', WCPGSK_DOMAIN); ?></strong></p></div>
-			<?php 
 			}
 			
 			// Now display the settings editing screen
@@ -528,7 +693,6 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$defunchecked = __('Default: unchecked', WCPGSK_DOMAIN);
 			
 			
-			$options['process']['fastcheckoutbtn'] = isset($options['process']['fastcheckoutbtn']) ? $options['process']['fastcheckoutbtn'] : '';
 			echo '<div class="wrap">';
 			// icon for settings
 			echo '<div id="icon-themes" class="icon32"><br></div>';
@@ -536,12 +700,38 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$wcpgsk_name = apply_filters('wcpgsk_plus_name', $wcpgsk_name);
 			echo "<h2>" . __( $wcpgsk_name, WCPGSK_DOMAIN ) . "</h2>";
 			// settings form 
+				
+			if ( isset($options['locale']['countrycode']) && $options['locale']['countrycode'] ) :
+				$locale = get_option( 'wcpgsk_locale', array() );
+
+				$localeCode = $options['locale']['countrycode'];
+				$jsfields = $this->wcpgsk_get_country_locale_field_selectors();
+				foreach ($jsfields as $field => $fieldids) :
+					$locale[$localeCode]['label_' . $field] = $options['locale']['label_' . $field];
+					$locale[$localeCode]['placeholder_' . $field] = $options['locale']['placeholder_' . $field];
+					$locale[$localeCode]['required_' . $field] = $options['locale']['required_' . $field];
+					if ( $field !== 'state' ) :
+						$locale[$localeCode]['hidden_' . $field] = $options['locale']['hidden_' . $field];
+					endif;
+				endforeach;
+				$locale[$localeCode]['postcode_before_city'] = $options['locale']['postcode_before_city'];	
+				// Save the posted values in the database
+				update_option( 'wcpgsk_locale', $locale );
+			endif;
+				
+				
 			?>
 			<form name="form" method="post" action="options.php" id="frm1">
 				<input type="hidden" name="<?php echo $hidden_field_name; ?>" value="Y">
 					<?php
 						settings_fields( 'wcpgsk_options' );
 						$options = get_option( 'wcpgsk_settings' );
+						$options['process']['fastcheckoutbtn'] = isset($options['process']['fastcheckoutbtn']) ? $options['process']['fastcheckoutbtn'] : '';
+						$options['process']['readmorebtn'] = isset($options['process']['readmorebtn']) ? $options['process']['readmorebtn'] : '';
+						$options['process']['buyproductbtn'] = isset($options['process']['buyproductbtn']) ? $options['process']['buyproductbtn'] : '';
+						$options['process']['viewproductsbtn'] = isset($options['process']['viewproductsbtn']) ? $options['process']['viewproductsbtn'] : '';
+						$options['process']['selectoptionsbtn'] = isset($options['process']['selectoptionsbtn']) ? $options['process']['selectoptionsbtn'] : '';
+						$options['process']['outofstockbtn'] = isset($options['process']['outofstockbtn']) ? $options['process']['outofstockbtn'] : '';
 						
 					?>
 				<div id="wcpgsk_accordion">
@@ -566,6 +756,51 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								</td>
 								<td>
 									<span class="description"><?php _e('Define the label for the Add to Cart button.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'Read more Button Label', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[process][readmorebtn]" id="wcpgsk_readmore_btn" value="<?php echo $options['process']['readmorebtn'] ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Define the label for the Read more button.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'View products Button Label', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[process][viewproductsbtn]" id="wcpgsk_viewproducts_btn" value="<?php echo $options['process']['viewproductsbtn'] ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Define the label for the View products button.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'Select options Button Label', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[process][selectoptionsbtn]" id="wcpgsk_selectoptions_btn" value="<?php echo $options['process']['selectoptionsbtn'] ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Define the label for the Select options button.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'Buy product Button Label', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[process][buyproductbtn]" id="wcpgsk_buyproduct_btn" value="<?php echo $options['process']['buyproductbtn'] ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Define the label for the Buy product button.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'Out of stock Button Label', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[process][outofstockbtn]" id="wcpgsk_outofstock_btn" value="<?php echo $options['process']['outofstockbtn'] ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Define the label for the Out of stock button.', WCPGSK_DOMAIN); ?></span>
 								</td>
 							</tr>
 							<tr>
@@ -793,6 +1028,80 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					</div>
 					<?php
 					do_action( 'wcpgsk_settings_page_six', $options );
+					
+					//if ( function_exists('WC') ) :
+					?>
+						<h3 class="wcpgsk_acc_header"><?php echo __('Woocommerce Checkout Localization',WCPGSK_DOMAIN); ?></h3>
+						<div>
+							<table class="widefat" border="1" >
+							<thead>
+								<tr>
+									<th><?php _e('Field Name', WCPGSK_DOMAIN);  ?></th>
+									<th><?php _e('Default Behaviour', WCPGSK_DOMAIN);  ?></th>		
+									<th><?php _e('Comments', WCPGSK_DOMAIN);  ?></th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php
+								$jsfields = $this->wcpgsk_get_country_locale_field_selectors();
+								foreach ($jsfields as $field => $fieldids) :
+								?>
+								<tr>
+									<td><?php echo $field; ?></td>
+									<td>
+										<input name="wcpgsk_settings[checkoutform][default_<?php echo $field; ?>]" type="hidden" value="0" />
+										<input name="wcpgsk_settings[checkoutform][default_<?php echo $field; ?>]" type="checkbox" value="1" <?php if ( isset($options['checkoutform']['default_' . $field]) && 1 == ($options['checkoutform']['default_' . $field])) echo "checked='checked'"; ?> />
+									</td>
+									<td>
+										<span class="description"><?php echo __('Let WooCommerce handle localization for fields of type', WCPGSK_DOMAIN) . ' ' . $field; ?></span>
+									</td>
+								</tr>
+
+								<?php
+								endforeach;
+								?>
+							</tbody>
+							</table>
+							<table class="widefat" border="1" >
+							<thead>
+								<tr>
+									<th><?php _e('Field Name', WCRGSK_DOMAIN);  ?></th>
+									<th><?php _e('Data', WCRGSK_DOMAIN);  ?></th>		
+									<th><?php _e('Comments', WCRGSK_DOMAIN);  ?></th>
+								</tr>
+							</thead>
+							<tbody>
+							
+								<tr>
+									<td><?php _e('Field Localization', WCRGSK_DOMAIN);  ?></td>
+									<td>
+									<select name="wcpgsk_configcountry" id="wcpgsk_configcountry" onChange="get_locale_fields_form()"> 
+										<option value=""><?php echo __('Select Locale', WCRGSK_DOMAIN); ?></option>
+										<option value="default"><?php _e('Default Locale', WCRGSK_DOMAIN); ?></option>
+									<?php
+										$countries = $this->wcpgsk_get_allowed_countries();//WC()->countries->countries;
+
+										foreach ($countries as $cc => $cn) :							
+										echo '<option value="' . $cc . '">' . $cn . '</option>';
+										endforeach;
+									?>
+									</select>
+									</td>
+									<td>
+									<?php _e('Select country to configure', WCRGSK_DOMAIN);  ?>
+									</td>
+									
+								</tr>
+							</tbody>
+							<tbody id="locale_field_form">
+							</tbody>
+							
+							</table>
+							<?php submit_button( __( 'Save Changes', WCPGSK_DOMAIN ) ); ?>
+						
+						</div>
+					<?php
+					
 					$checkoutforms = array('billing' => 'Billing', 'shipping' => 'Shipping');
 					$checkoutforms = apply_filters( 'wcpgsk_checkoutforms', $checkoutforms );
 					foreach($checkoutforms as $section => $title) :
@@ -1376,7 +1685,6 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				if ($input['cart']['maxqty_' . $type] == 1) $input['cart'][$type . 'productnoqty'] = 1;
 			endforeach;
 			$input = apply_filters('wcpgsk_validate_settings', $input);
-
 			return $input;
 		}
 		
@@ -1393,6 +1701,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			global $woocommerce;
 			$options = get_option( 'wcpgsk_settings' );
 			$field_order = 1;	
+			$locale = get_option( 'wcpgsk_locale', array() );
+			$wc_locale = $this->wcpgsk_get_country_locale();
+
 			foreach ($address as $key => $field) :
 				$address[$key]['order'] = ((!empty($options['woofields']['order_' . $key]) && ctype_digit($options['woofields']['order_' . $key])) ? $options['woofields']['order_' . $key] : $field_order);			
 				
@@ -1406,20 +1717,44 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					$address[$key]['label'] = '';
 					$address[$key]['required'] = false;
 				else :
-					if ( isset($options['woofields']['label_' . $key]) ) :	
-						$address[$key]['label'] = __( $options['woofields']['label_' . $key], WCPGSK_DOMAIN );
+					
+					$is_billing = strpos($key, 'billing_');
+					$cc = false;
+					$wc_field_handle = false;
+					if ( $is_billing !== false ) :
+						$wc_field_handle = str_replace('billing_', '', $key);
+						if ( isset($address['billing_country']['value']) ) :
+							$cc = $address['billing_country']['value'];
+						else :
+							$cc = $this->wcpgsk_load_address_value($key);
+						endif;
+					else : 
+						$wc_field_handle = str_replace('shipping_', '', $key);					
+						if ( isset($address['shipping_country']['value']) ) :
+							$cc = $address['shipping_country']['value'];
+						else :
+							$cc = $this->wcpgsk_load_address_value($key);
+						endif;
+						
 					endif;
-					if ( isset($options['woofields']['placeholder_' . $key]) ) :	
-						$address[$key]['placeholder'] = __( $options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN );
-					endif;
-					if ( isset($options['woofields']['required_' . $key]) ) :
-						$address[$key]['required'] = ((isset($options['woofields']['required_' . $key])) ? $options['woofields']['required_' . $key] : ( isset($address[$key]['required']) ? $address[$key]['required'] : false ) );
-					endif;
-					//if (!empty($options['woofields']['class_' . $key])) {
-					if (!empty($address[$key]['class']) && is_array($address[$key]['class'])) :
-						$address[$key]['class'][0] = 'form-row-wide';
+					if ( $cc && $wc_field_handle && isset($options['checkoutform']['default_' . $wc_field_handle]) && $options['checkoutform']['default_' . $wc_field_handle] ) :
+						$address[$key] = $this->wcpgsk_config_locale_field($address[$key], $wc_field_handle, $cc, $wc_locale, $locale);
 					else :
-						$address[$key]['class'] = array ('form-row-wide');
+						if ( isset($options['woofields']['label_' . $key]) ) :	
+							$address[$key]['label'] = __( $options['woofields']['label_' . $key], WCPGSK_DOMAIN );
+						endif;
+						if ( isset($options['woofields']['placeholder_' . $key]) ) :	
+							$address[$key]['placeholder'] = __( $options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN );
+						endif;
+						if ( isset($options['woofields']['required_' . $key]) ) :
+							$address[$key]['required'] = ((isset($options['woofields']['required_' . $key])) ? $options['woofields']['required_' . $key] : ( isset($address[$key]['required']) ? $address[$key]['required'] : false ) );
+						endif;
+						//if (!empty($options['woofields']['class_' . $key])) {
+						if (!empty($address[$key]['class']) && is_array($address[$key]['class'])) :
+							$address[$key]['class'][0] = 'form-row-wide';
+						else :
+							$address[$key]['class'] = array ('form-row-wide');
+						endif;
 					endif;
 				endif;
 				$field_order++;				
@@ -1428,7 +1763,55 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			uasort($address, array($this, "compareFieldOrder"));						
 			return $address;
 		}
+		
+		public function wcpgsk_load_address_value($key) {
+			global $woocommerce, $current_user;
+			get_currentuserinfo();
+			
+			$value = get_user_meta( get_current_user_id(), $key, true );
 
+			if ( ! $value ) {
+				switch( $key ) {
+					case 'billing_email' :
+					case 'shipping_email' :
+						$value = $current_user->user_email;
+					break;
+					case 'billing_country' :
+					case 'shipping_country' :
+						$value = $woocommerce->countries->get_base_country();
+					break;
+					case 'billing_state' :
+					case 'shipping_state' :
+						$value = $woocommerce->countries->get_base_state();
+					break;
+				}
+			}
+			return $value;		
+		}
+		
+		public function wcpgsk_config_locale_field($address_field, $wc_field_handle, $countrycode, $wc_locale, $locale) {
+
+			$default_required = isset($locale['default']['required_' . $wc_field_handle]) ? $locale['default']['required_' . $wc_field_handle] : '0';
+			$wc_localerequired = isset($wc_locale[$countrycode]) && isset($wc_locale[$countrycode][$wc_field_handle]) && isset($wc_locale[$countrycode][$wc_field_handle]['required']) ? ( $wc_locale[$countrycode][$wc_field_handle]['required'] ? '1' : '0' ) : ( isset($wc_locale['default'][$wc_field_handle]['required']) && $wc_locale['default'][$wc_field_handle]['required'] ? '1' : $default_required );
+			$locale[$countrycode]['required_' . $wc_field_handle] = isset($locale[$countrycode]['required_' . $wc_field_handle]) ? $locale[$countrycode]['required_' . $wc_field_handle] : $wc_localerequired;
+			$address_field['required'] = $locale[$countrycode]['required_' . $wc_field_handle] ? true : false;
+			
+			$default_label = isset($locale['default']['label_' . $wc_field_handle]) ? $locale['default']['label_' . $wc_field_handle] : '';
+			$wc_localelabel = isset($wc_locale[$countrycode]) && isset($wc_locale[$countrycode][$wc_field_handle]) && isset($wc_locale[$countrycode][$wc_field_handle]['label']) ? $wc_locale[$countrycode][$wc_field_handle]['label'] : ( isset($wc_locale['default'][$wc_field_handle]['label']) ? $wc_locale['default'][$wc_field_handle]['label'] : $default_label );						
+			$locale[$countrycode]['label_' . $wc_field_handle] = isset($locale[$countrycode]['label_' . $wc_field_handle]) ? $locale[$countrycode]['label_' . $wc_field_handle] : $wc_localelabel;
+			$address_field['label'] = __($locale[$countrycode]['label_' . $wc_field_handle], WCPGSK_DOMAIN);
+			
+			$default_placeholder = isset($locale['default']['placeholder_' . $wc_field_handle]) ? $locale['default']['placeholder_' . $wc_field_handle] : '';
+			$wc_localeplaceholder = isset($wc_locale[$countrycode]) && isset($wc_locale[$countrycode][$wc_field_handle]) && isset($wc_locale[$countrycode][$wc_field_handle]['placeholder']) ? $wc_locale[$countrycode][$wc_field_handle]['placeholder'] : ( isset($wc_locale['default'][$wc_field_handle]['placeholder']) ? $wc_locale['default'][$wc_field_handle]['placeholder'] : $default_placeholder );
+			$locale[$countrycode]['placeholder_' . $wc_field_handle] = isset($locale[$countrycode]['placeholder_' . $wc_field_handle]) ? $locale[$countrycode]['placeholder_' . $wc_field_handle] : $wc_localeplaceholder;
+			$address_field['placeholder'] = __($locale[$countrycode]['placeholder_' . $wc_field_handle], WCPGSK_DOMAIN);
+
+			$default_hidden = isset($locale['default']['hidden_' . $wc_field_handle]) ? $locale['default']['hidden_' . $wc_field_handle] : '0';
+			$wc_localehidden = isset($wc_locale[$countrycode]) && isset($wc_locale[$countrycode][$wc_field_handle]) && isset($wc_locale[$countrycode][$wc_field_handle]['hidden']) ? ( $wc_locale[$countrycode][$wc_field_handle]['hidden'] ? '1' : '0' ) : ( isset($wc_locale['default'][$wc_field_handle]['hidden']) && $wc_locale['default'][$wc_field_handle]['hidden'] ? '1' : $default_hidden );
+			$locale[$countrycode]['hidden_' . $wc_field_handle] = isset($locale[$countrycode]['hidden_' . $wc_field_handle]) ? $locale[$countrycode]['hidden_' . $wc_field_handle] : $wc_localehidden;
+			$address_field['hidden'] = $locale[$countrycode]['hidden_' . $wc_field_handle] == '1' ? true : false;			
+			return $address_field;
+		}
 		
 		/**
 		 * Filter fields for admin user page.
@@ -1687,6 +2070,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				if ( isset($options['woofields']['remove_' . $key]) && $options['woofields']['remove_' . $key] == 1) :
 					$fields[$key]['required'] = false;
 				endif;
+				if ( isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) :
+					$fields[$key]['required'] = false;
+				endif;
 				$field_order++;
 			endforeach;
 			uasort($fields, array($this, "compareFieldOrder"));						
@@ -1876,14 +2262,123 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			endforeach;
 			return apply_filters( 'wcpgsk_admin_shipping_fields', $shipping_fields );	
 		}
+		
+		/**
+		 * Handle WooCommerce js overwrites of field labels, placeholders, hidden and required status.
+		 *
+		 * @access public
+		 * @param array $params
+		 * @since 1.7.1
+		 * @return array $params
+		 */						
+		public function wcpgsk_address_i18n_params($params) {
+			$options = get_option( 'wcpgsk_settings' );
+			$locale = get_option( 'wcpgsk_locale', array() );
 
+			$wc_locale = $this->wcpgsk_get_country_locale();
+			$jsfields = $this->wcpgsk_get_country_locale_field_selectors();
+			$countrycodes = $this->wcpgsk_get_allowed_countries();
+			foreach($countrycodes as $countrycode => $cn) :
+
+				$default_postcode = isset($locale['default']['postcode_before_city']) ? $locale['default']['postcode_before_city'] : '0';
+				$wc_localepostcode = isset($wc_locale[$countrycode]) && isset($wc_locale[$countrycode]['postcode_before_city']) && $wc_locale[$countrycode]['postcode_before_city'] ? 1 : ( isset($wc_locale['default']['postcode_before_city']) && $wc_locale['default']['postcode_before_city'] ? 1 : $default_postcode );
+				$locale[$countrycode]['postcode_before_city'] = isset($locale[$countrycode]['postcode_before_city']) ? $locale[$countrycode]['postcode_before_city'] : $wc_localepostcode;
+				$wc_locale[$countrycode]['postcode_before_city'] = $locale[$countrycode]['postcode_before_city'] ? true : false;
+			
+				foreach ($jsfields as $fieldkey => $config) :
+					if ( isset($jsfields[$fieldkey]) && !empty($jsfields[$fieldkey]) ) :
+						//use wcpgsk billing fields configuration
+						if ( isset($options['checkoutform']['default_' . $fieldkey]) && $options['checkoutform']['default_' . $fieldkey] ) :
+
+							$default_label = isset($locale['default']['label_' . $fieldkey]) ? $locale['default']['label_' . $fieldkey] : '';
+							$wc_localelabel = isset($wc_locale[$countrycode]) && isset($wc_locale[$countrycode][$fieldkey]) && isset($wc_locale[$countrycode][$fieldkey]['label']) ? $wc_locale[$countrycode][$fieldkey]['label'] : ( isset($wc_locale['default'][$fieldkey]['label']) ? $wc_locale['default'][$fieldkey]['label'] : $default_label );
+							$locale[$countrycode]['label_' . $fieldkey] = isset($locale[$countrycode]['label_' . $fieldkey]) ? $locale[$countrycode]['label_' . $fieldkey] : $wc_localelabel;
+							$wc_locale[$countrycode][$fieldkey]['label'] = __($locale[$countrycode]['label_' . $fieldkey], WCPGSK_DOMAIN);
+							
+							$default_placeholder = isset($locale['default']['placeholder_' . $fieldkey]) ? $locale['default']['placeholder_' . $fieldkey] : '';
+							$wc_localeplaceholder = isset($wc_locale[$countrycode]) && isset($wc_locale[$countrycode][$fieldkey]) && isset($wc_locale[$countrycode][$fieldkey]['placeholder']) ? $wc_locale[$countrycode][$fieldkey]['placeholder'] : ( isset($wc_locale['default'][$fieldkey]['placeholder']) ? $wc_locale['default'][$fieldkey]['placeholder'] : $default_placeholder );
+							$locale[$countrycode]['placeholder_' . $fieldkey] = isset($locale[$countrycode]['placeholder_' . $fieldkey]) ? $locale[$countrycode]['placeholder_' . $fieldkey] : $wc_localeplaceholder;
+							$wc_locale[$countrycode][$fieldkey]['placeholder'] = __($locale[$countrycode]['placeholder_' . $fieldkey], WCPGSK_DOMAIN);
+
+							$default_required = isset($locale['default']['required_' . $fieldkey]) ? $locale['default']['required_' . $fieldkey] : '0';
+							$wc_localerequired = isset($wc_locale[$countrycode]) && isset($wc_locale[$countrycode][$fieldkey]) && isset($wc_locale[$countrycode][$fieldkey]['required']) ? ( $wc_locale[$countrycode][$fieldkey]['required'] ? '1' : '0' ) : ( isset($wc_locale['default'][$fieldkey]['required']) && $wc_locale['default'][$fieldkey]['required'] ? '1' : $default_required );
+							$locale[$countrycode]['required_' . $fieldkey] = isset($locale[$countrycode]['required_' . $fieldkey]) ? $locale[$countrycode]['required_' . $fieldkey] : $wc_localerequired;
+							$wc_locale[$countrycode][$fieldkey]['required'] = $locale[$countrycode]['required_' . $fieldkey] == '1' ? true : false;
+
+							$default_hidden = isset($locale['default']['hidden_' . $fieldkey]) ? $locale['default']['hidden_' . $fieldkey] : '0';
+							$wc_localehidden = isset($wc_locale[$countrycode]) && isset($wc_locale[$countrycode][$fieldkey]) && isset($wc_locale[$countrycode][$fieldkey]['hidden']) ? ( $wc_locale[$countrycode][$fieldkey]['hidden'] ? '1' : '0' ) : ( isset($wc_locale['default'][$fieldkey]['hidden']) && $wc_locale['default'][$fieldkey]['hidden'] ? '1' : $default_hidden );
+							$locale[$countrycode]['hidden_' . $fieldkey] = isset($locale[$countrycode]['hidden_' . $fieldkey]) ? $locale[$countrycode]['hidden_' . $fieldkey] : $wc_localehidden;
+							$wc_locale[$countrycode][$fieldkey]['hidden'] = $locale[$countrycode]['hidden_' . $fieldkey] == '1' ? true : false;
+						
+						else :
+							$wc_locale[$countrycode][$fieldkey]['required'] = false;					
+							if (isset($options['woofields']['required_billing_' . $fieldkey]) && $options['woofields']['required_billing_' . $fieldkey] == 1) :
+								$wc_locale[$countrycode][$fieldkey]['required'] = true;
+							else :
+								$wc_locale[$countrycode][$fieldkey]['required'] = false;							
+							endif;
+							if (isset($options['woofields']['remove_billing_' . $fieldkey]) && $options['woofields']['remove_billing_' . $fieldkey] == 1) :
+								$wc_locale[$countrycode][$fieldkey]['required'] = false;
+								$wc_locale[$countrycode][$fieldkey]['hidden'] = true;
+							endif;
+							if ( isset($options['woofields']['label_billing_' . $fieldkey]) ) :
+								$wc_locale[$countrycode][$fieldkey]['label'] = __($options['woofields']['label_billing_' . $fieldkey], WCPGSK_DOMAIN);
+							endif;
+							if ( isset($options['woofields']['placeholder_billing_' . $fieldkey]) ) :
+								$wc_locale[$countrycode][$fieldkey]['placeholder'] = __($options['woofields']['placeholder_billing_' . $fieldkey], WCPGSK_DOMAIN);
+							endif;
+						
+						endif;
+						
+					endif;
+				endforeach;
+			endforeach;
+			
+			if ( function_exists('WC') ) :
+				return array(
+					'locale'                    => json_encode( $wc_locale ),
+					'locale_fields'             => json_encode( WC()->countries->get_country_locale_field_selectors() ),
+					'i18n_required_text'        => esc_attr__( 'required', 'woocommerce' ),
+				);		
+			else :
+				//locale fields exist hardcoded in wc js file for WC versions below 2.1
+				$params['locale'] = json_encode( $wc_locale );
+				return $params;			
+			endif;
+		}
+
+		/**
+		 * Handle WooCommerce js overwrites of field labels, placeholders, hidden and required status.
+		 * 
+		 *
+		 * @access public
+		 * @param array $locale_fields
+		 * @since 1.7.1
+		 * @return array $locale_fields
+		 */								
+		public function wcpgsk_country_locale_field_selectors($locale_fields) {
+			$options = get_option('wcpgsk_settings');
+			foreach($locale_fields as $field => $selectors) :
+				$selarray = array();
+				if ( isset($options['checkoutform']['default_' . $field]) && $options['checkoutform']['default_' . $field] ) :
+					$selarray[] = '#billing_' . $field . '_field';
+					$selarray[] = '#shipping_' . $field . '_field';					
+				else :
+					$selarray[] = '#no_wc_billing_' . $field . '_handle';
+					$selarray[] = '#no_wc_shipping_' . $field . '_handle';
+				endif;
+				$locale_fields[$field] = implode(', ', $selarray);
+			endforeach;
+			return $locale_fields;
+		}
+		
 		/**
 		 * Our filter for billing fields.
 		 *
 		 * @access public
 		 * @param array $fields
 		 * @since 1.1.0
-		 * @modified 1.5.2
+		 * @modified 1.7.1
 		 * @return array $fields (processed)
 		 */						
 		public function wcpgsk_checkout_fields_billing($fields) {
@@ -1902,7 +2397,6 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				
 					$orderfields[$key] = $fields['billing'][$key];
 
-					$orderfields[$key]['label'] = !empty($options['woofields']['label_' . $key]) ? __($options['woofields']['label_' . $key], WCPGSK_DOMAIN) : '';
 					//cosmetic stuff
 					if (!empty($options['woofields']['class_' . $key])) {
 						if (!empty($orderfields[$key]['class']) && is_array($orderfields[$key]['class']))
@@ -1911,19 +2405,24 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							$orderfields[$key]['class'] = array ($options['woofields']['class_' . $key]);
 					}
 					
-					//set all our other data
-					//woocommerce changed?
-					//if ($options['woofields']['billing'][$key]['custom_' . $key])
-					//	$orderfields[$key] = createCustomStandardField($key, 'billing', $options['woofields']['type_' . $key]);			
-					if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) :
-						unset($orderfields[$key]['required']);
-					elseif (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] == 1) :
-						$orderfields[$key]['required'] = true;
-					endif;
+					//Respect WC handling if desired
+					$wc_field_handle = str_replace('billing_', '', $key);					
+					if ( isset($options['checkoutform']['default_' . $wc_field_handle]) && $options['checkoutform']['default_' . $wc_field_handle] ) :
+						//do nothing with required
+						$orderfields[$key]['label'] = !empty($options['woofields']['label_' . $key]) ? __($options['woofields']['label_' . $key], WCPGSK_DOMAIN) : '';
+						$orderfields[$key]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
+					else :	
+						$orderfields[$key]['label'] = !empty($options['woofields']['label_' . $key]) ? __($options['woofields']['label_' . $key], WCPGSK_DOMAIN) : '';
 					
-					//check if repeater field
-				
-					$orderfields[$key]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
+						if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) :
+							$orderfields[$key]['required'] = false;
+						elseif (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] == 1) :
+							$orderfields[$key]['required'] = true;
+						else :
+							$orderfields[$key]['required'] = false;					
+						endif;
+						$orderfields[$key]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
+					endif;
 					//set the order data
 
 					
@@ -2001,7 +2500,6 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				
 					$orderfields[$key] = $fields['shipping'][$key];
 
-					$orderfields[$key]['label'] = !empty($options['woofields']['label_' . $key]) ? __($options['woofields']['label_' . $key], WCPGSK_DOMAIN) : '';
 					//cosmetic stuff
 					if (!empty($options['woofields']['class_' . $key])) {
 						if (!empty($orderfields[$key]['class']) && is_array($orderfields[$key]['class']))
@@ -2010,17 +2508,24 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							$orderfields[$key]['class'] = array ($options['woofields']['class_' . $key]);
 					}
 					
-					//set all our other data
-					//woocommerce changed?
-					//if ($options['woofields']['shipping'][$key]['custom_' . $key])
-					//	$orderfields[$key] = createCustomStandardField($key, 'shipping', $options['woofields']['type_' . $key]);			
-					if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) :
-						unset($orderfields[$key]['required']);
-					elseif (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] == 1) :
-						$orderfields[$key]['required'] = true;
+					//Respect WC handling if desired
+					$wc_field_handle = str_replace('shipping_', '', $key);					
+					if ( isset($options['checkoutform']['default_' . $wc_field_handle]) && $options['checkoutform']['default_' . $wc_field_handle] ) :
+						//do nothing with required
+						$orderfields[$key]['label'] = !empty($options['woofields']['label_' . $key]) ? __($options['woofields']['label_' . $key], WCPGSK_DOMAIN) : '';
+						$orderfields[$key]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
+					else :	
+						$orderfields[$key]['label'] = !empty($options['woofields']['label_' . $key]) ? __($options['woofields']['label_' . $key], WCPGSK_DOMAIN) : '';
+						if (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] != 1) :
+							$orderfields[$key]['required'] = false;
+						elseif (isset($options['woofields']['required_' . $key]) && $options['woofields']['required_' . $key] == 1) :
+							$orderfields[$key]['required'] = true;
+						else :
+							$orderfields[$key]['required'] = false;					
+						endif;
+						$orderfields[$key]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
 					endif;
-				
-					$orderfields[$key]['placeholder'] = !empty($options['woofields']['placeholder_' . $key]) ? __($options['woofields']['placeholder_' . $key], WCPGSK_DOMAIN) : '';
+
 					//set the order data
 
 					
@@ -2081,7 +2586,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 *
 		 * @access public
 		 * @since 1.1.0
-		 * @modified 1.5.0
+		 * @modified 1.7.1
 		 * @return Raise errors and adjust values if necessary
 		 */						
 		public function wcpgsk_checkout_process() {
@@ -2092,10 +2597,63 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			
 			if (isset($options['checkoutform']['billingemailvalidator']) && $options['checkoutform']['billingemailvalidator'] == 1) {
 				if ($_POST[ 'billing_email' ] && $_POST[ 'billing_email_validator' ] && strtolower($_POST[ 'billing_email' ]) != strtolower($_POST[ 'billing_email_validator' ]))
-					$woocommerce->add_error(  '<strong>' . __('Email addresses do not match', WCPGSK_DOMAIN) . ': ' . $_POST[ 'billing_email' ] . ' : ' . (empty($_POST[ 'billing_email_validator' ]) ? __('Missing validation email', WCPGSK_DOMAIN) : $_POST[ 'billing_email_validator' ]) . '</strong>');
+					wcpgsk_add_error(  '<strong>' . __('Email addresses do not match', WCPGSK_DOMAIN) . ': ' . $_POST[ 'billing_email' ] . ' : ' . (empty($_POST[ 'billing_email_validator' ]) ? __('Missing validation email', WCPGSK_DOMAIN) : $_POST[ 'billing_email_validator' ]) . '</strong>');
 				elseif ($_POST[ 'billing_email' ] && !$_POST[ 'billing_email_validator' ])
-					$woocommerce->add_error(  '<strong>' . __('You have to supply a validation email for: ', WCPGSK_DOMAIN) . $_POST[ 'billing_email' ] . '</strong>');
+					wcpgsk_add_error(  '<strong>' . __('You have to supply a validation email for: ', WCPGSK_DOMAIN) . $_POST[ 'billing_email' ] . '</strong>');
 			}
+			
+			//Just communicate the required state to WC plus the label in billing context based on user choice and locale configuration
+			//WC will take care of the error handling
+			if ( isset($_POST['billing_country']) && $_POST['billing_country'] ) :
+				//Respect WC handling if desired
+				$jsfields = $this->wcpgsk_get_country_locale_field_selectors();
+				$locale = get_option( 'wcpgsk_locale', array() );
+				$wc_locale = $this->wcpgsk_get_country_locale();
+				$countrycode = $_POST['billing_country'];
+				foreach ($jsfields as $wc_field_handle => $wc_field_config) :
+					if ( isset($options['checkoutform']['default_' . $wc_field_handle]) && $options['checkoutform']['default_' . $wc_field_handle] ) :
+						$default_required = isset($locale['default']['required_' . $wc_field_handle]) ? $locale['default']['required_' . $wc_field_handle] : '0';
+						$wc_localerequired = isset($wc_locale[$countrycode]) && isset($wc_locale[$countrycode][$wc_field_handle]) && isset($wc_locale[$countrycode][$wc_field_handle]['required']) ? ( $wc_locale[$countrycode][$wc_field_handle]['required'] ? '1' : '0' ) : ( isset($wc_locale['default'][$wc_field_handle]['required']) && $wc_locale['default'][$wc_field_handle]['required'] ? '1' : $default_required );
+						$locale[$countrycode]['required_' . $wc_field_handle] = isset($locale[$countrycode]['required_' . $wc_field_handle]) ? $locale[$countrycode]['required_' . $wc_field_handle] : $wc_localerequired;
+						$required_field = $locale[$countrycode]['required_' . $wc_field_handle] ? true : false;
+						
+						$default_label = isset($locale['default']['label_' . $wc_field_handle]) ? $locale['default']['label_' . $wc_field_handle] : '';
+						$wc_localelabel = isset($wc_locale[$countrycode]) && isset($wc_locale[$countrycode][$wc_field_handle]) && isset($wc_locale[$countrycode][$wc_field_handle]['label']) ? $wc_locale[$countrycode][$wc_field_handle]['label'] : ( isset($wc_locale['default'][$wc_field_handle]['label']) ? $wc_locale['default'][$wc_field_handle]['label'] : $default_label );						
+						$locale[$countrycode]['label_' . $wc_field_handle] = isset($locale[$countrycode]['label_' . $wc_field_handle]) ? $locale[$countrycode]['label_' . $wc_field_handle] : $wc_localelabel;
+						$required_label = $locale[$countrycode]['label_' . $wc_field_handle];
+
+						$woocommerce->checkout->checkout_fields['billing']['billing_' . $wc_field_handle]['required'] = $required_field;
+						$woocommerce->checkout->checkout_fields['billing']['billing_' . $wc_field_handle]['label'] = __($required_label, WCPGSK_DOMAIN);
+
+					endif;
+				endforeach;
+			endif;
+
+			//Just communicate the required state to WC plus the label in shipping context based on user choice and locale configuration
+			//WC will take care of the error handling
+			if ( isset($_POST['shipping_country']) && $_POST['shipping_country'] ) :
+				//Respect WC handling if desired
+				$jsfields = $this->wcpgsk_get_country_locale_field_selectors();
+				$locale = get_option( 'wcpgsk_locale', array() );
+				$wc_locale = $this->wcpgsk_get_country_locale();
+				$countrycode = $_POST['shipping_country'];
+				foreach ($jsfields as $wc_field_handle => $wc_field_config) :
+					if ( isset($options['checkoutform']['default_' . $wc_field_handle]) && $options['checkoutform']['default_' . $wc_field_handle] ) :
+						$default_required = isset($locale['default']['required_' . $wc_field_handle]) ? $locale['default']['required_' . $wc_field_handle] : '0';
+						$wc_localerequired = isset($wc_locale[$countrycode]) && isset($wc_locale[$countrycode][$wc_field_handle]) && isset($wc_locale[$countrycode][$wc_field_handle]['required']) ? ( $wc_locale[$countrycode][$wc_field_handle]['required'] ? '1' : '0' ) : ( isset($wc_locale['default'][$wc_field_handle]['required']) && $wc_locale['default'][$wc_field_handle]['required'] ? '1' : $default_required );
+						$locale[$countrycode]['required_' . $wc_field_handle] = isset($locale[$countrycode]['required_' . $wc_field_handle]) ? $locale[$countrycode]['required_' . $wc_field_handle] : $wc_localerequired;
+						$required_field = $locale[$countrycode]['required_' . $wc_field_handle] == '1' ? true : false;
+						
+						$default_label = isset($locale['default']['label_' . $wc_field_handle]) ? $locale['default']['label_' . $wc_field_handle] : '';
+						$wc_localelabel = isset($wc_locale[$countrycode]) && isset($wc_locale[$countrycode][$wc_field_handle]) && isset($wc_locale[$countrycode][$wc_field_handle]['label']) ? $wc_locale[$countrycode][$wc_field_handle]['label'] : ( isset($wc_locale['default'][$wc_field_handle]['label']) ? $wc_locale['default'][$wc_field_handle]['label'] : $default_label );						
+						$locale[$countrycode]['label_' . $wc_field_handle] = isset($locale[$countrycode]['label_' . $wc_field_handle]) ? $locale[$countrycode]['label_' . $wc_field_handle] : $wc_localelabel;
+						$required_label = $locale[$countrycode]['label_' . $wc_field_handle];
+						
+						$woocommerce->checkout->checkout_fields['shipping']['shipping_' . $wc_field_handle]['required'] = $required_field;
+						$woocommerce->checkout->checkout_fields['shipping']['shipping_' . $wc_field_handle]['label'] = __($required_label, WCPGSK_DOMAIN);
+					endif;
+				endforeach;
+			endif;
 			
 			$combine = array();
 			foreach($_POST as $key => $val) {
@@ -2119,6 +2677,42 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					unset($_POST[$key]);
 				
 				elseif ( ( isset($options['woofields']['billing'][$key]['custom_' . $key]) && $options['woofields']['billing'][$key]['custom_' . $key] ) || ( isset( $options['woofields']['shipping'][$key]['custom_' . $key] ) && $options['woofields']['shipping'][$key]['custom_' . $key] ) ) :
+					//validate date fields
+					if ( $options['woofields']['type_' . $key] == 'date' && !empty($_POST[$key]) ) :
+						if ( $this->ValidateDate($_POST[$key]) ) :
+							$params = $this->explodeParameters($options['woofields']['settings_' . $key]);
+							if ( isset($params) && isset($params['mindays']) && !empty($params['mindays']) && ctype_digit(strval($params['mindays'])) ) :
+								$forLabel = '';
+								$daydiff = $this->datediffdays($_POST[$key]);
+								if ( $daydiff < $params['mindays'] ) :
+									if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
+										$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+									endif;
+									$mindate = date('Y/m/d', strtotime(date("Y-m-d") . ' + ' . $params['mindays'] . ' days'));
+									$woocommerce->add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be set at least to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $mindate ) . '</strong>');						
+								endif;
+							endif;
+							if ( isset($params) && isset($params['maxdays']) && !empty($params['maxdays']) && ctype_digit(strval($params['maxdays'])) ) :
+								$forLabel = '';
+								$daydiff = $this->datediffdays($_POST[$key]);
+								if ( $daydiff > $params['maxdays'] ) :
+									if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
+										$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+									endif;
+									$maxdate = date('Y/m/d', strtotime(date("Y-m-d") . ' + ' . ($params['maxdays'] + 1) . ' days'));
+									$woocommerce->add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be prior to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $maxdate ) . '</strong>');						
+								endif;
+							endif;
+						else :
+							$forLabel = '';
+							if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
+								$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+							endif;
+							$woocommerce->add_error(  '<strong>' . sprintf(__('You have to supply a valid date for <em style="color:red">%s</em> using the format year/month/day, e.g. 2014/12/24', WCPGSK_DOMAIN), $forLabel ) . '</strong>');												
+						endif;
+					endif;
+					
+					
 					$combine[$key] = array();
 					if (is_array($_POST[$key])) {
 						foreach($_POST[$key] as $value){
@@ -2559,7 +3153,38 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			return $params;
 		}
 		
+		/**
+		 * Helper function to calculate difference in days (php < 5.3 compatible) 
+		 * @access public
+		 * @param string $formdate 
+		 * @since 1.7.1
+		 * @return int $days
+		 */		
+		public function datediffdays($formdate) {
+			$dateSplits = explode("/", $formdate);
+			$date1 =  strtotime(date('Y-m-d'));
+			$date2 =  mktime(0, 0, 0, (int)$dateSplits[1],(int)$dateSplits[2],(int)$dateSplits[0]);
+			$days = ($date2 - $date1)/(3600*24);
+			// returns numberofdays
+			return $days; 		
+		} 	
 		
+		/**
+		 * Helper function to validate a date (php < 5.3 compatible) 
+		 * @access public
+		 * @param string $formdate 
+		 * @since 1.7.1
+		 * @return int $days
+		 */		
+		function ValidateDate($formdate, $format = 'Y-m-d') {
+			$version = explode('.', phpversion());
+			$dateSplits = explode("/", $formdate);
+			if ( count($dateSplits) == 3 ) :
+				return checkdate($dateSplits[1], $dateSplits[2], $dateSplits[0]);
+			else :
+				return false;
+			endif;
+		}		
 		/**
 		 * Our admin menu and admin scripts
 		 * @access public
