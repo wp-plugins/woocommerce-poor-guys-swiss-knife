@@ -43,24 +43,30 @@ function wcpgsk_available_variation($variation_data, $product, $variation) {
 	return $variation_data;
 }
 
+/* 
+ * @changed 1.8.1 fix quantity input for grouped products
+ * @TODO: actually the min/max/step configuration for grouped products is not effective
+ */
 function woocommerce_quantity_input( $args = array(), $product = null, $echo = true ) {
 	if ( is_null( $product ) )
 		$product = $GLOBALS['product'];
-
 	$options = get_option( 'wcpgsk_settings' );
 	$product_id = $product->post->ID;		
 	$selectqty = get_post_meta($product_id, '_wcpgsk_selectqty', true);		
 	$ival = apply_filters( 'woocommerce_quantity_input_min', '', $product );
-	if ( $product->product_type === 'grouped' ) :
-		$ival = 0;
+	$mval = $ival;
+	if ( !empty($args) && isset($args['input_name']) && strpos($args['input_name'], 'quantity[') !== false ) :
+		$ival = 1;
+		$mval = 0;
 	elseif ( empty($ival) || !is_numeric($ival) ) :
 		$ival = 1;
+		$mval = 1;
 	endif;
 	$defaults = array(
 		'input_name'  	=> 'quantity',
 		'input_value'  	=> $ival,
 		'max_value'  	=> apply_filters( 'woocommerce_quantity_input_max', '', $product ),
-		'min_value'  	=> $ival,
+		'min_value'  	=> $mval,
 		'step' 		=> apply_filters( 'woocommerce_quantity_input_step', '1', $product ),
 		'style'		=> apply_filters( 'woocommerce_quantity_style', 'float:left; margin-right:10px;', $product )
 	);
@@ -296,10 +302,14 @@ function wcpgsk_minitems_in_cart( $valid, $cart_item_key, $values, $quantity ) {
 }
 
 if ( !function_exists('wcpgsk_check_qty_config') ) {
+/*
+ * @changed 1.8.1 to fix sold_individually problem
+ */
 function wcpgsk_check_qty_config( $return, $product ) {
 	global $woocommerce;
 	$options = get_option( 'wcpgsk_settings' );
-	$switch = false;
+	//respect established will fix bug communicated
+	$switch = $return;
 	
     switch ($product->product_type) {
 		case 'variation' :
@@ -641,11 +651,19 @@ function wcpgsk_after_checkout_form($checkout) {
 	wp_enqueue_script( 'jquery-ui-timepicker-addon', plugins_url('/assets/js/jquery-ui-timepicker-addon.js', __FILE__) , '', '', false);
 
 	wp_enqueue_script( 'wcpgsk-validate', plugins_url('/assets/js/wcpgsk-validate.js', __FILE__) , '', '', false);
+	wp_enqueue_script( 'wcpgsk-userjs', plugins_url('wcpgsk-user.js', __FILE__) , '', '', false);
 
 	
 	wp_enqueue_style( 'jquery-ui', "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css" , '', '', false);
 	wp_enqueue_style( 'jquery-ui-timepicker-addon', plugins_url('/assets/css/jquery-ui-timepicker-addon.css', __FILE__) , '', '', false);
 
+	$wcpgsk_checkoutjs = get_option('wcpgsk_checkoutjs');
+	if ( !empty($wcpgsk_checkoutjs) ) :
+		echo '<script language="javascript">';
+		echo $wcpgsk_checkoutjs;
+		echo '</script>';
+	endif;
+	
 	echo '<script language="javascript">';
 
 	echo 'jQuery(document).ready(function(){

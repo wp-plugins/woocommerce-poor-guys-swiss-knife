@@ -497,12 +497,35 @@ function get_locale_fields_form() {
 			jQuery("#locale_field_form").html("");
 			jQuery("#locale_field_form").append(response);
 		});
-		//jQuery("#locale_process_form").show();
-		
 	}
 	else {
 		jQuery("#locale_field_form").html("");
-		//jQuery("#locale_process_form").hide();
-				
 	}
+};
+
+function save_checkoutjs() {
+		jQuery("#result_save_checkoutjs").html("");
+		checkoutjs = jQuery('#wcpgsk_checkoutjs').val();
+		if (checkoutjs != null) {
+			 jQuery.ajax({
+					  url: 'http://clean.saveva.com/wp-admin/admin-ajax.php',
+					  type: "POST",
+					  data:{
+						   'action':'wcpgsk_save_checkoutjs',
+						   'checkoutjs':checkoutjs
+						   },
+					  dataType: 'html',
+					  success:function(data){
+					  		jQuery("#result_save_checkoutjs").append(data);
+							},
+					  error: function(jxq, eStatus, errorThrown){
+						   alert('error' + eStatus);
+						   console.log(errorThrown);
+					  }
+					   
+			 
+				 });		
+		}
+		else jQuery("#result_save_checkoutjs").html("");
+		return false;
 };

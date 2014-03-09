@@ -49,6 +49,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				add_action( 'woocommerce_process_product_meta', array( $this, 'wcpgsk_process_product_meta' ), 99);
 				add_action( 'woocommerce_process_product_meta_variable', array( $this, 'wcpgsk_process_product_meta' ), 99);
 				add_action('wp_ajax_get_locale_field_form', array($this, 'get_locale_field_form_callback'));	
+				
+				add_action('wp_ajax_wcpgsk_save_checkoutjs', array($this, 'wcpgsk_save_checkoutjs_callback'));	
 
 			endif;
 			
@@ -115,6 +117,26 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			endif;
 		}
 		
+		/**
+		 * Save checkout js
+		 *
+		 * 
+		 * @access public
+		 * @since 1.8.1
+		 * @return nothing 
+		 */
+		public function wcpgsk_save_checkoutjs_callback() {
+			global $wpdb;
+			$data = $_POST['checkoutjs'];//json_decode(str_replace('\\"','"', $_POST['jsondata']), true);
+			
+			$checkoutjs = $_POST['checkoutjs'];
+			if ( isset($checkoutjs) ) :
+				update_option('wcpgsk_checkoutjs', stripslashes($checkoutjs));
+				echo __('js saved', WCPGSK_DOMAIN);
+			endif;
+			$this->phpdie();
+
+		}
 		
 		/**
 		 * Helper function: mimics 2.1.x for 2.0.x installations and calls +2.1 function directly if available
@@ -680,6 +702,14 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$options = get_option( 'wcpgsk_settings' );
 			if( isset($_POST[ $hidden_field_name ]) && $_POST[ $hidden_field_name ] == 'Y' ) {
 				// Save the posted values in the database
+				//var_dump($_POST);
+				/*
+				if ( isset($_POST['wcpgsk_settings']['checkoutform']['checkoutjs']) ) :
+					$wcpgsk_checkoutjs = $options['checkoutform']['checkoutjs'];
+					$options['checkoutform']['checkoutjs'] = '';
+					update_option('wcpgsk_checkoutjs', $wcpgsk_checkoutjs);
+				endif;
+				*/
 				update_option( 'wcpgsk_settings', $options );
 			}
 			
@@ -1020,6 +1050,21 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									<span class="description"><?php _e('If you want to oblige the user to input his/her email a second time and to assure that the email is valid, activate. This field will be added automatically.', WCPGSK_DOMAIN); ?></span>
 								</td>
 							</tr>
+							<tr>
+								<td><?php _e('Checkout Script', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<textarea name="wcpgsk_checkoutjs" id="wcpgsk_checkoutjs"><?php echo get_option('wcpgsk_checkoutjs') ;?></textarea>
+									<button onclick="save_checkoutjs();return false;"><?php _e('Save js', WCPGSK_DOMAIN); ?></button>
+									<span id="result_save_checkoutjs"></span>
+								</td>
+								<td>
+									<span class="description"><?php _e('You can save your own js code for the checkout page here. Only code, no tags!', WCPGSK_DOMAIN); ?></span>
+									<br />
+									<span class="description"><?php _e('Please use with care as this may break things if not handled with care.', WCPGSK_DOMAIN); ?></span>
+									<br />
+									<span class="description"><?php _e('You can include your script by editing wcpgsk_user.js too but you will have to restore your changes after every update of this plugin.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
 							<?php do_action('wcpgsk_settings_checkout_after', $options); ?>
 
 						</tbody>
@@ -1065,19 +1110,19 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							<table class="widefat" border="1" >
 							<thead>
 								<tr>
-									<th><?php _e('Field Name', WCRGSK_DOMAIN);  ?></th>
-									<th><?php _e('Data', WCRGSK_DOMAIN);  ?></th>		
-									<th><?php _e('Comments', WCRGSK_DOMAIN);  ?></th>
+									<th><?php _e('Field Name', WCPGSK_DOMAIN);  ?></th>
+									<th><?php _e('Data', WCPGSK_DOMAIN);  ?></th>		
+									<th><?php _e('Comments', WCPGSK_DOMAIN);  ?></th>
 								</tr>
 							</thead>
 							<tbody>
 							
 								<tr>
-									<td><?php _e('Field Localization', WCRGSK_DOMAIN);  ?></td>
+									<td><?php _e('Field Localization', WCPGSK_DOMAIN);  ?></td>
 									<td>
 									<select name="wcpgsk_configcountry" id="wcpgsk_configcountry" onChange="get_locale_fields_form()"> 
-										<option value=""><?php echo __('Select Locale', WCRGSK_DOMAIN); ?></option>
-										<option value="default"><?php _e('Default Locale', WCRGSK_DOMAIN); ?></option>
+										<option value=""><?php echo __('Select Locale', WCPGSK_DOMAIN); ?></option>
+										<option value="default"><?php _e('Default Locale', WCPGSK_DOMAIN); ?></option>
 									<?php
 										$countries = $this->wcpgsk_get_allowed_countries();//WC()->countries->countries;
 
@@ -1088,7 +1133,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									</select>
 									</td>
 									<td>
-									<?php _e('Select country to configure', WCRGSK_DOMAIN);  ?>
+									<?php _e('Select country to configure', WCPGSK_DOMAIN);  ?>
 									</td>
 									
 								</tr>
@@ -3366,5 +3411,14 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			load_plugin_textdomain( $domain, FALSE, dirname( plugin_basename( $this->file ) ) . '/lang/' );
 		} // End load_plugin_textdomain()
 		
+		public function phpdie() {
+			if (defined('PHPUNIT_TESTING')) {
+				//do nothing
+				//throw new TestingPhpDieException();
+			} else {
+				die();
+			}
+		}	
 	}
+	
 }

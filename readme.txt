@@ -32,7 +32,7 @@ The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more to
 
 = What's new? =
 	
-* Now includes translations for German, Portuguese and Spanish.
+* Now includes translations for German, Brazilian Portuguese and Spanish.
 * WooCommerce Checkout Localization Management for core WooCommerce Fields
 
 == Usage ==
@@ -175,6 +175,12 @@ Yes, you can change the required status, label and placeholders or even remove t
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.8.1 =
+
+* Fix sold individually problem which was not respecting the product configuration when applying the type configuration
+* Fix quantity input for grouped products allowing to set individual products to 0
+* Add support for custom checkout script (via file and via database)
 
 = 1.8.0 =
 
