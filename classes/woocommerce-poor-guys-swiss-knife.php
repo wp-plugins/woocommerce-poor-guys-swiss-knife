@@ -1198,8 +1198,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 										$checkout_fields[$key]['fieldkey'] = $key;
 										$checkout_fields[$key]['displaylabel'] = isset($options['woofields']['label_' . $key]) && !empty($field['label']) ? __($field['label'], WCPGSK_DOMAIN) : $key;
 										$checkout_fields[$key]['order'] = ((isset($options['woofields']['order_' . $key]) && !empty($options['woofields']['order_' . $key]) && ctype_digit($options['woofields']['order_' . $key])) ? $options['woofields']['order_' . $key] : $field_order);
-										$checkout_fields[$key]['placeholder'] = ((isset($options['woofields']['placeholder_' . $key]) && !empty($options['woofields']['placeholder_' . $key])) ? $options['woofields']['placeholder_' . $key] : $checkout_fields[$key]['placeholder']);
-										$checkout_fields[$key]['label'] = ((isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key])) ? $options['woofields']['label_' . $key] : $checkout_fields[$key]['label']);
+										//$checkout_fields[$key]['placeholder'] = ((isset($options['woofields']['placeholder_' . $key]) && !empty($options['woofields']['placeholder_' . $key])) ? $options['woofields']['placeholder_' . $key] : $checkout_fields[$key]['placeholder']);
+										$checkout_fields[$key]['placeholder'] = ((isset($options['woofields']['placeholder_' . $key])) ? $options['woofields']['placeholder_' . $key] : $checkout_fields[$key]['placeholder']);
+										$checkout_fields[$key]['label'] = ((isset($options['woofields']['label_' . $key])) ? $options['woofields']['label_' . $key] : $checkout_fields[$key]['label']);
+										//$checkout_fields[$key]['label'] = ((isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key])) ? $options['woofields']['label_' . $key] : $checkout_fields[$key]['label']);
 										//before required defreq
 										$checkout_fields[$key]['defreq'] = ((isset($checkout_fields[$key]['required']) && $checkout_fields[$key]['required'] == 1) ? $defchecked : $defunchecked);
 										$checkout_fields[$key]['required'] = ((isset($options['woofields']['required_' . $key])) ? $options['woofields']['required_' . $key] : $checkout_fields[$key]['required']);
@@ -1505,8 +1507,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			<tr class="field_option">
 				<td class="label">
 					<label><?php _e('Minimum offset in days', WCPGSK_DOMAIN) ; ?></label>
-					<p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
-					
+					<p><?php _e('Value has to be a number for dynamic calculation or a fix date in the format yyyy/mm/dd', WCPGSK_DOMAIN) ; ?></p>					
 				</td>
 				<td>
 					<input type="text" for="wcpgsk_add_mindays" value="" />
@@ -1515,7 +1516,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			<tr class="field_option">
 				<td class="label">
 					<label><?php _e('Maximum offset in days', WCPGSK_DOMAIN) ; ?></label>
-					<p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
+					<p><?php _e('Value has to be a number for dynamic calculation or a fix date in the format yyyy/mm/dd', WCPGSK_DOMAIN) ; ?></p>
 				</td>
 				<td>
 					<input type="text" for="wcpgsk_add_maxdays" value="" />
@@ -2180,6 +2181,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				$checkout_fields[$key]['order'] = ((!empty($options['woofields']['order_' . $key]) && ctype_digit($options['woofields']['order_' . $key])) ? $options['woofields']['order_' . $key] : $field_order);
 				$checkout_fields[$key]['placeholder'] = ((!empty($options['woofields']['placeholder_' . $key])) ? $options['woofields']['placeholder_' . $key] : $checkout_fields[$key]['placeholder']);
 				$checkout_fields[$key]['label'] = ((!empty($options['woofields']['label_' . $key])) ? $options['woofields']['label_' . $key] : $checkout_fields[$key]['label']);
+				//$checkout_fields[$key]['label'] = ((isset($options['woofields']['label_' . $key])) ? $options['woofields']['label_' . $key] : $checkout_fields[$key]['label']);
 				//before required defreq
 				$checkout_fields[$key]['defreq'] = ((isset($checkout_fields[$key]['required']) && $checkout_fields[$key]['required'] == 1) ? $defchecked : $defunchecked);
 				$checkout_fields[$key]['required'] = ((isset($options['woofields']['required_' . $key])) ? $options['woofields']['required_' . $key] : $checkout_fields[$key]['required']);
@@ -2441,7 +2443,11 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				else {
 				
 					$orderfields[$key] = $fields['billing'][$key];
-
+					
+					if ( isset($options['woofields']['settings_' . $key]) && $options['woofields']['settings_' . $key]) :
+						$orderfields[$key] = $this->createCustomStandardField($key, 'billing', $options['woofields']['type_' . $key]);
+					endif;
+					
 					//cosmetic stuff
 					if (!empty($options['woofields']['class_' . $key])) {
 						if (!empty($orderfields[$key]['class']) && is_array($orderfields[$key]['class']))
@@ -2810,7 +2816,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							case 'selected':
 								if ( !empty($value) ) :
 									foreach($value as $keyval => $option) {
-										if (!empty($option) || $value == 0) $selected = $option;
+										//if (!empty($option) || $value == 0) $selected = $option;
+										if (!empty($keyval)) $selected = $keyval;
 									}
 								endif;
 								break;

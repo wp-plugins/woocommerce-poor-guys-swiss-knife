@@ -657,12 +657,6 @@ function wcpgsk_after_checkout_form($checkout) {
 	wp_enqueue_style( 'jquery-ui', "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css" , '', '', false);
 	wp_enqueue_style( 'jquery-ui-timepicker-addon', plugins_url('/assets/css/jquery-ui-timepicker-addon.css', __FILE__) , '', '', false);
 
-	$wcpgsk_checkoutjs = get_option('wcpgsk_checkoutjs');
-	if ( !empty($wcpgsk_checkoutjs) ) :
-		echo '<script language="javascript">';
-		echo $wcpgsk_checkoutjs;
-		echo '</script>';
-	endif;
 	
 	echo '<script language="javascript">';
 
@@ -796,47 +790,60 @@ function wcpgsk_after_checkout_form($checkout) {
 				$select.find("option").each(function(j, option){
 					var $option = jQuery(option);
 					// Create a radio:
-					var $radio = jQuery("<input type=\'radio\' />");
-					// Set name and value:
-					$radio.attr("name", $select.attr("name")).attr("value", $option.val()).attr("class", "radio").attr("style","width:10%");
-					// Set checked if the option was selected
-					if ($option.attr("selected")) $radio.attr("checked", "checked");
-					//$radio.text($option.text());
-					// Insert radio before select box:
-					$select.before($radio);
-					// Insert a label:
-					$select.before(
-					  jQuery("<span />").attr("for", $select.attr("name")).text($option.text())
-					);
-					// Insert a <br />:
-					$select.before("<br/>");
+					if ($option.val() != null && $option.val() != "") {
+						var $radio = jQuery("<input type=\'radio\' />");
+						// Set name and value:
+						$radio.attr("name", $select.attr("name")).attr("value", $option.val()).attr("class", "radio").attr("style","width:10%");
+						// Set checked if the option was selected
+						if ($option.attr("selected")) $radio.attr("checked", "checked");
+						//$radio.text($option.text());
+						// Insert radio before select box:
+						$select.before($radio);
+						// Insert a label:
+						$select.before(
+						  jQuery("<span />").attr("for", $select.attr("name")).text($option.text())
+						);
+						// Insert a <br />:
+						$select.before("<br/>");
+					}
 				});
 				$select.remove();
 			});
-		
+			
 			jQuery("select[presentation=\'checkbox\']").each(function(i, select){
 				var $select = jQuery(select);
 				$select.find("option").each(function(j, option){
 					var $option = jQuery(option);
 					// Create a radio:
-					var $radio = jQuery("<input type=\'checkbox\' />");
-					// Set name and value:
-					$radio.attr("name", $select.attr("name") + "[" + j + "]").attr("value", $option.val()).attr("class", "checkbox").attr("style","width:10%");
-					// Set checked if the option was selected
-					if ($option.attr("selected")) $radio.attr("checked", "checked");
-					//$radio.text($option.text());
-					// Insert radio before select box:
-					$select.before($radio);
-					// Insert a label:
-					$select.before(
-					  jQuery("<span />").attr("for", $select.attr("name")).text($option.text())
-					);
-					$select.before("<br/>");
+					if ($option.val() != null && $option.val() != "") {
+						var $radio = jQuery("<input type=\'checkbox\' />");
+						// Set name and value:
+						$radio.attr("name", $select.attr("name") + "[" + j + "]").attr("value", $option.val()).attr("class", "checkbox").attr("style","width:10%");
+						// Set checked if the option was selected
+						if ($option.attr("selected")) $radio.attr("checked", "checked");
+						//$radio.text($option.text());
+						// Insert radio before select box:
+						$select.before($radio);
+						// Insert a label:
+						$select.before(
+						  jQuery("<span />").attr("for", $select.attr("name")).text($option.text())
+						);
+						$select.before("<br/>");
+					}
 				});
 				$select.remove();
 			});
+			
 		});
 	</script><!--unit test after checkout end-->';
+	//load our user scripts from db...
+	$wcpgsk_checkoutjs = get_option('wcpgsk_checkoutjs');
+	if ( !empty($wcpgsk_checkoutjs) ) :
+		echo '<script language="javascript">';
+		echo $wcpgsk_checkoutjs;
+		echo '</script>';
+	endif;
+	
 }
 
 }
