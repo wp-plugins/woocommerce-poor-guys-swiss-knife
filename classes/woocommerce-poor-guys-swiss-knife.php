@@ -1507,7 +1507,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			<tr class="field_option">
 				<td class="label">
 					<label><?php _e('Minimum offset in days', WCPGSK_DOMAIN) ; ?></label>
-					<p><?php _e('Value has to be a number for dynamic calculation or a fix date in the format yyyy/mm/dd', WCPGSK_DOMAIN) ; ?></p>					
+					<p><?php _e('Value has to be a number for dynamic calculation or a fix date in the format specified in Date format', WCPGSK_DOMAIN) ; ?></p>					
 				</td>
 				<td>
 					<input type="text" for="wcpgsk_add_mindays" value="" />
@@ -1516,10 +1516,23 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			<tr class="field_option">
 				<td class="label">
 					<label><?php _e('Maximum offset in days', WCPGSK_DOMAIN) ; ?></label>
-					<p><?php _e('Value has to be a number for dynamic calculation or a fix date in the format yyyy/mm/dd', WCPGSK_DOMAIN) ; ?></p>
+					<p><?php _e('Value has to be a number for dynamic calculation or a fix date in the format specified in Date format', WCPGSK_DOMAIN) ; ?></p>
 				</td>
 				<td>
 					<input type="text" for="wcpgsk_add_maxdays" value="" />
+				</td>
+			</tr>
+			<tr class="field_option">
+				<td class="label">
+					<label><?php _e('Date format', WCPGSK_DOMAIN) ; ?></label>
+					<p><?php _e('Please select a date format.', WCPGSK_DOMAIN) ; ?></p>
+				</td>
+				<td>
+					<select for="wcpgsk_add_dateformat">
+						<option value="">yyyy/mm/dd</option>
+						<option value="mm/dd/yy">mm/dd/yyyy</option>
+						<option value="dd/mm/yy">dd/mm/yyyy</option>
+					</select>
 				</td>
 			</tr>
 			</table>
@@ -2642,7 +2655,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 */						
 		public function wcpgsk_checkout_process() {
 			global $woocommerce;
-			global $wcpgs_ksession;
+			global $wcpgsk_session;
 			$wcpgsk_session->post = $_POST;
 			$options = get_option( 'wcpgsk_settings' );
 			
@@ -2730,8 +2743,19 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				elseif ( ( isset($options['woofields']['billing'][$key]['custom_' . $key]) && $options['woofields']['billing'][$key]['custom_' . $key] ) || ( isset( $options['woofields']['shipping'][$key]['custom_' . $key] ) && $options['woofields']['shipping'][$key]['custom_' . $key] ) ) :
 					//validate date fields
 					if ( $options['woofields']['type_' . $key] == 'date' && !empty($_POST[$key]) ) :
+						//transform back based on field setting
+						$params = $this->explodeParameters($options['woofields']['settings_' . $key]);
+						$_POST[$key] = str_replace('-', '/', $_POST[$key]);
+						if ( isset($params['dateformat']) && !empty($params['dateformat']) ) :
+							if ( $params['dateformat'] == 'dd/mm/yy' ) :
+								$arrdate = explode('/', $_POST[$key]);
+								$_POST[$key] = $arrdate[2].'/'.$arrdate[1].'/'.$arrdate[0];
+							elseif ( $params['dateformat'] == 'mm/dd/yy' ) :
+								$arrdate = explode('/', $_POST[$key]);
+								$_POST[$key] = $arrdate[2].'/'.$arrdate[0].'/'.$arrdate[1];								
+							endif;
+						endif;
 						if ( $this->ValidateDate($_POST[$key]) ) :
-							$params = $this->explodeParameters($options['woofields']['settings_' . $key]);
 							if ( isset($params) && isset($params['mindays']) && !empty($params['mindays']) && ctype_digit(strval($params['mindays'])) ) :
 								$forLabel = '';
 								$daydiff = $this->datediffdays($_POST[$key]);
@@ -2742,6 +2766,26 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									$mindate = date('Y/m/d', strtotime(date("Y-m-d") . ' + ' . $params['mindays'] . ' days'));
 									$woocommerce->add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be set at least to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $mindate ) . '</strong>');						
 								endif;
+							elseif ( isset($params) && isset($params['mindays']) && !empty($params['mindays']) ) :
+								$forLabel = '';
+								$mindays = $params['mindays'];
+								if ( isset($params['dateformat']) && !empty($params['dateformat']) ) :
+									if ( $params['dateformat'] == 'dd/mm/yy' ) :
+										$arrdate = explode('/', $params['mindays']);
+										$mindays = $arrdate[2].'/'.$arrdate[1].'/'.$arrdate[0];
+									elseif ( $params['dateformat'] == 'mm/dd/yy' ) :
+										$arrdate = explode('/', $params['mindays']);
+										$mindays = $arrdate[2].'/'.$arrdate[0].'/'.$arrdate[1];								
+									endif;
+								endif;
+
+								if ( $_POST[$key] < $mindays ) :
+									if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
+										$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+									endif;
+									$woocommerce->add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be set at least to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $params['mindays'] ) . '</strong>');						
+								endif;								
+	
 							endif;
 							if ( isset($params) && isset($params['maxdays']) && !empty($params['maxdays']) && ctype_digit(strval($params['maxdays'])) ) :
 								$forLabel = '';
@@ -2753,6 +2797,25 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									$maxdate = date('Y/m/d', strtotime(date("Y-m-d") . ' + ' . ($params['maxdays'] + 1) . ' days'));
 									$woocommerce->add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be prior to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $maxdate ) . '</strong>');						
 								endif;
+							elseif ( isset($params) && isset($params['maxdays']) && !empty($params['maxdays']) ) :
+								$forLabel = '';
+								$maxdays = $params['maxdays'];
+								if ( isset($params['dateformat']) && !empty($params['dateformat']) ) :
+									if ( $params['dateformat'] == 'dd/mm/yy' ) :
+										$arrdate = explode('/', $params['maxdays']);
+										$maxdays = $arrdate[2].'/'.$arrdate[1].'/'.$arrdate[0];
+									elseif ( $params['dateformat'] == 'mm/dd/yy' ) :
+										$arrdate = explode('/', $params['maxdays']);
+										$maxdays = $arrdate[2].'/'.$arrdate[0].'/'.$arrdate[1];								
+									endif;
+								endif;
+
+								if ( $_POST[$key] > $maxdays ) :
+									if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
+										$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+									endif;
+									$woocommerce->add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be prior to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $params['maxdays'] ) . '</strong>');						
+								endif;								
 							endif;
 						else :
 							$forLabel = '';

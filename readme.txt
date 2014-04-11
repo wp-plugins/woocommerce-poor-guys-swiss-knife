@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization
 Requires at least: 3.1
 Tested up to: 3.8.1
-Stable tag: 1.8.2
+Stable tag: 1.8.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,17 +16,51 @@ WooCommerce Poor Guys Swiss Knife powerloads your standard WooCommerce installat
 
 WooCommerce Poor Guys Swiss Knife comes packaged with real value and no restrictions. The big brother WooCommerce Rich Guys Swiss Knife offers additional stuff and features.
 
-Data captured via customized (added) form fields is available within your order administration and will be added in the appropiate sections of the individual orders. What shows up can be configured for each individual custom field. Data captured will be shown to the customer on the order receipt page and in emails.
+= Most important WCPGSK Features =
 
-You can even organize your form with drag and drop and define if a field spans over the full row or set it as first or last element on a checkout form row.
+Checkout / My Account:
+
+* Checkout form customization (works also for billing and shipping fields on the customer's "My Account" page)
+* Drag and Drop for all Checkout form fields to order all fields (WooCommerce build-in fields and your custom fields)
+* Support for all input types and data (select, checkbox, radio, text, textarea, date picker, time picker, number ranges, password, email) without restrictions
+* Full i18n support to allow localization and translation of all labels, placeholders
+* Remove build-in fields
+* Manage required state for all fields
+* Handle minimum and maximum calendar offset for date fields
+* Separate build-in billing and shipping fields from your own custom fields adding a custom title
+* Manage build-in and custom field alignment and span for each field (left, right, full)
+* Add second email validator field for build-in email field
+* Add second validator field to custom input fields for passwords, additional email inputs, etc. 
+* Hide captured data in emails and receipts on a per field basis
+* Load values and options into inputs and selects via custom javascript
+
+Localization:
+
+* Configure and handle behaviour of vital build in fields for enabled countries (checkout form reconfigures dynamically when customer switches billing or shipping country and this allows you to handle labels and placeholders for enabled countries)
+
+General:
+
+* Set labels for shop buttons (Add to Cart, Read more, Select options, etc.) 
+* Manage available payment gateways on a per product basis with intelligent filter to show the most restrictive combination when a customer has more than one product in his cart
+
+Cart:
+
+* Set required minimum / allowed maximum and incremental steps globally for all products based on product type
+* Set minimum, maximum and incremental steps on a per product basis
+* Switch off quantity input for product types
+
+= Features available with WooCommerce Rich Guys Swiss Knife (WCRGSK) =
+
+* Checkout personalization on a per product and variation basis
+* Attach another general form section to checkout form apart from billing, shipping and comment section
+* Manage order comments section (add fields, manage title, label and placeholder for comment textarea or hide section)
+* Variation bulk manager to apply configurations to variations based on filters
+* Add Variation description
+* In work: Html injects, color picker support, tooltips, terms and conditions on per product basis, etc.
+
+Data captured via customized (added) form fields is available within your order administration and will be added in the appropriate sections of the individual orders. What shows up can be configured for each individual custom field. Data captured will be shown to the customer on the order receipt page and in emails.
 
 WooCommerce Poor Guys Swiss Knife has been developed in cooperation with [Nicestay](http://www.nicestay.net) to set up a transfer and shuttle service website related with their short term rental business of apartments in Barcelona.
-
-From version 1.3 onwards captured data in the context of billing and shipping custom fields will display as additional billing and shipping information on order receipt page and emails.
-
-WooCommerce Poor Guys Swiss Knife includes, starting with v.1.4.0 the possibility to enable confirmation fields, useful in the context of added email and password custom fields, for instance. The standard email validation field for the email field supplied by WooCommerce within the billing section has to be activated like before.
-
-With version 1.6.0 minimum, maximum and incremental steps for product quantities can be defined globally for product types (simple, variable, etc.) and on a per product basis which allows better adaptation according to store necessities.
 
 The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more tools to your swiss knife like custom fields on a per product and per variation basis for checkout forms and a lot more.
 
@@ -34,6 +68,7 @@ The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more to
 	
 * Now includes translations for German, Brazilian Portuguese and Spanish.
 * WooCommerce Checkout Localization Management for core WooCommerce Fields
+* Date Format for date picker inputs
 
 == Usage ==
 
@@ -130,6 +165,9 @@ Automatic updates should work without problems, but, like always, backup your si
 
 == Frequently Asked Questions ==
 
+= Can I translate all labels and placeholders = 
+Yes, WCPGSK allows you to translate all labels and placeholders
+
 = After installation labels and placeholder do not show up. What can I do? = 
 Please save the WooCommerce Poor Guys Swiss Knife Settings page (WooCommerce -> WooCommerce Poor Guys Swiss Knife) at least once.
 (Starting with version 1.6.2 it's not necessary anymore to save the WooCommerce Poor Guys Swiss Knife settings after installation and first activation.)
@@ -175,6 +213,12 @@ Yes, you can change the required status, label and placeholders or even remove t
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.8.3 =
+
+* Fix obsolete warning for wcpgsk_session as reported by one user
+* Add support for basic date formats
+* Add validation for max and min dates (if value is date and not integer)
 
 = 1.8.2 =
 
@@ -301,18 +345,18 @@ Development start
 * [WooCommerce Poor Guys Swiss Knife](http://takebarcelona.com/woocommerce-poor-guys-swiss-knife/): Home of this plugin.
 * [WooCommerce Rich Guys Swiss Knife](http://takebarcelona.com/woocommerce-rich-guys-swiss-knife/): The big brother of this plugin. Most of you will have enough with the little one...
 * [Tessa Authorship](http://takebarcelona.com/tessa-authorship/): A tool to reflect WordPress user independent authorship information, biographies.
-* [Tessa Theme](http://takebarcelona.com/tessa-theme/): Tessa maximizes content and scales from fullscreen to mobile devices. Tessa is ideal for photography, art and design presentation. "Tessa" has builtin WooCommerce Support and plays nicely with WPML as well.
+* [Tessa Theme](http://takebarcelona.com/tessa-theme/): Tessa maximizes content and scales gracefully from mobile devices to desktop fullscreen. Tessa is ideal for photography, art and design presentation. "Tessa" has builtin WooCommerce Support and plays nicely with WPML as well.
 * [Nicestay](http://www.nicestay.net): Sponsor website that offers short term rentals of apartments for holidays and business in Barcelona, Madrid, Catalonia and the rest of Spain. 
 
 == Updates ==
 
-Updates to the plugin will be posted on the [WooCommerce Poor Guys Swiss Knife homepage](http://takebarcelona.com/woocommerce-poor-guys-swiss-knife/) where you will always find the newest version.
+Updates are available via WordPress plugin directory. Additional information about the plugin is available on [WooCommerce Poor Guys Swiss Knife homepage](http://takebarcelona.com/woocommerce-poor-guys-swiss-knife/).
 
 == Thanks ==
 To family and friends for support
 
 == Collaboration ==
-Whoever wants to work or share his translations, welcome. We will provide i18n po and mo files soon. Thank you! Bugs reports, suggestions and feedback are highly appreciated. Translations for Spanish and German and Catalan will follow.
+Whoever wants to work or share his translations, welcome. We will provide i18n po and mo files soon. Thank you! Bugs reports, suggestions and feedback are highly appreciated..
 
 == Credits ==
 @samirbridi for the Brazilian Portuguese translation
