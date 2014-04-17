@@ -16,15 +16,15 @@ WooCommerce Poor Guys Swiss Knife powerloads your standard WooCommerce installat
 
 WooCommerce Poor Guys Swiss Knife comes packaged with real value and no restrictions. The big brother WooCommerce Rich Guys Swiss Knife offers additional stuff and features.
 
-= Most important WCPGSK Features =
+= Most important WooCommerce Poor Guys Swiss Knife Features =
 
 Checkout / My Account:
 
-* Checkout form customization (works also for billing and shipping fields on the customer's "My Account" page)
+* WooCommerce Checkout form customization (works also for billing and shipping fields on the customer's "My Account" page)
 * Drag and Drop for all Checkout form fields to order all fields (WooCommerce build-in fields and your custom fields)
 * Support for all input types and data (select, checkbox, radio, text, textarea, date picker, time picker, number ranges, password, email) without restrictions
 * Full i18n support to allow localization and translation of all labels, placeholders
-* Remove build-in fields
+* Remove WooCommerce build-in fields
 * Manage required state for all fields
 * Handle minimum and maximum calendar offset for date fields
 * Separate build-in billing and shipping fields from your own custom fields adding a custom title
