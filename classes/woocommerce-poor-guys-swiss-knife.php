@@ -2657,6 +2657,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			global $woocommerce;
 			global $wcpgsk_session;
 			$wcpgsk_session->post = $_POST;
+			
 			$options = get_option( 'wcpgsk_settings' );
 			
 			if (isset($options['checkoutform']['billingemailvalidator']) && $options['checkoutform']['billingemailvalidator'] == 1) {
@@ -2824,6 +2825,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							endif;
 							$woocommerce->add_error(  '<strong>' . sprintf(__('You have to supply a valid date for <em style="color:red">%s</em> using the format year/month/day, e.g. 2014/12/24', WCPGSK_DOMAIN), $forLabel ) . '</strong>');												
 						endif;
+					elseif ( $options['woofields']['type_' . $key] == 'select' ) :
+						//if ( is_array($key) ) :
+						//endif;
+
 					endif;
 					
 					
@@ -2831,7 +2836,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					if (is_array($_POST[$key])) {
 						foreach($_POST[$key] as $value){
 							$combine[$key][] = esc_attr($value);
-						}			
+						}									
 					}
 					else $combine[$key][] = esc_attr($val);
 				endif;
@@ -2839,6 +2844,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			foreach($combine as $key => $val) {
 				$_POST[$key] = implode('|', $val);
 			}
+			
 		}
 		
 		

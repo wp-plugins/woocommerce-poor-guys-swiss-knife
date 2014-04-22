@@ -836,6 +836,10 @@ function wcpgsk_after_checkout_form($checkout) {
 				});
 				$select.remove();
 			});
+			jQuery("select[multiple=\'multiple\']").each(function(i, select){
+				var $select = jQuery(select);
+				$select.attr("name", $select.attr("name") + "[]");
+			});
 			
 		});
 	</script><!--unit test after checkout end-->';
