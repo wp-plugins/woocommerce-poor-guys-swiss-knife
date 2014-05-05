@@ -73,7 +73,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			endif;
 			
 			
-			add_action( 'woocommerce_checkout_process', array($this, 'wcpgsk_checkout_process') );
+			add_action( 'woocommerce_checkout_process', array($this, 'wcpgsk_checkout_process'), 99 );
 
 			add_filter( 'woocommerce_load_order_data', array($this, 'wcpgsk_load_order_data'), 5,  1);
 			add_action( 'woocommerce_checkout_init', array($this, 'wcpgsk_checkout_init'), 10, 1 );
@@ -94,6 +94,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 
 			add_filter( 'woocommerce_customer_meta_fields', array($this, 'wcpgsk_customer_meta_fields'), 99 );
 			
+			add_action( 'wp_print_scripts', array($this, 'wcpgsk_handle_scripts'), 100 );
+			add_action( 'wp_enqueue_scripts', array($this, 'wcpgsk_degenerate'), 100 );			
 		}
 
 		/**
@@ -535,12 +537,17 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 
 						<p>
 						<?php 
-							$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
-							if ( isset($billing_fields) && !empty($billing_fields) ) :
-								foreach ($billing_fields as $key => $field) :
-									echo $field['label'] . ": " . $field['captured'] . '<br />';
-								endforeach;
-							endif;
+							//$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
+							//if ( isset($billing_fields) && !empty($billing_fields) ) :
+							foreach ($billing_fields as $key => $field) :
+								$key_type = "billing_" . $key;
+								$label = !empty($field['label']) ? $field['label'] . ": " : "";
+								//if ( isset($options['woofields']['type_' . $key_type]) && $options['woofields']['type_' . $key_type] == 'fileupload' ) :
+								//else :
+								echo $label . $field['captured'] . '<br />';
+								//endif;
+							endforeach;
+							//endif;
 						?>
 						</p>
 
@@ -559,7 +566,12 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						<p>
 						<?php 
 							foreach ($shipping_fields as $key => $field) :
-								echo $field['label'] . ": " . $field['captured'] . '<br />';
+								$key_type = "shipping_" . $key;
+								$label = !empty($field['label']) ? $field['label'] . ": " : "";
+								//if ( isset($options['woofields']['type_' . $key_type]) && $options['woofields']['type_' . $key_type] == 'fileupload' ) :
+								//else :
+									echo $label . $field['captured'] . '<br />';
+								//endif;
 							endforeach;
 						?>
 						</p>
@@ -599,12 +611,17 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 
 						<p>
 						<?php 
-							$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
-							if ( isset($billing_fields) && !empty($billing_fields) ) :
-								foreach ($billing_fields as $key => $field) :
-									echo $field['label'] . ": " . $field['captured'] . '<br />';
-								endforeach;
-							endif;
+							//$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
+							//if ( isset($billing_fields) && !empty($billing_fields) ) :
+							foreach ($billing_fields as $key => $field) :
+								$key_type = "billing_" . $key;
+								$label = !empty($field['label']) ? $field['label'] . ": " : "";
+								//if ( isset($options['woofields']['type_' . $key_type]) && $options['woofields']['type_' . $key_type] == 'fileupload' ) :
+								//else :
+									echo $label . $field['captured'] . '<br />';
+								//endif;
+							endforeach;
+							//endif;
 						?>
 						</p>
 
@@ -622,7 +639,12 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						<p>
 						<?php 
 							foreach ($shipping_fields as $key => $field) :
-								echo $field['label'] . ": " . $field['captured'] . '<br />';
+								$key_type = "shipping_" . $key;
+								$label = !empty($field['label']) ? $field['label'] . ": " : "";
+								//if ( isset($options['woofields']['type_' . $key_type]) && $options['woofields']['type_' . $key_type] == 'fileupload' ) :
+								//else :
+									echo $label . $field['captured'] . '<br />';
+								//endif;
 							endforeach;
 						?>
 						</p>
@@ -666,7 +688,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				$fieldkey = str_replace('billing_', '', $key);
 				if ($key != 'billing_email_validator' && $field['hideorder'] == 0 && $key != 'billing_phone' && $key != 'billing_email') :
 					if ( isset($options['woofields'][$fortype][$key]['custom_' . $key]) && $options['woofields'][$fortype][$key]['custom_' . $key]) :
-						$configField['label'] = __($checkout_fields[$key]['label'], WCPGSK_DOMAIN);
+						$configField['label'] = isset($checkout_fields[$key]['label']) && !empty($checkout_fields[$key]['label']) ? __($checkout_fields[$key]['label'], WCPGSK_DOMAIN) : "";
 						$captured_value = $order->$key;
 						if ( isset($options['woofields']['settings_' . $key]) ) :
 							$params = $this->explodeParameters($options['woofields']['settings_' . $key]);
@@ -1324,6 +1346,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								<option value="time" >time</option>
 								<option value="number" >number</option>
 								<option value="select" >select</option>
+								<?php
+									do_action( 'wcpgsk_settings_form_field_types', $options );								
+								?>
 							</select>
 
 							Identifier New Field: <input type="text" id="wcpgsk_<?php echo $section ;?>_table_fieldid" value="" maxlength="25" size="12" /> <a href="javascript:;" class="add_custom_field button-primary" id="add_custom_<?php echo $section ;?>_btn" for="wcpgsk_<?php echo $section ;?>_table" placeholder="<?php echo $section ;?>"><?php _e( 'New ' . $title . ' Field' , WCPGSK_DOMAIN ); ?></a>
@@ -1535,9 +1560,38 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					</select>
 				</td>
 			</tr>
+			<tr class="field_option">
+				<td class="label">
+					<label><?php _e('Exclude weekends', WCPGSK_DOMAIN) ; ?></label>
+					<p><?php _e('If you want to exclude weekends, please check.', WCPGSK_DOMAIN) ; ?></p>
+				</td>
+				<td>
+					<ul class="wcpgsk-radio-list radio horizontal">
+					<li><label><input id="wcpgsk_add_exweekend_0" for="wcpgsk_add_exweekend" value="0" type="radio" checked="checked" data-checked="checked" ><?php _e('No', WCPGSK_DOMAIN) ; ?></label></li>
+					<li><label><input id="wcpgsk_add_exweekend_1" for="wcpgsk_add_exweekend" value="1" type="radio"><?php _e('Yes', WCPGSK_DOMAIN) ; ?></label></li>
+					</ul>	
+				</td>
+			</tr>
+			<tr class="field_option">
+				<td class="label">
+					<label><?php _e('Exclude week days', WCPGSK_DOMAIN) ; ?></label>
+					<p><?php _e('Please specify weekdays to exclude using integers separated by coma.', WCPGSK_DOMAIN) ; ?></p>
+				</td>
+				<td>
+					<input type="text" for="wcpgsk_add_daysexcluded" style="width:100%" />
+				</td>
+			</tr>
+			<tr class="field_option">
+				<td class="label">
+					<label><?php _e('Exclude dates', WCPGSK_DOMAIN) ; ?></label>
+					<p><?php _e('Please specify dates like holidays you want to exclude from selection separated by coma.', WCPGSK_DOMAIN) ; ?></p>
+				</td>
+				<td>
+					<input type="text" for="wcpgsk_add_datesexcluded" style="width:100%" />
+				</td>
+			</tr>
 			</table>
 			</form>
-
 			</div>
 
 			<div id="wcpgsk_dialog_form_time" title="Configure Time Field" class="wcpgsk_dialog_forms">
@@ -1668,6 +1722,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			
 			
 			<?php
+			do_action( 'wcpgsk_settings_form_field_dialogs', $options );								
+			
 			echo '</div>';
 			echo '<!--unit test options page end-->';
 			
@@ -2230,6 +2286,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							if ( !empty($configField['type']) && $configField['type'] == 'select' ) $configField['type'] = 'text';
 							//textarea is not recognized by woocommerce in order billing address context
 							if ( !empty($configField['type']) && $configField['type'] == 'textarea' ) $configField['type'] = 'text';
+							//if ( !empty($configField['type']) && $configField['type'] == 'fileupload' ) $configField['type'] = 'text';
 							if ($field['hideorder'] == 0)
 								$configField['show'] = true;
 							else
@@ -2656,9 +2713,17 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		public function wcpgsk_checkout_process() {
 			global $woocommerce;
 			global $wcpgsk_session;
-			$wcpgsk_session->post = $_POST;
+			if ( function_exists('WC') ) :
+				WC()->session->set('post', $_POST);
+			else :
+				$wcpgsk_session->post = $_POST;
+			endif;
+			
+			//$wcpgsk_session->post = $_POST;
 			
 			$options = get_option( 'wcpgsk_settings' );
+			
+			//do_action('wcpgsk_checkout_process_action');
 			
 			if (isset($options['checkoutform']['billingemailvalidator']) && $options['checkoutform']['billingemailvalidator'] == 1) {
 				if ($_POST[ 'billing_email' ] && $_POST[ 'billing_email_validator' ] && strtolower($_POST[ 'billing_email' ]) != strtolower($_POST[ 'billing_email_validator' ]))
@@ -2736,7 +2801,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						if ( isset($options['woofields']['label_' . $testkey]) && !empty($options['woofields']['label_' . $testkey]) ) :
 							$forLabel = __($options['woofields']['label_' . $testkey], WCPGSK_DOMAIN);
 						endif;
-						$woocommerce->add_error(  '<strong>' . sprintf(__('You have to validate the value <em style="color:red">%s</em> for %s correctly! Please check your input.', WCPGSK_DOMAIN), $captured_value, $forLabel ) . '</strong>');
+						wcpgsk_add_error(  '<strong>' . sprintf(__('You have to validate the value <em style="color:red">%s</em> for %s correctly! Please check your input.', WCPGSK_DOMAIN), $captured_value, $forLabel ) . '</strong>');
 					
 					endif;
 					unset($_POST[$key]);
@@ -2765,7 +2830,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 										$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
 									endif;
 									$mindate = date('Y/m/d', strtotime(date("Y-m-d") . ' + ' . $params['mindays'] . ' days'));
-									$woocommerce->add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be set at least to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $mindate ) . '</strong>');						
+									wcpgsk_add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be set at least to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $mindate ) . '</strong>');						
 								endif;
 							elseif ( isset($params) && isset($params['mindays']) && !empty($params['mindays']) ) :
 								$forLabel = '';
@@ -2784,7 +2849,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
 										$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
 									endif;
-									$woocommerce->add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be set at least to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $params['mindays'] ) . '</strong>');						
+									wcpgsk_add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be set at least to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $params['mindays'] ) . '</strong>');						
 								endif;								
 	
 							endif;
@@ -2796,7 +2861,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 										$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
 									endif;
 									$maxdate = date('Y/m/d', strtotime(date("Y-m-d") . ' + ' . ($params['maxdays'] + 1) . ' days'));
-									$woocommerce->add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be prior to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $maxdate ) . '</strong>');						
+									wcpgsk_add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be prior to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $maxdate ) . '</strong>');						
 								endif;
 							elseif ( isset($params) && isset($params['maxdays']) && !empty($params['maxdays']) ) :
 								$forLabel = '';
@@ -2815,7 +2880,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
 										$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
 									endif;
-									$woocommerce->add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be prior to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $params['maxdays'] ) . '</strong>');						
+									wcpgsk_add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be prior to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $params['maxdays'] ) . '</strong>');						
 								endif;								
 							endif;
 						else :
@@ -2823,7 +2888,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
 								$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
 							endif;
-							$woocommerce->add_error(  '<strong>' . sprintf(__('You have to supply a valid date for <em style="color:red">%s</em> using the format year/month/day, e.g. 2014/12/24', WCPGSK_DOMAIN), $forLabel ) . '</strong>');												
+							wcpgsk_add_error(  '<strong>' . sprintf(__('You have to supply a valid date for <em style="color:red">%s</em> using the format year/month/day, e.g. 2014/12/24', WCPGSK_DOMAIN), $forLabel ) . '</strong>');												
 						endif;
 					elseif ( $options['woofields']['type_' . $key] == 'select' ) :
 						//if ( is_array($key) ) :
@@ -3001,6 +3066,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 
 						case 'select':
 						$custom_attributes['display'] = $display;
+						$custom_attributes['hasselected'] = !empty($selected) ? 'true' : 'false';
 						$field = array(
 							'type'				=> 'select',
 							'label' 			=> __( $options['woofields']['label_' . $customkey], WCPGSK_DOMAIN ),
@@ -3014,9 +3080,23 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'clear'				=> $clear					
 						);
 						break;
+						default:
+						$custom_attributes['display'] = $display;
+						$field = array(
+							'type'				=> $type,
+							'label' 			=> __( $options['woofields']['label_' . $customkey], WCPGSK_DOMAIN ),
+							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
+							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
+							'custom_attributes'	=> $custom_attributes,
+							'class' 			=> array( $options['woofields']['class_' . $customkey] ),
+							'validate'			=> $validate,
+							'clear'				=> $clear
+						);						
+						break;
 				}
+				//apply_filters('wcpgsk_create_custom_standard_field', $field, 
 			}
-			return $field;
+			return apply_filters('wcpgsk_create_custom_standard_field', $field);
 		}
 
 		public function createCustomStandardFieldClone($customkey, $context, $type) {
@@ -3495,6 +3575,50 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				die();
 			}
 		}	
-	}
-	
+		
+		/**
+		 * Optimize load by dequeue if not necessary.
+		 * @since 1.9.0
+		 * @return  void
+		 */
+		public function wcpgsk_handle_scripts() {
+			//first check that woo exists to prevent fatal errors
+			if ( function_exists( 'is_woocommerce' ) ) :
+				//dequeue scripts and styles
+				if ( !is_cart() && !is_checkout() && !is_account_page() ) :
+				endif;
+				if ( is_checkout() || is_account_page() ) :
+					wp_enqueue_script( 'jquery-ui-dialog' );
+					wp_enqueue_script( 'jquery-ui-datepicker' );
+					wp_enqueue_script( 'jquery-ui-slider' );
+					wp_enqueue_script( 'jquery-ui-button' );
+						
+					wp_enqueue_script( 'jquery-ui-sliderAccess', plugins_url('/assets/js/jquery-ui-sliderAccess.js', $this->file) , '', '', false);
+					wp_enqueue_script( 'jquery-ui-timepicker-addon', plugins_url('/assets/js/jquery-ui-timepicker-addon.js', $this->file) , array('jquery'), '', true);
+
+					wp_enqueue_script( 'wcpgsk-validate', plugins_url('/assets/js/wcpgsk-validate.js', $this->file) , '', '', false);
+					wp_enqueue_script( 'wcpgsk-userjs', plugins_url('wcpgsk-user.js', $this->file) , '', '', false);
+
+					
+					wp_enqueue_style( 'jquery-ui', "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css" , '', '', false);
+					wp_enqueue_style( 'jquery-ui-timepicker-addon', plugins_url('/assets/css/jquery-ui-timepicker-addon.css', $this->file) , '', '', false);
+				endif;
+			endif;
+			
+
+		}				
+
+		/**
+		 * Try to get rid of generator if not a WooCommerce page
+		 * @since 1.9.0
+		 * @return  void
+		 */		
+		public function wcpgsk_degenerate() { 
+			if (function_exists( 'is_woocommerce' )) { 
+				//if (!is_woocommerce()) {
+					//remove_action( 'wp_head', array( $GLOBALS['woocommerce'], 'generator' ) ); 
+				//} 
+			} 
+		}		
+	}	
 }

@@ -568,6 +568,7 @@ if ( isset($wcpgsk_options['process']['paymentgateways']) && 1 == ($wcpgsk_optio
 		require_once dirname(dirname(__FILE__)).'/woocommerce/classes/class-wc-payment-gateways.php';
 		require_once dirname(dirname(__FILE__)).'/woocommerce/classes/class-wc-cart.php';
 	endif; 
+
 	add_action( 'add_meta_boxes', 'wcpgsk_gateways_meta_box_add' );  
 	if ( !function_exists('wcpgsk_gateways_meta_box_add') ) {
 	function wcpgsk_gateways_meta_box_add()  
@@ -578,19 +579,23 @@ if ( isset($wcpgsk_options['process']['paymentgateways']) && 1 == ($wcpgsk_optio
 	if ( !function_exists('wcpgsk_payments_form') ) {
 	function wcpgsk_payments_form()  
 	{
-		global $post, $woo;
+		global $post;//, $woo;
 		$postPayments = get_metadata('post', $post->ID, 'payment_gateways', false) ;
-		$woo = new WC_Payment_Gateways();
-		$payments = $woo->get_available_payment_gateways();
-		foreach($payments as $pay){
+		$woogate = new WC_Payment_Gateways();
+		
+		$payments = $woogate->payment_gateways();//get_available_payment_gateways();
+		
+		foreach ($payments as $pay) {
 			$checked = '';
-			if(in_array($pay->id, $postPayments)) $checked = ' checked="yes" ';
+			
+			if ( in_array($pay->id, $postPayments) ) $checked = ' checked="yes" ';
 			?>  
 				<input type="checkbox" <?php echo $checked; ?> value="<?php echo $pay->id; ?>" name="pays[]" id="payments" />
 				<label for="payment_gateway_meta_box_text"><?php echo $pay->title; ?></label>  
 				<br />  
 			<?php 
-		}      
+		} 
+		
 	} 
 	}
 	add_action('save_post', 'wcpgsk_gateways_meta_box_save', 10, 2 );
@@ -640,22 +645,6 @@ function wcpgsk_after_checkout_form($checkout) {
 	</div>
 	<?php
 	$options = get_option( 'wcpgsk_settings' );
-
-	wp_enqueue_script( 'jquery-ui-dialog' );
-	wp_enqueue_script( 'jquery-ui-datepicker' );
-	wp_enqueue_script( 'jquery-ui-slider' );
-	wp_enqueue_script( 'jquery-ui-button' );
-	wp_enqueue_script( 'jquery-ui-tabs' );
-		
-	wp_enqueue_script( 'jquery-ui-sliderAccess', plugins_url('/assets/js/jquery-ui-sliderAccess.js', __FILE__) , '', '', false);
-	wp_enqueue_script( 'jquery-ui-timepicker-addon', plugins_url('/assets/js/jquery-ui-timepicker-addon.js', __FILE__) , '', '', false);
-
-	wp_enqueue_script( 'wcpgsk-validate', plugins_url('/assets/js/wcpgsk-validate.js', __FILE__) , '', '', false);
-	wp_enqueue_script( 'wcpgsk-userjs', plugins_url('wcpgsk-user.js', __FILE__) , '', '', false);
-
-	
-	wp_enqueue_style( 'jquery-ui', "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css" , '', '', false);
-	wp_enqueue_style( 'jquery-ui-timepicker-addon', plugins_url('/assets/css/jquery-ui-timepicker-addon.css', __FILE__) , '', '', false);
 
 	
 	echo '<script language="javascript">';
@@ -709,8 +698,10 @@ function wcpgsk_after_checkout_form($checkout) {
 				"' . __('Thu', WCPGSK_DOMAIN) . '",
 				"' . __('Fri', WCPGSK_DOMAIN) . '",
 				"' . __('Sat', WCPGSK_DOMAIN) . '"];
-				
-			jQuery("input[display=\'date\']").each(function() {
+			
+			
+
+			jQuery("input[display=\'date\']").each(function(i, cal) {
 				var minD = "' . $options['checkoutform']['mindate'] . '";
 				var maxD = "' . $options['checkoutform']['maxdate'] . '";
 				if (jQuery(this).attr("mindays")) minD = jQuery(this).attr("mindays");
@@ -718,8 +709,27 @@ function wcpgsk_after_checkout_form($checkout) {
 				
 				var dateF = "yy/mm/dd";
 				if (jQuery(this).attr("dateformat")) dateF = jQuery(this).attr("dateformat");
-				
+				var exDays = jQuery(this).attr("daysexcluded");
+				var exDates = new String(jQuery(this).attr("datesexcluded"));
+				var exWeekend = new String(jQuery(this).attr("exweekend"));
+				if ( exDays != null && exDays != "" ) exDays = jQuery.map(exDays.split(","), jQuery.trim); 
+				if ( exDates != null && exDates != "" ) exDates = jQuery.map(exDates.split(","), jQuery.trim);
 				jQuery(this).datepicker({
+					beforeShowDay: function(date) {
+						show = true;
+						if ( exWeekend == "1" ) {
+							show = jQuery.datepicker.noWeekends(date)[0];
+						}
+						if ( show && exDays.length > 0 ) {
+							
+							if ( jQuery.inArray( date.getDay().toString(), exDays ) !== -1 ) show = false;
+						}
+						if ( show && exDates.length > 0 ) { 
+							checkDate = jQuery.datepicker.formatDate(dateF, date);
+							if ( jQuery.inArray( checkDate.toString(), exDates ) !== -1 ) show = false;
+						}
+						return [show, "", (!show) ? "' . __('Date excluded', WCPGSK_DOMAIN) . '" : ""];
+					},
 					dateFormat: dateF,
 					minDate: minD,
 					maxDate: maxD,
@@ -798,7 +808,7 @@ function wcpgsk_after_checkout_form($checkout) {
 						// Set name and value:
 						$radio.attr("name", $select.attr("name")).attr("value", $option.val()).attr("class", "radio").attr("style","width:10%");
 						// Set checked if the option was selected
-						if ($option.attr("selected")) $radio.attr("checked", "checked");
+						if ($option.attr("selected") != null && $option.attr("selected") == "selected" && $select.attr("hasselected") != null && $select.attr("hasselected") == "true" ) $radio.attr("checked", "checked");
 						//$radio.text($option.text());
 						// Insert radio before select box:
 						$select.before($radio);
@@ -823,7 +833,7 @@ function wcpgsk_after_checkout_form($checkout) {
 						// Set name and value:
 						$radio.attr("name", $select.attr("name") + "[" + j + "]").attr("value", $option.val()).attr("class", "checkbox").attr("style","width:10%");
 						// Set checked if the option was selected
-						if ($option.attr("selected")) $radio.attr("checked", "checked");
+						if ($option.attr("selected") != null && $option.attr("selected") == "selected" && $select.attr("hasselected") != null && $select.attr("hasselected") == "true" ) $radio.attr("checked", "checked");
 						//$radio.text($option.text());
 						// Insert radio before select box:
 						$select.before($radio);

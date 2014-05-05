@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization
 Requires at least: Wordpress 3.1 and WooCommerce 2.0
 Tested up to: 3.9.0
-Stable tag: 1.8.4
+Stable tag: 1.9.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -56,7 +56,11 @@ Cart:
 * Manage order comments section (add fields, manage title, label and placeholder for comment textarea or hide section)
 * Variation bulk manager to apply configurations to variations based on filters
 * Add Variation description
-* In work: Html injects, color picker support, tooltips, terms and conditions on per product basis, etc.
+* Html injects (Add whatever you want in between your checkout form fields)
+* Color picker field
+* Acceptable terms and conditions on per product basis
+* File uploads for checkout form sections and on a per product basis
+* Product terms and conditions
 
 Data captured via customized (added) form fields is available within your order administration and will be added in the appropriate sections of the individual orders. What shows up can be configured for each individual custom field. Data captured will be shown to the customer on the order receipt page and in emails.
 
@@ -213,6 +217,14 @@ Yes, you can change the required status, label and placeholders or even remove t
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.9.0 =
+
+* Improve date field handling by adding configuration options to exclude days of week, weekends and holidays
+* Improve single checkbox handling by avoiding unwanted checkbox checked on first (single) checkbox
+* Better load of javascript code
+* Fix storage problem of user javascript code
+* Fix product editor error when "Enable Payment Gateways Configuration" is enabled under "Shop Settings"
 
 = 1.8.4 =
 

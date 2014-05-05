@@ -1,7 +1,7 @@
 jQuery(function() {
 	// Uploading files
 	var file_frame;
-	jQuery('.upload_image_button').live('click', function( event ){
+	jQuery('.upload_image_button').on('click', function( event ){
 
 		event.preventDefault();
 
@@ -33,7 +33,7 @@ jQuery(function() {
 		file_frame.open();
 	});
 
-	jQuery('.upload_file_button').live('click', function( event ){
+	jQuery('.upload_file_button').on('click', function( event ){
 
 		event.preventDefault();
 
@@ -273,7 +273,7 @@ jQuery(document).ready(function() {
 		activateCustomFields(sortobj);
 	});
 	// Add field
-	jQuery('.add_custom_field').live('click', function(){
+	jQuery('.add_custom_field').on('click', function(){
 		var table = jQuery('#' + jQuery(this).attr('for')),			
 			for_table = jQuery(this).attr('for'),
 			new_placeholder = jQuery(this).attr('placeholder'),
@@ -379,39 +379,10 @@ jQuery(document).ready(function() {
 			var mee = jQuery(this).dialog( 'option', 'context' );
 			var btn = jQuery('[name="' + mee + '"]');
 			var new_id = jQuery(this).dialog( 'option', 'new_id' );
-			switch(new_type) {
-				case 'select':
-					tr = btn.closest('tr');
-					var str = tr.find('[name$="[settings_' + new_id + ']"]').val();						
-					var s = jQuery('#wcpgsk_dlg_form_' + new_type).unserializeForm(str);
-				case 'date':
-					tr = btn.closest('tr');
-					var str = tr.find('[name$="[settings_' + new_id + ']"]').val();						
-					var s = jQuery('#wcpgsk_dlg_form_' + new_type).unserializeForm(str);
-					break;
-				case 'time':
-					tr = btn.closest('tr');
-					var str = tr.find('[name$="[settings_' + new_id + ']"]').val();						
-					var s = jQuery('#wcpgsk_dlg_form_' + new_type).unserializeForm(str);
-					break;
-				case 'text':
-					tr = btn.closest('tr');
-					var str = tr.find('[name$="[settings_' + new_id + ']"]').val();						
-					var s = jQuery('#wcpgsk_dlg_form_' + new_type).unserializeForm(str);
-					break;
-				case 'textarea':
-					tr = btn.closest('tr');
-					var str = tr.find('[name$="[settings_' + new_id + ']"]').val();						
-					var s = jQuery('#wcpgsk_dlg_form_' + new_type).unserializeForm(str);
-					break;
-				case 'number':
-					tr = btn.closest('tr');
-					var str = tr.find('[name$="[settings_' + new_id + ']"]').val();						
-					var s = jQuery('#wcpgsk_dlg_form_' + new_type).unserializeForm(str);
-					break;
-				case 'default':
-					break;
-			}
+
+			tr = btn.closest('tr');
+			var str = tr.find('[name$="[settings_' + new_id + ']"]').val();						
+			var s = jQuery('#wcpgsk_dlg_form_' + new_type).unserializeForm(str);
 			return false;
 		},
 		beforeClose: function(event, ui) {
@@ -422,41 +393,10 @@ jQuery(document).ready(function() {
 			var mee = jQuery(this).dialog( 'option', 'context' );
 			var btn = jQuery('[name="' + mee + '"]');
 			var new_id = jQuery(this).dialog( 'option', 'new_id' );
-			switch(jQuery(this).dialog( 'option', 'new_type' )) {
-				case 'select':
-					var str = jQuery('#wcpgsk_dlg_form_select').serialize();
-					tr = btn.closest('tr');
-					tr.find('[name$="[settings_' + new_id + ']"]').val(str);						
-					break;
-				case 'date':
-					var str = jQuery('#wcpgsk_dlg_form_date').serialize();
-					tr = btn.closest('tr');
-					tr.find('[name$="[settings_' + new_id + ']"]').val(str);						
-					break;
-				case 'time':
-					var str = jQuery('#wcpgsk_dlg_form_time').serialize();
-					tr = btn.closest('tr');
-					tr.find('[name$="[settings_' + new_id + ']"]').val(str);						
-					break;
-				case 'text':
-					var str = jQuery('#wcpgsk_dlg_form_text').serialize();
-					tr = btn.closest('tr');
-					tr.find('[name$="[settings_' + new_id + ']"]').val(str);						
-					break;
-				case 'textarea':
-					var str = jQuery('#wcpgsk_dlg_form_textarea').serialize();
-					tr = btn.closest('tr');
-					tr.find('[name$="[settings_' + new_id + ']"]').val(str);						
-					break;
-				case 'number':
-					var str = jQuery('#wcpgsk_dlg_form_number').serialize();
-					tr = btn.closest('tr');
-					tr.find('[name$="[settings_' + new_id + ']"]').val(str);						
-					break;
-				case 'default':
-					break;
-			}
-			
+			var dlgtype = jQuery(this).dialog( 'option', 'new_type' );
+			var str = jQuery('#wcpgsk_dlg_form_' + dlgtype).serialize();
+			tr = btn.closest('tr');
+			tr.find('[name$="[settings_' + new_id + ']"]').val(str);						
 			jQuery( this ).dialog( 'close' );
 		},
 		Cancel: function() {
@@ -469,7 +409,7 @@ jQuery(document).ready(function() {
 	
 	
 	// Remove button
-	jQuery('.wcpgsk_remove_field').live('click', function(){
+	jQuery('.wcpgsk_remove_field').on('click', function(){
 		var remTable = jQuery('#' + jQuery(this).attr('for')),
 			tr = jQuery(this).closest('tr');
 		
@@ -508,7 +448,7 @@ function save_checkoutjs() {
 		checkoutjs = jQuery('#wcpgsk_checkoutjs').val();
 		if (checkoutjs != null) {
 			 jQuery.ajax({
-					  url: 'http://clean.saveva.com/wp-admin/admin-ajax.php',
+					  url: ajaxurl,
 					  type: "POST",
 					  data:{
 						   'action':'wcpgsk_save_checkoutjs',
@@ -522,8 +462,6 @@ function save_checkoutjs() {
 						   alert('error' + eStatus);
 						   console.log(errorThrown);
 					  }
-					   
-			 
 				 });		
 		}
 		else jQuery("#result_save_checkoutjs").html("");
