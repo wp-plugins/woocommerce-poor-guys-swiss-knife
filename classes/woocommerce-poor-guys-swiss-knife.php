@@ -3592,7 +3592,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					wp_enqueue_script( 'jquery-ui-datepicker' );
 					wp_enqueue_script( 'jquery-ui-slider' );
 					wp_enqueue_script( 'jquery-ui-button' );
-						
+					wp_enqueue_script( 'jquery-ui-tabs' );
+	
 					wp_enqueue_script( 'jquery-ui-sliderAccess', plugins_url('/assets/js/jquery-ui-sliderAccess.js', $this->file) , '', '', false);
 					wp_enqueue_script( 'jquery-ui-timepicker-addon', plugins_url('/assets/js/jquery-ui-timepicker-addon.js', $this->file) , array('jquery'), '', true);
 
