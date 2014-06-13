@@ -3,8 +3,8 @@ Contributors: ulih
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KJ4K2X953H8CC
 Tags: WooCommerce checkout manager, WooCommerce cart manager, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization
 Requires at least: Wordpress 3.1 and WooCommerce 2.0
-Tested up to: 3.9.0
-Stable tag: 1.9.1
+Tested up to: 3.9.1
+Stable tag: 1.9.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,8 +40,9 @@ Localization:
 
 General:
 
-* Set labels for shop buttons (Add to Cart, Read more, Select options, etc.) 
+* Set labels for shop buttons (Add to Cart, Read more, Select options, tax, etc.) 
 * Manage available payment gateways on a per product basis with intelligent filter to show the most restrictive combination when a customer has more than one product in his cart
+* Configure number of items on shop pages, etc.
 
 Cart:
 
@@ -210,6 +211,15 @@ You have to reconfigure what was formerly "Show in order". From version 1.5.0 on
 = Can I reconfigure the WooCommerce standard fields? =
 Yes, you can change the required status, label and placeholders or even remove the built-in WooCommerce fields, but please test your changes. Especially the email, country and postcode fields can be vital for the correct functioning of your WooCommerce instance.
 
+= Incompatible plugins, are there?
+Yes, WooCommerce Checkout Manager is reported to be incompatible. If you run this plugin, you should not activate WooCommerce Poor Guys Swiss Knife.
+Up to now, no other incompatibilities have been reported.
+
+= There are few language translations, does this mean that I'm not able to run customizations in my language?
+Not at all. Labels, fields, everything you configure is available for translation via WPML or by your own means. If you use WPML please register your newly configured strings by activating "auto-register strings" under String Translation settings in WPML. Once registered you should deactivate this option as it consumes a lot of resources.
+
+= I've configured a number for the items to be displayed on the shop page, but it doesn't work. What's wrong? =
+Plugins like Jetpack preconfigure the main query in the context of "infinite scroll" function for example. That's not a bug, your template should display your products using "infinite scroll".
 == Screenshots ==
 
 1. Settings Page WooCommerce Poor Guys Swiss Knife.
@@ -217,6 +227,12 @@ Yes, you can change the required status, label and placeholders or even remove t
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.9.2 =
+
+* Enhancements: Additional WooCommerce filters support for labels, loops
+* Cleanups: Remove unsupported settings for grouped product type
+* Minor bugfix: Correct erroneous comments help text in Checkout Localization
 
 = 1.9.1 =
 

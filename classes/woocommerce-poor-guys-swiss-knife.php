@@ -99,6 +99,63 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		}
 
 		/**
+		 * Hook available and WCPGSK configured WooCommerce filters
+		 *
+		 * @since 1.9.2
+		 */
+		public function wcpgsk_hook_woocommerce_filters() {
+			$options = get_option( 'wcpgsk_settings' );
+			if ( !empty( $options['filters'] ) ) :
+				foreach ( $options['filters'] as $filter => $value ) :
+					//do it late
+					add_filter( $filter, array( $this, 'wcpgsk_apply_woocommerce_filter' ), 1 );
+				endforeach;
+			endif;
+		}
+		/**
+		 * Run available WooCommerce filters
+		 *
+		 * @since 1.9.2
+		 * @return configured string value
+		 */
+		public function wcpgsk_apply_woocommerce_filter( $filterval ) {
+			$options = get_option( 'wcpgsk_settings' );
+
+			$the_filter = current_filter();
+			if ( isset( $options['filters'][ $the_filter ] ) ) {
+				$configval = $options['filters'][ $the_filter ];
+				switch ( $the_filter ) :
+					
+					case "loop_shop_per_page" :
+						if ( !empty( $configval ) && is_numeric( $configval ) && intval( $configval ) > 0 ) :
+							$filterval = intval( $configval );
+						endif;
+					break;
+					case "loop_shop_columns" :
+						if ( !empty( $configval ) && is_numeric( $configval ) && intval( $configval ) > 0 ) :
+							$filterval = intval( $configval );
+						endif;
+					break;
+					case "woocommerce_product_thumbnails_columns" :
+						if ( !empty( $configval ) && is_numeric( $configval ) && intval( $configval ) > 0 ) :
+							$filterval = intval( $configval );
+						endif;
+					break;
+					default :
+						//make translatable
+						if ( !empty( $configval ) ) :
+							$filterval = __($configval, WCPGSK_DOMAIN);
+						else :
+							$filterval = "";
+						endif;
+					break;
+				endswitch;
+			}			
+			return $filterval;
+		}
+		
+		
+		/**
 		 * Register Product Tab for Min/Max/Step Configuration for Simple and Variable products
 		 *
 		 * @access public
@@ -770,8 +827,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				// Save the posted values in the database
 				update_option( 'wcpgsk_locale', $locale );
 			endif;
-				
-				
+								
 			?>
 			<form name="form" method="post" action="options.php" id="frm1">
 				<input type="hidden" name="<?php echo $hidden_field_name; ?>" value="Y">
@@ -783,7 +839,27 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						$options['process']['buyproductbtn'] = isset($options['process']['buyproductbtn']) ? $options['process']['buyproductbtn'] : '';
 						$options['process']['viewproductsbtn'] = isset($options['process']['viewproductsbtn']) ? $options['process']['viewproductsbtn'] : '';
 						$options['process']['selectoptionsbtn'] = isset($options['process']['selectoptionsbtn']) ? $options['process']['selectoptionsbtn'] : '';
-						$options['process']['outofstockbtn'] = isset($options['process']['outofstockbtn']) ? $options['process']['outofstockbtn'] : '';
+						$options['process']['outofstockbtn'] = isset($options['process']['outofstockbtn']) ? $options['process']['outofstockbtn'] : '';	
+						//add options if necessary
+						//unset( $options['filters'] );
+						if ( !isset( $options['filters'] ) || empty( $options['filters'] ) ) :
+							$options['filters'] = array(
+								'loop_shop_per_page' => get_option( 'posts_per_page' ),
+								'loop_shop_columns' => '4',
+								'woocommerce_product_thumbnails_columns' => '3',
+								'woocommerce_product_description_tab_title' => __('Description', 'woocommerce'),
+								'woocommerce_product_description_heading' => __( 'Product Description', 'woocommerce' ),
+								'woocommerce_product_additional_information_tab_title' => __('Additional Information', 'woocommerce'),
+								'woocommerce_product_additional_information_heading' => __( 'Additional Information', 'woocommerce' ),
+								'woocommerce_checkout_must_be_logged_in_message' => __( 'You must be logged in to checkout.', 'woocommerce' ),
+								'woocommerce_checkout_login_message' => __( 'Returning customer?', 'woocommerce' ),
+								'woocommerce_checkout_coupon_message' => __( 'Have a coupon?', 'woocommerce' ),
+								'woocommerce_order_button_text' => __( 'Place order', 'woocommerce' ),
+								'woocommerce_countries_tax_or_vat' => $this->WC()->countries->tax_or_vat(),
+								'woocommerce_countries_inc_tax_or_vat' => $this->WC()->countries->inc_tax_or_vat(),
+								'woocommerce_countries_ex_tax_or_vat' => $this->WC()->countries->ex_tax_or_vat(),
+							);
+						endif;
 						
 					?>
 				<div id="wcpgsk_accordion">
@@ -855,6 +931,97 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									<span class="description"><?php _e('Define the label for the Out of stock button.', WCPGSK_DOMAIN); ?></span>
 								</td>
 							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'Tax Label', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[filters][woocommerce_countries_tax_or_vat]" id="wcpgsk_woocommerce_countries_tax_or_vat" value="<?php echo $options['filters']['woocommerce_countries_tax_or_vat'] ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Define the tax label.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'Includes tax message', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[filters][woocommerce_countries_inc_tax_or_vat]" id="wcpgsk_woocommerce_countries_inc_tax_or_vat" value="<?php echo $options['filters']['woocommerce_countries_inc_tax_or_vat'] ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Define the tax included message.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'Tax excluded message', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[filters][woocommerce_countries_ex_tax_or_vat]" id="wcpgsk_woocommerce_countries_ex_tax_or_vat" value="<?php echo $options['filters']['woocommerce_countries_ex_tax_or_vat'] ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Define the tax excluded message.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'Product Description Tab Label', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[filters][woocommerce_product_description_tab_title]" id="wcpgsk_woocommerce_product_description_tab_title" value="<?php echo $options['filters']['woocommerce_product_description_tab_title'] ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Define the label for the product description tab.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'Product Description Header', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[filters][woocommerce_product_description_heading]" id="wcpgsk_woocommerce_product_description_heading" value="<?php echo $options['filters']['woocommerce_product_description_heading'] ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Define the product description header.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'Product Additional Information Tab Label', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[filters][woocommerce_product_additional_information_tab_title]" id="wcpgsk_woocommerce_product_additional_information_tab_title" value="<?php echo $options['filters']['woocommerce_product_additional_information_tab_title'] ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Define the label for the product additional information tab.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'Product Additional Information Header', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[filters][woocommerce_product_additional_information_heading]" id="wcpgsk_woocommerce_product_additional_information_heading" value="<?php echo $options['filters']['woocommerce_product_additional_information_heading'] ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Define the product additional information header.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td><?php _e('Product items per page', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[filters][loop_shop_per_page]" type="text" value="<?php if (isset($options['filters']['loop_shop_per_page'])) echo esc_attr( $options['filters']['loop_shop_per_page'] ); ?>" size="2" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php esc_attr(_e('Specify the number of items you want to show on a shop page.', WCPGSK_DOMAIN)); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td><?php _e('Product columns per page', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[filters][loop_shop_columns]" type="text" value="<?php if (isset($options['filters']['loop_shop_columns'])) echo esc_attr( $options['filters']['loop_shop_columns'] ); ?>" size="2" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php esc_attr(_e('Specify the number of product columns you want to show on a shop page.', WCPGSK_DOMAIN)); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td><?php _e('Product thumbnail columns per page', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[filters][woocommerce_product_thumbnails_columns]" type="text" value="<?php if (isset($options['filters']['woocommerce_product_thumbnails_columns'])) echo esc_attr( $options['filters']['woocommerce_product_thumbnails_columns'] ); ?>" size="2" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php esc_attr(_e('Specify the number of product thumbnail columns you want to show on a shop page.', WCPGSK_DOMAIN)); ?></span>
+								</td>
+							</tr>
+							
 							<tr>
 								<td width="25%"><?php _e( 'Enable Fast Cart', WCPGSK_DOMAIN ); ?></td>
 								<td>
@@ -961,10 +1128,12 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 										<option value="1" <?php if ($options['cart']['variableproductnoqty'] == 1) echo "selected"; ?> ><?php echo $noquantity . ' ' . __('Variable Product', WCPGSK_DOMAIN);?></option>	
 										<option value="0" <?php if ($options['cart']['variableproductnoqty'] == 0) echo "selected"; ?> ><?php echo $quantity . ' ' . __('Variable Product', WCPGSK_DOMAIN);?></option>
 									</select><br />
+									<!-- Does not apply
 									<select name="wcpgsk_settings[cart][groupedproductnoqty]" class="wcpgsk_qty_select">
 										<option value="1" <?php if ($options['cart']['groupedproductnoqty'] == 1) echo "selected"; ?> ><?php echo $noquantity  . ' ' . __('Grouped Product', WCPGSK_DOMAIN);?></option>	
 										<option value="0" <?php if ($options['cart']['groupedproductnoqty'] == 0) echo "selected"; ?> ><?php echo $quantity . ' ' . __('Grouped Product', WCPGSK_DOMAIN);?></option>
 									</select><br />
+									-->
 									<select name="wcpgsk_settings[cart][externalproductnoqty]" class="wcpgsk_qty_select">
 										<option value="1" <?php if ($options['cart']['externalproductnoqty'] == 1) echo "selected"; ?> ><?php echo $noquantity . ' ' . __('External Product', WCPGSK_DOMAIN);?></option>
 										<option value="0" <?php if ($options['cart']['externalproductnoqty'] == 0) echo "selected"; ?> ><?php echo $quantity . ' ' . __('External Product', WCPGSK_DOMAIN);?></option>
@@ -982,7 +1151,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						<?php
 							$product_types = array('variation' => __('Set the minimum and maximum quantities allowed for each item that a customer can add to his/her cart', WCPGSK_DOMAIN),
 								'variable' => __('Please, you should not confuse product quantity and the allowed maximum and minimum of individual items in a cart.', WCPGSK_DOMAIN),
-								'grouped' => __('The min and max quantity values only have effect if you enable quantity input for a given product type. To disable this functionality you can set this value to 0.', WCPGSK_DOMAIN),
+								//does not apply 'grouped' => __('The min and max quantity values only have effect if you enable quantity input for a given product type. To disable this functionality you can set this value to 0.', WCPGSK_DOMAIN),
 								'external' => __('To squizze out more of WooCommerce you may want to upgrade to WooCommerce Rich Guys Swiss Knife :-).', WCPGSK_DOMAIN),
 								'simple' => __('Individual items can be personalized by Woocommerce Rich Guys Swiss Knife during checkout.', WCPGSK_DOMAIN));
 							foreach($product_types as $type => $descr) :
@@ -1041,6 +1210,42 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								</td>
 								<td>
 									<span class="description"><?php _e('For date fields you can specify a maximum offset in number of days.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td><?php _e('Set Order Button Text', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[filters][woocommerce_order_button_text]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_order_button_text'])) echo esc_attr( $options['filters']['woocommerce_order_button_text'] ); ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Set the order button text.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td><?php _e('Set Login required message', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[filters][woocommerce_checkout_must_be_logged_in_message]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_checkout_must_be_logged_in_message'])) echo esc_attr( $options['filters']['woocommerce_checkout_must_be_logged_in_message'] ); ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Change the login required message for the checkout form.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td><?php _e('Set Login possible message', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[filters][woocommerce_checkout_login_message]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_checkout_login_message'])) echo esc_attr( $options['filters']['woocommerce_checkout_login_message'] ); ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Change the returning customer login message for the checkout form.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td><?php _e('Set Coupon message', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[filters][woocommerce_checkout_coupon_message]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_checkout_coupon_message'])) echo esc_attr( $options['filters']['woocommerce_checkout_coupon_message'] ); ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Change the coupon message for the checkout form.', WCPGSK_DOMAIN); ?></span>
 								</td>
 							</tr>
 							<tr>
@@ -1120,7 +1325,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 										<input name="wcpgsk_settings[checkoutform][default_<?php echo $field; ?>]" type="checkbox" value="1" <?php if ( isset($options['checkoutform']['default_' . $field]) && 1 == ($options['checkoutform']['default_' . $field])) echo "checked='checked'"; ?> />
 									</td>
 									<td>
-										<span class="description"><?php echo __('Let WooCommerce handle localization for fields of type', WCPGSK_DOMAIN) . ' ' . $field; ?></span>
+										<span class="description"><?php echo __('Let WCPGSK handle localization for fields of type', WCPGSK_DOMAIN) . ' ' . $field; ?></span>
 									</td>
 								</tr>
 
@@ -1785,7 +1990,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 
 			if ( isset( $input['process']['fastcart'] ) && $input['process']['fastcart'] == 1 && $input['process']['fastcheckout'] == 1) $input['process']['fastcheckout'] = 0;
 			
-			$product_types = array('variation', 'variable', 'grouped', 'external', 'simple');
+			//$product_types = array('variation', 'variable', 'grouped', 'external', 'simple');
+			$product_types = array('variation', 'variable', 'external', 'simple');
 			foreach($product_types as $type) :
 				if ( empty($input['cart']['maxqty_' . $type]) ) $input['cart']['maxqty_' . $type] = 0;
 				if ( !ctype_digit($input['cart']['maxqty_' . $type]) ) $input['cart']['maxqty_' . $type] = 0;
@@ -3479,9 +3685,27 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 */		
 		private function wcpgsk_initial_settings() {
 			global $woocommerce;
-			//@TODO check what we need in light version
-			if ( !get_option('wcpgsk_settings') ) :
+			$options = $get_option('wcpgsk_settings');
+			
+			if ( !$options ) :
+				
 				$defaults = array( 
+					'filters' => array(
+						'loop_shop_per_page' => get_option( 'posts_per_page' ),
+						'loop_shop_columns' => '4',
+						'woocommerce_product_thumbnails_columns' => '3',
+						'woocommerce_product_description_tab_title' => __('Description', 'woocommerce'),
+						'woocommerce_product_description_heading' => __( 'Product Description', 'woocommerce' ),
+						'woocommerce_product_additional_information_tab_title' => __('Additional Information', 'woocommerce'),
+						'woocommerce_product_additional_information_heading' => __( 'Additional Information', 'woocommerce' ),
+						'woocommerce_checkout_must_be_logged_in_message' => __( 'You must be logged in to checkout.', 'woocommerce' ),
+						'woocommerce_checkout_login_message' => __( 'Returning customer?', 'woocommerce' ),
+						'woocommerce_checkout_coupon_message' => __( 'Have a coupon?', 'woocommerce' ),
+						'woocommerce_order_button_text' => __( 'Place order', 'woocommerce' ),
+						'woocommerce_countries_tax_or_vat' => $this->WC()->countries->tax_or_vat(),
+						'woocommerce_countries_inc_tax_or_vat' => $this->WC()->countries->inc_tax_or_vat(),
+						'woocommerce_countries_ex_tax_or_vat' => $this->WC()->countries->ex_tax_or_vat(),
+					),
 					'wcpgsk_forms' => array( array(
 						'label'  => __( 'Label', WCPGSK_DOMAIN ),
 						'placeholder' => __( 'Placeholder', WCPGSK_DOMAIN ))),
@@ -3610,12 +3834,28 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		}				
 
 		/**
+		 * Returns the WooCommerce instance
+		 *
+		 * @since 1.9.2
+		 * @return WooCommerce woocommerce instance
+		 */
+		private function WC() {
+
+			if ( function_exists( 'WC' ) && !is_null( WC() ) ) :
+				return WC();
+			else :
+				global $woocommerce;
+				return $woocommerce;
+			endif;
+		}
+		
+		/**
 		 * Try to get rid of generator if not a WooCommerce page
 		 * @since 1.9.0
 		 * @return  void
 		 */		
 		public function wcpgsk_degenerate() { 
-			if (function_exists( 'is_woocommerce' )) { 
+			if ( function_exists( 'is_woocommerce' ) ) { 
 				//if (!is_woocommerce()) {
 					//remove_action( 'wp_head', array( $GLOBALS['woocommerce'], 'generator' ) ); 
 				//} 

@@ -320,10 +320,12 @@ function wcpgsk_check_qty_config( $return, $product ) {
 			if(isset($options['cart']['variableproductnoqty']) && $options['cart']['variableproductnoqty'] == 1)
 				$switch = true;
 			break;
+		/* does not apply
 		case 'grouped' :
 			 if( isset($options['cart']['groupedproductnoqty']) && $options['cart']['groupedproductnoqty'] == 1)
 				$switch = true;
 			break;
+		*/
 		case 'external' :
 			if( isset($options['cart']['externalproductnoqty']) && $options['cart']['externalproductnoqty'] == 1)
 				$switch = true;
@@ -709,9 +711,14 @@ function wcpgsk_after_checkout_form($checkout) {
 				
 				var dateF = "yy/mm/dd";
 				if (jQuery(this).attr("dateformat")) dateF = jQuery(this).attr("dateformat");
-				var exDays = jQuery(this).attr("daysexcluded");
-				var exDates = new String(jQuery(this).attr("datesexcluded"));
-				var exWeekend = new String(jQuery(this).attr("exweekend"));
+				var exDays = "";
+				var exDates = "";
+				var exWeekend = "0";
+				if (jQuery(this).attr("daysexcluded")) exDays = jQuery(this).attr("daysexcluded");
+				if (jQuery(this).attr("datesexcluded")) exDates = jQuery(this).attr("datesexcluded");
+				if (jQuery(this).attr("exweekend")) exWeekend = jQuery(this).attr("exweekend");
+
+
 				if ( exDays != null && exDays != "" ) exDays = jQuery.map(exDays.split(","), jQuery.trim); 
 				if ( exDates != null && exDates != "" ) exDates = jQuery.map(exDates.split(","), jQuery.trim);
 				jQuery(this).datepicker({
@@ -720,11 +727,11 @@ function wcpgsk_after_checkout_form($checkout) {
 						if ( exWeekend == "1" ) {
 							show = jQuery.datepicker.noWeekends(date)[0];
 						}
-						if ( show && exDays.length > 0 ) {
+						if ( show && exDays != null && exDays != "" && exDays.length > 0 ) {
 							
 							if ( jQuery.inArray( date.getDay().toString(), exDays ) !== -1 ) show = false;
 						}
-						if ( show && exDates.length > 0 ) { 
+						if ( show && exDates != null && exDates != "" && exDates.length > 0 ) { 
 							checkDate = jQuery.datepicker.formatDate(dateF, date);
 							if ( jQuery.inArray( checkDate.toString(), exDates ) !== -1 ) show = false;
 						}
