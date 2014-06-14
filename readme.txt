@@ -211,11 +211,11 @@ You have to reconfigure what was formerly "Show in order". From version 1.5.0 on
 = Can I reconfigure the WooCommerce standard fields? =
 Yes, you can change the required status, label and placeholders or even remove the built-in WooCommerce fields, but please test your changes. Especially the email, country and postcode fields can be vital for the correct functioning of your WooCommerce instance.
 
-= Incompatible plugins, are there?
+= Incompatible plugins, are there? =
 Yes, WooCommerce Checkout Manager is reported to be incompatible. If you run this plugin, you should not activate WooCommerce Poor Guys Swiss Knife.
 Up to now, no other incompatibilities have been reported.
 
-= There are few language translations, does this mean that I'm not able to run customizations in my language?
+= There are few language translations, does this mean that I'm not able to run customizations in my language? =
 Not at all. Labels, fields, everything you configure is available for translation via WPML or by your own means. If you use WPML please register your newly configured strings by activating "auto-register strings" under String Translation settings in WPML. Once registered you should deactivate this option as it consumes a lot of resources.
 
 = I've configured a number for the items to be displayed on the shop page, but it doesn't work. What's wrong? =
