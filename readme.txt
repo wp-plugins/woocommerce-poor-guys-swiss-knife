@@ -216,7 +216,7 @@ Yes, WooCommerce Checkout Manager is reported to be incompatible. If you run thi
 Up to now, no other incompatibilities have been reported.
 
 = There are few language translations, does this mean that I'm not able to run customizations in my language? =
-Not at all. Labels, fields, everything you configure is available for translation via WPML or by your own means. If you use WPML please register your newly configured strings by activating "auto-register strings" under String Translation settings in WPML. Once registered you should deactivate this option as it consumes a lot of resources.
+Not at all. Labels, fields, everything you configure are available for translation via WPML or by your own means. If you use WPML please register your newly configured strings by activating "auto-register strings" under String Translation settings in WPML. Once registered you should deactivate this option as it consumes a lot of resources.
 
 = I've configured a number for the items to be displayed on the shop page, but it doesn't work. What's wrong? =
 Plugins like Jetpack preconfigure the main query in the context of "infinite scroll" function for example. That's not a bug, your template should display your products using "infinite scroll".
