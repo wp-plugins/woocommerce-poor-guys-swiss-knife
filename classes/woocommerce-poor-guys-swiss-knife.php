@@ -392,7 +392,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					</style>
 					<div id="wcpgsk_data_tab" class="panel wc-metaboxes-wrapper woocommerce_options_panel">
 					<?php
-						woocommerce_wp_checkbox( array( 'id' => '_wcpgsk_selectqty', 'label' => __( 'Quantity Selector', WCPGSK_DOMAIN ), 'description' => __( 'Convert quantity input to selector based on quantity configuration.', WCDLM_DOMAIN ) ) );
+						woocommerce_wp_checkbox( array( 'id' => '_wcpgsk_selectqty', 'label' => __( 'Quantity Selector', WCPGSK_DOMAIN ), 'description' => __( 'Convert quantity input to selector based on quantity configuration.', WCPGSK_DOMAIN ) ) );
 					
 						woocommerce_wp_text_input( array( 'id' => '_wcpgsk_minqty', 'type' => 'numeric', 'label' => __( 'Minimum Quantity', WCPGSK_DOMAIN ), 'desc_tip' => true, 'description' => __( 'Please specify an integer value. 0 deactivates the option.', WCPGSK_DOMAIN ), 'custom_attributes' => array('style' => 'width:40%' ) ) );
 						woocommerce_wp_text_input( array( 'id' => '_wcpgsk_maxqty', 'type' => 'numeric', 'label' => __( 'Maximum Quantity', WCPGSK_DOMAIN ), 'desc_tip' => true, 'description' => __( 'Please specify an integer value. Should be equal or higher than minimum value or 0. 0 deactivates the option.', WCPGSK_DOMAIN ), 'custom_attributes' => array('style' => 'width:40%' ) ) );
@@ -3685,7 +3685,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 */		
 		private function wcpgsk_initial_settings() {
 			global $woocommerce;
-			$options = $get_option('wcpgsk_settings');
+			$options = get_option('wcpgsk_settings');
 			
 			if ( !$options ) :
 				
