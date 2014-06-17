@@ -53,6 +53,8 @@ Cart:
 = Features available with WooCommerce Rich Guys Swiss Knife (WCRGSK) =
 
 * Checkout personalization on a per product and variation basis
+* Min/Max/Step quantity settings and backorder support for variations
+* Product filters based on categories and/or attributes for shop page
 * Attach another general form section to checkout form apart from billing, shipping and comment section
 * Manage order comments section (add fields, manage title, label and placeholder for comment textarea or hide section)
 * Variation bulk manager to apply configurations to variations based on filters
