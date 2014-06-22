@@ -279,7 +279,9 @@ jQuery(document).ready(function() {
 			new_placeholder = jQuery(this).attr('placeholder'),
 			row_count = table.children('tbody').children('tr.wcpgsk_order_row').length,
 			new_row = table.children('tbody').children('tr.wcpgsk_add_field_row').clone(false),
-			new_id = jQuery('#' + jQuery(this).attr('for') + '_fieldid').val().toLowerCase().replace(/[^a-z0-9_\s]/gi, '').replace(/[_\s]/g, '-'),
+			/*fix hyphen problem*/
+			//new_id = jQuery('#' + jQuery(this).attr('for') + '_fieldid').val().toLowerCase().replace(/[^a-z0-9_\s]/gi, '').replace(/[_\s]/g, '_'),
+			new_id = jQuery('#' + jQuery(this).attr('for') + '_fieldid').val().toLowerCase().replace(/[^a-z0-9_\s]/gi, '').replace(/[\s]/g, '_'),
 			new_type = jQuery('#' + jQuery(this).attr('for') + '_type').val();// Create and add the new field row
 		if (new_id.length > 0) {
 			new_id = new_placeholder + '_' + new_id;

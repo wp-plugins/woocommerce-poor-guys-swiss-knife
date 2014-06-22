@@ -392,6 +392,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					</style>
 					<div id="wcpgsk_data_tab" class="panel wc-metaboxes-wrapper woocommerce_options_panel">
 					<?php
+						do_action( 'wcpgsk_qty_panel_settings' );
 						woocommerce_wp_checkbox( array( 'id' => '_wcpgsk_selectqty', 'label' => __( 'Quantity Selector', WCPGSK_DOMAIN ), 'description' => __( 'Convert quantity input to selector based on quantity configuration.', WCPGSK_DOMAIN ) ) );
 					
 						woocommerce_wp_text_input( array( 'id' => '_wcpgsk_minqty', 'type' => 'numeric', 'label' => __( 'Minimum Quantity', WCPGSK_DOMAIN ), 'desc_tip' => true, 'description' => __( 'Please specify an integer value. 0 deactivates the option.', WCPGSK_DOMAIN ), 'custom_attributes' => array('style' => 'width:40%' ) ) );
@@ -435,15 +436,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				
 				if ($minqty > $maxqty && $maxqty > 0) $minqty = 1;
 				if ($maxqty < $minqty) $maxqty = 0;
-				//if ($stepqty < $minqty && $maxqty !== 0) $maxqty = 0;
-				/*
-				if ( $stepqty > 0 ) :
-					$stepval = ( $max_qty - $minqty ) % $stepqty;
-					if ( $stepval < 0 ) :
-						$stepqty = 0;
-					endif;
-				endif;
-				*/
+				do_action( 'wcpgsk_process_additional_product_meta', $post_id );
 				if ( isset( $_POST['_wcpgsk_selectqty'] ) && $_POST['_wcpgsk_selectqty'] == 'yes' ) :
 					update_post_meta( $post_id, '_wcpgsk_selectqty', 'yes' );
 				else :
@@ -790,7 +783,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				endif;
 				*/
 				update_option( 'wcpgsk_settings', $options );
+				//echo "<h1>mumpits</h1>";
 			}
+			do_action( 'wcpgsk_settings_update', $options );
 			
 			// Now display the settings editing screen
 			//get some reused labels
@@ -1103,6 +1098,24 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								</td>
 							</tr>
 							<tr>
+								<td><?php _e('Maximum global cart quantity', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[cart][maxqtycart]" type="text" value="<?php if (isset($options['cart']['maxqtycart'])) echo esc_attr( $options['cart']['maxqtycart'] ); ?>" size="3" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('You can specify the allowed overall maximum (sum of all item quantities). If you leave this blank, 0 (=option deactivated) will be established.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td><?php _e('Minimum global cart quantity', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[cart][minqtycart]" type="text" value="<?php if (isset($options['cart']['minqtycart'])) echo esc_attr( $options['cart']['minqtycart'] ); ?>" size="3" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('You can specify the required overall minimum (sum of all item quantities). If you leave this blank, 0 (=option deactivated) will be established.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
 								<td><?php _e('Allow min/max/step configuration on per product basis', WCPGSK_DOMAIN); ?>:</td>
 								<td>
 									<input name="wcpgsk_settings[cart][minmaxstepproduct]" type="hidden" value="0" />
@@ -1130,8 +1143,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									</select><br />
 									<!-- Does not apply
 									<select name="wcpgsk_settings[cart][groupedproductnoqty]" class="wcpgsk_qty_select">
-										<option value="1" <?php if ($options['cart']['groupedproductnoqty'] == 1) echo "selected"; ?> ><?php echo $noquantity  . ' ' . __('Grouped Product', WCPGSK_DOMAIN);?></option>	
-										<option value="0" <?php if ($options['cart']['groupedproductnoqty'] == 0) echo "selected"; ?> ><?php echo $quantity . ' ' . __('Grouped Product', WCPGSK_DOMAIN);?></option>
+										<option value="1" <?php //if ($options['cart']['groupedproductnoqty'] == 1) echo "selected"; ?> ><?php //echo $noquantity  . ' ' . __('Grouped Product', WCPGSK_DOMAIN);?></option>	
+										<option value="0" <?php //if ($options['cart']['groupedproductnoqty'] == 0) echo "selected"; ?> ><?php //echo $quantity . ' ' . __('Grouped Product', WCPGSK_DOMAIN);?></option>
 									</select><br />
 									-->
 									<select name="wcpgsk_settings[cart][externalproductnoqty]" class="wcpgsk_qty_select">
@@ -1965,10 +1978,19 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			if ( !ctype_digit($input['cart']['minitemscart']) ) $input['cart']['minitemscart'] = 0;
 			if ( empty($input['cart']['maxitemscart'] ) ) $input['cart']['maxitemscart'] = 0;
 			if ( !ctype_digit($input['cart']['maxitemscart']) ) $input['cart']['maxitemscart'] = 0;
-
 			$mincart = $input['cart']['minitemscart'];
 			$maxcart = $input['cart']['maxitemscart'];
 			if ($mincart > $maxcart && $maxcart > 0) $input['cart']['minitemscart'] = 1;
+
+			if ( empty($input['cart']['minqtycart']) ) $input['cart']['minqtycart'] = 0;
+			if ( !ctype_digit($input['cart']['minqtycart']) ) $input['cart']['minqtycart'] = 0;
+			if ( empty($input['cart']['maxqtycart'] ) ) $input['cart']['maxqtycart'] = 0;
+			if ( !ctype_digit($input['cart']['maxqtycart']) ) $input['cart']['maxqtycart'] = 0;
+			$minqtycart = $input['cart']['minqtycart'];
+			$maxqtycart = $input['cart']['maxqtycart'];
+			if ($minqtycart > $maxqtycart && $maxqtycart > 0) $input['cart']['minqtycart'] = 1;
+
+
 			
 			//@todo:could be a string, but not vital
 			if (empty($input['checkoutform']['mindate']) || !ctype_digit($input['checkoutform']['mindate'])) $input['checkoutform']['mindate'] = 2;
@@ -3713,6 +3735,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						'minmaxstepproduct' => 0,
 						'minitemscart' => 1,
 						'maxitemscart' => 3,
+						'minqtycart' => 0,
+						'maxqtycart' => 0,
 						'minvariationperproduct' => 1,
 						'maxvariationperproduct' => 1,
 						'maxqty_variation' => 0,

@@ -1,10 +1,10 @@
 === WooCommerce Poor Guys Swiss Knife ===
 Contributors: ulih
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KJ4K2X953H8CC
-Tags: WooCommerce checkout manager, WooCommerce cart manager, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization
+Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization
 Requires at least: Wordpress 3.1 and WooCommerce 2.0
 Tested up to: 3.9.1
-Stable tag: 1.9.3
+Stable tag: 1.9.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,10 +43,12 @@ General:
 * Set labels for shop buttons (Add to Cart, Read more, Select options, tax, etc.) 
 * Manage available payment gateways on a per product basis with intelligent filter to show the most restrictive combination when a customer has more than one product in his cart
 * Configure number of items on shop pages, etc.
+* Filter products to be displayed on main shop page
 
 Cart:
 
 * Set required minimum / allowed maximum and incremental steps globally for all products based on product type
+* Aggregate required minimum / allowed maximum based on item quantities
 * Set minimum, maximum and incremental steps on a per product basis
 * Switch off quantity input for product types
 
@@ -64,6 +66,7 @@ Cart:
 * Acceptable terms and conditions on per product basis
 * File uploads for checkout form sections and on a per product basis
 * Product terms and conditions
+* Advanced quantity and backorder management for products and variations
 
 Data captured via customized (added) form fields is available within your order administration and will be added in the appropriate sections of the individual orders. What shows up can be configured for each individual custom field. Data captured will be shown to the customer on the order receipt page and in emails.
 
@@ -73,9 +76,13 @@ The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more to
 
 = What's new? =
 	
-* Now includes translations for German, Brazilian Portuguese and Spanish.
-* WooCommerce Checkout Localization Management for core WooCommerce Fields
-* Date Format for date picker inputs
+* Product display filters for main shop page
+* Global minimum and maximum for item quantities
+* Year and month dropdown selection for calendars
+
+= What's on its way? =
+
+Priceable fields for products and variations
 
 == Usage ==
 
@@ -85,6 +92,8 @@ The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more to
 * Enable Fast Cart (show cart after a customer added something to the cart in the shop. Also available in WooCommerce)
 * Enable Fast Checkout (go directly to checkout, when a customer adds a product from the shop)
 * Enable Payment Gateways (allows you to restrict the available payment gateways on a per product basis)
+* Filter products to be displayed on main shop page based on categories and attributes
+
 
 = Variation Overload and Bulk Settings =
 
@@ -95,7 +104,8 @@ You need to upgrade to WooCommerce Rich Guys Swiss Knife to use Variation Overlo
 = Cart Settings =
 
 * Minimum and maximum of allowed cart items (not to confuse quantities of individual items or products)
-* Turn of quantity input specifically for product types (simple, variable, grouped, etc.)
+* Aggregate minimum and maximum which takes into account the sum of all item quantities in the cart
+* Turn of quantity input specifically for product types (simple, variable, etc.)
 * Activate min/max/step settings for individual products (configuration for values available on edit page for simple and variable products)
 * Set minimum and maximum and incremental steps for quantities required or allowed in the context of product types (simple, variable, variations, etc.)
 
@@ -164,7 +174,9 @@ More Tools for your WooCommerce Swiss Knife are available with the Rich Guys Swi
 * Custom fields on a per product and per variation basis using Item personalization options
 * Bulk operations for variations
 * Variation Extender which allows to attach virtual variations meaningful to customers and to map these variations back to a more reduced set of internal variations. This allows you to overcome the resource (runtime) and management limits that most e-commerce stores show in the context of variable products.
-
+* File upload
+* Color picker support for fields
+* Advanced (conditional) quantity input and backorder management for products and variations
 
 == Upgrade Notice ==
 
@@ -188,6 +200,8 @@ With WooCommerce Poor Guys Swiss Knife you can support:
 * Time
 * Number (as simple numeric input or ranges)
 * Select (with subtypes of checkboxes, radio buttons or single or multiple select boxes)
+
+WooCommerce Rich Guys Swiss Knife offers additonal fields: file upload, color picker, product terms
 
 With WooCommerce Poor Guys Swiss Knife you have 11 diferent custom field types available or directly or via the configuration of the main types.
 
@@ -229,6 +243,13 @@ Plugins like Jetpack preconfigure the main query in the context of "infinite scr
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.9.4 =
+
+* Enhancement: Year and month dropdown that respects calendar restrictions for date picker fields.
+* Enhancement: Aggregate minimum and maximum cart settings
+* Bugfix: Less restrictive setting for field names
+* Minor fixes and cleanups
 
 = 1.9.3 =
 
