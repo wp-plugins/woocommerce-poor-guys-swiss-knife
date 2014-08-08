@@ -106,6 +106,23 @@ function woocommerce_quantity_input( $args = array(), $product = null, $echo = t
 		
 		else :
 			extract( $args, EXTR_OVERWRITE );
+			if ( function_exists( 'wc_get_template' ) ) :				
+				ob_start();
+				wc_get_template( 'global/quantity-input.php', $args );
+				if ( $echo ) {
+					echo ob_get_clean();
+				} else {
+					return ob_get_clean();
+				}
+			else :
+				?>
+					<div class="quantity"><input type="number" step="<?php echo esc_attr( $step ); ?>" <?php if ( is_numeric( $min_value ) ) : ?>min="<?php echo esc_attr( $min_value ); ?>"<?php endif; ?> <?php if ( is_numeric( $max_value ) ) : ?>max="<?php echo esc_attr( $max_value ); ?>"<?php endif; ?> name="<?php echo esc_attr( $input_name ); ?>" value="<?php echo esc_attr( $input_value ); ?>" title="<?php _ex( 'Qty', 'Product quantity input tooltip', 'woocommerce' ) ?>" class="input-text qty text" size="4" /></div>
+				<?php
+			endif;
+		endif;
+	else :
+		extract( $args, EXTR_OVERWRITE );
+		if ( function_exists( 'wc_get_template' ) ) :				
 			ob_start();
 			wc_get_template( 'global/quantity-input.php', $args );
 			if ( $echo ) {
@@ -113,17 +130,11 @@ function woocommerce_quantity_input( $args = array(), $product = null, $echo = t
 			} else {
 				return ob_get_clean();
 			}
-			
+		else :
+			?>
+				<div class="quantity"><input type="number" step="<?php echo esc_attr( $step ); ?>" <?php if ( is_numeric( $min_value ) ) : ?>min="<?php echo esc_attr( $min_value ); ?>"<?php endif; ?> <?php if ( is_numeric( $max_value ) ) : ?>max="<?php echo esc_attr( $max_value ); ?>"<?php endif; ?> name="<?php echo esc_attr( $input_name ); ?>" value="<?php echo esc_attr( $input_value ); ?>" title="<?php _ex( 'Qty', 'Product quantity input tooltip', 'woocommerce' ) ?>" class="input-text qty text" size="4" /></div>
+			<?php
 		endif;
-	else :
-		extract( $args, EXTR_OVERWRITE );
-		ob_start();
-		wc_get_template( 'global/quantity-input.php', $args );
-		if ( $echo ) {
-			echo ob_get_clean();
-		} else {
-			return ob_get_clean();
-		}
 	endif;
 }
 
@@ -809,7 +820,7 @@ function wcpgsk_after_checkout_form($checkout) {
 				if (jQuery(this).attr("mindays")) minD = jQuery(this).attr("mindays");
 				if (jQuery(this).attr("maxdays")) maxD = jQuery(this).attr("maxdays");
 				
-				var dateF = "yy/mm/dd";
+				var dateF = "dd/mm/yy";
 				if (jQuery(this).attr("dateformat")) dateF = jQuery(this).attr("dateformat");
 				var exDays = "";
 				var exDates = "";
@@ -824,6 +835,7 @@ function wcpgsk_after_checkout_form($checkout) {
 				jQuery(this).datepicker({
 					changeMonth: true,
 					changeYear: true,
+					yearRange: "-100:+100",
 					 beforeShow: function() {
 					   if ((selDate = jQuery(this).val()).length > 0) 
 					   {
