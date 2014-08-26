@@ -440,7 +440,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				if ( isset( $_POST['_wcpgsk_selectqty'] ) && $_POST['_wcpgsk_selectqty'] == 'yes' ) :
 					update_post_meta( $post_id, '_wcpgsk_selectqty', 'yes' );
 				else :
-					update_post_meta( $post_id, '_wcpgsk_selectqty', 'no' );
+					update_post_meta( $post_id, '_wcpgsk_selectqty', 0 );
 				endif;
 				update_post_meta( $post_id, '_wcpgsk_minqty', $minqty );
 				update_post_meta( $post_id, '_wcpgsk_maxqty', $maxqty );

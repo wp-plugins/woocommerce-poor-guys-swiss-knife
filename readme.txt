@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization
 Requires at least: Wordpress 3.1 and WooCommerce 2.0
 Tested up to: 3.9.1
-Stable tag: 1.9.5
+Stable tag: 1.9.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,7 @@ Checkout / My Account:
 * Add second validator field to custom input fields for passwords, additional email inputs, etc. 
 * Hide captured data in emails and receipts on a per field basis
 * Load values and options into inputs and selects via custom javascript
+* Restrict payment gateways on a per product basis loading the most restrictive set of gateways if customer cart holds more than one product
 
 Localization:
 
@@ -79,6 +80,7 @@ The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more to
 * Product display filters for main shop page
 * Global minimum and maximum for item quantities
 * Year and month dropdown selection for calendars
+* Improved min/max/step settings with support for 0 for quantity inputs in all contexts
 
 = What's on its way? =
 
@@ -243,6 +245,10 @@ Plugins like Jetpack preconfigure the main query in the context of "infinite scr
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.9.6 =
+
+* Enhancement: Better handling of min/max/step allowing 0 quantity in cart in all contexts.
 
 = 1.9.5 =
 
