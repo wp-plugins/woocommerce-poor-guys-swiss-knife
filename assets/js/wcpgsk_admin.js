@@ -280,8 +280,8 @@ jQuery(document).ready(function() {
 			row_count = table.children('tbody').children('tr.wcpgsk_order_row').length,
 			new_row = table.children('tbody').children('tr.wcpgsk_add_field_row').clone(false),
 			/*fix hyphen problem*/
-			//new_id = jQuery('#' + jQuery(this).attr('for') + '_fieldid').val().toLowerCase().replace(/[^a-z0-9_\s]/gi, '').replace(/[_\s]/g, '_'),
 			new_id = jQuery('#' + jQuery(this).attr('for') + '_fieldid').val().toLowerCase().replace(/[^a-z0-9_\s]/gi, '').replace(/[\s]/g, '_'),
+			
 			new_type = jQuery('#' + jQuery(this).attr('for') + '_type').val();// Create and add the new field row
 		if (new_id.length > 0) {
 			new_id = new_placeholder + '_' + new_id;
@@ -293,8 +293,6 @@ jQuery(document).ready(function() {
 			});
 			if (!foundid) {
 				new_row.attr( 'class', 'wcpgsk_order_row' );
-
-			
 				// Update names
 				var count = parseInt(row_count) + 1;
 				new_row.find('[convert]').each(function(){
@@ -305,7 +303,22 @@ jQuery(document).ready(function() {
 					
 					
 				});
-
+				//fix new field problem
+				var newfield = new_row.find('[name$="[label_' + new_id + ']"]').val();
+				alert(newfield);
+				var nfcnt = 1;
+				table.children('tbody').children('tr.wcpgsk_order_row').each(function() {
+					jQuery(this).find('[name*="[label_"]').each(function(){
+						if ( jQuery(this).val().indexOf(newfield) == 0 ) {
+							nfcnt++;
+						}
+					});
+				});
+				if ( nfcnt > 1 ) {
+					new_row.find('[name$="[placeholder_' + new_id + ']"]').val(newfield + nfcnt);
+					new_row.find('[name$="[label_' + new_id + ']"]').val(newfield + nfcnt);					
+				}
+				//fix end
 				new_row.find('[name$="[ident_' + new_id + ']"]').html(new_id);
 				new_row.find('[name$="[button_' + new_id + ']"]').html(new_type);
 				new_row.find('[name$="[type_' + new_id + ']"]').val(new_type);

@@ -821,246 +821,247 @@ endif;
 
 if ( !function_exists('wcpgsk_after_checkout_form') ) {
 function wcpgsk_after_checkout_form($checkout) {
-	?>
-	<div id="wcpgsk-dialog-validation-errors" title="<?php _e('Validation errors' , WCPGSK_DOMAIN); ?>">
-		<p><span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span><?php _e('Please check the fields marked with a red border. The values do not pass validation.' , WCPGSK_DOMAIN); ?></p>		
-	</div>
-	<?php
-	$options = get_option( 'wcpgsk_settings' );
+	if ( is_checkout() || is_account_page() ) :
+		?>
+		<div id="wcpgsk-dialog-validation-errors" title="<?php _e('Validation errors' , WCPGSK_DOMAIN); ?>">
+			<p><span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span><?php _e('Please check the fields marked with a red border. The values do not pass validation.' , WCPGSK_DOMAIN); ?></p>		
+		</div>
+		<?php
+		$options = get_option( 'wcpgsk_settings' );
 
-	
-	echo '<script language="javascript">';
-
-	echo 'jQuery(document).ready(function(){
-			jQuery("#cartitemfields").tabs();
-			var cT = "' . __('Close', WCPGSK_DOMAIN) . '";
-			var pT = "' . __('<Prev', WCPGSK_DOMAIN) . '";
-			var nT = "' . __('Next>', WCPGSK_DOMAIN) . '";
-			var cTT = "' . __('Now', WCPGSK_DOMAIN) . '";
-			var cTD = "' . __('Today', WCPGSK_DOMAIN) . '";
-			
-			var mN = ["' . __('January', WCPGSK_DOMAIN) . '", 
-				"' . __('February', WCPGSK_DOMAIN) . '",
-				"' . __('March', WCPGSK_DOMAIN) . '",
-				"' . __('April', WCPGSK_DOMAIN) . '",
-				"' . __('May', WCPGSK_DOMAIN) . '",
-				"' . __('June', WCPGSK_DOMAIN) . '",
-				"' . __('July', WCPGSK_DOMAIN) . '",
-				"' . __('August', WCPGSK_DOMAIN) . '",
-				"' . __('September', WCPGSK_DOMAIN) . '",
-				"' . __('October', WCPGSK_DOMAIN) . '",
-				"' . __('November', WCPGSK_DOMAIN) . '",
-				"' . __('December', WCPGSK_DOMAIN) . '"];
-
-			var mNS = ["' . __('Jan', WCPGSK_DOMAIN) . '", 
-				"' . __('Feb', WCPGSK_DOMAIN) . '",
-				"' . __('Mar', WCPGSK_DOMAIN) . '",
-				"' . __('Apr', WCPGSK_DOMAIN) . '",
-				"' . __('May', WCPGSK_DOMAIN) . '",
-				"' . __('Jun', WCPGSK_DOMAIN) . '",
-				"' . __('Jul', WCPGSK_DOMAIN) . '",
-				"' . __('Aug', WCPGSK_DOMAIN) . '",
-				"' . __('Sep', WCPGSK_DOMAIN) . '",
-				"' . __('Oct', WCPGSK_DOMAIN) . '",
-				"' . __('Nov', WCPGSK_DOMAIN) . '",
-				"' . __('Dec', WCPGSK_DOMAIN) . '"];
-
-			var dN = ["' . __('Sunday', WCPGSK_DOMAIN) . '", 
-				"' . __('Monday', WCPGSK_DOMAIN) . '",
-				"' . __('Tuesday', WCPGSK_DOMAIN) . '",
-				"' . __('Wednesday', WCPGSK_DOMAIN) . '",
-				"' . __('Thursday', WCPGSK_DOMAIN) . '",
-				"' . __('Friday', WCPGSK_DOMAIN) . '",
-				"' . __('Saturday', WCPGSK_DOMAIN) . '"];
-
-			var dNS = ["' . __('Sun', WCPGSK_DOMAIN) . '", 
-				"' . __('Mon', WCPGSK_DOMAIN) . '",
-				"' . __('Tue', WCPGSK_DOMAIN) . '",
-				"' . __('Wed', WCPGSK_DOMAIN) . '",
-				"' . __('Thu', WCPGSK_DOMAIN) . '",
-				"' . __('Fri', WCPGSK_DOMAIN) . '",
-				"' . __('Sat', WCPGSK_DOMAIN) . '"];
-			
-
-
-			jQuery("input[display=\'date\']").each(function(i, cal) {
-				var minD = "' . $options['checkoutform']['mindate'] . '";
-				var maxD = "' . $options['checkoutform']['maxdate'] . '";
-				if (jQuery(this).attr("mindays")) minD = jQuery(this).attr("mindays");
-				if (jQuery(this).attr("maxdays")) maxD = jQuery(this).attr("maxdays");
-				
-				var dateF = "dd/mm/yy";
-				if (jQuery(this).attr("dateformat")) dateF = jQuery(this).attr("dateformat");
-				var exDays = "";
-				var exDates = "";
-				var exWeekend = "0";
-				if (jQuery(this).attr("daysexcluded")) exDays = jQuery(this).attr("daysexcluded");
-				if (jQuery(this).attr("datesexcluded")) exDates = jQuery(this).attr("datesexcluded");
-				if (jQuery(this).attr("exweekend")) exWeekend = jQuery(this).attr("exweekend");
-
-
-				if ( exDays != null && exDays != "" ) exDays = jQuery.map(exDays.split(","), jQuery.trim); 
-				if ( exDates != null && exDates != "" ) exDates = jQuery.map(exDates.split(","), jQuery.trim);
-				jQuery(this).datepicker({
-					changeMonth: true,
-					changeYear: true,
-					yearRange: "-100:+100",
-					 beforeShow: function() {
-					   if ((selDate = jQuery(this).val()).length > 0) 
-					   {
-						  iYear = selDate.substring(selDate.length - 4, selDate.length);
-						  iMonth = jQuery.inArray(selDate.substring(0, selDate.length - 5), 
-								   jQuery(this).datepicker("option", "monthNames"));
-						  jQuery(this).datepicker("option", "defaultDate", new Date(iYear, iMonth, 1));
-						  jQuery(this).datepicker("setDate", new Date(iYear, iMonth, 1));
-					   }
-					},					
-					beforeShowDay: function(date) {
-						show = true;
-						if ( exWeekend == "1" ) {
-							show = jQuery.datepicker.noWeekends(date)[0];
-						}
-						if ( show && exDays != null && exDays != "" && exDays.length > 0 ) {
-							
-							if ( jQuery.inArray( date.getDay().toString(), exDays ) !== -1 ) show = false;
-						}
-						if ( show && exDates != null && exDates != "" && exDates.length > 0 ) { 
-							checkDate = jQuery.datepicker.formatDate(dateF, date);
-							if ( jQuery.inArray( checkDate.toString(), exDates ) !== -1 ) show = false;
-						}
-						return [show, "", (!show) ? "' . __('Date excluded', WCPGSK_DOMAIN) . '" : ""];
-					},
-					dateFormat: dateF,
-					minDate: minD,
-					maxDate: maxD,
-					dayNamesShort: dNS,
-					dayNames: dN,
-					monthNamesShort: mNS,
-					monthNames: mN,				
-					closeText: cT,
-					prevText: pT,
-					nextText: nT,
-					currentText: cTD,
-					firstDay: 1
-				});		
-			});
-
-			jQuery("input[display=\'time\']").each(function() {
-				var hMax = 23;
-				var hMin = 0;
-				if (jQuery(this).attr("maxhour")) hMax = parseInt(jQuery(this).attr("maxhour"));
-				if (jQuery(this).attr("minhour")) hMin = parseInt(jQuery(this).attr("minhour"));
-				
-				jQuery(this).timepicker({
-					timeFormat: "HH:mm",
-					hourMax: hMax,
-					hourMin: hMin,
-					stepHour: parseInt(jQuery(this).attr("hoursteps")),
-					stepMinute: parseInt(jQuery(this).attr("minutesteps")),
-					addSliderAccess: true,
-					sliderAccessArgs: { touchonly: false },
-					timeText: "' . __('Time', WCPGSK_DOMAIN) . '",
-					hourText: "' . __('Hour', WCPGSK_DOMAIN) . '",
-					minuteText: "' . __('Minute', WCPGSK_DOMAIN) . '",
-					currentText: cTT,
-					closeText: cT,
-					timeOnlyTitle: "' . __('Choose Time', WCPGSK_DOMAIN) . '"
-				});		
-			});
-
-			jQuery("input[display=\'number\']").each(function() {
-				var $this = this;
-				jQuery(this).after("<div id=\'slider_" + jQuery(this).attr("id") + "\'></div>");
-
-				if (jQuery($this).attr("numpres") == "true") {
-					jQuery("#slider_" + jQuery($this).attr("id")).slider({
-						range: true,
-						min: parseInt(jQuery($this).attr("minvalue")),
-						max: parseInt(jQuery($this).attr("maxvalue")),
-						step: parseInt(jQuery($this).attr("numstep")),
-						values: [ parseInt(jQuery($this).val()), parseInt(jQuery($this).attr("rangemax")) ],
-						slide: function( event, ui ) {
-							jQuery( $this ).val( ui.values[0] + " - " +  ui.values[1]);
-						}		
-					});
-				}
-				else {
-					jQuery("#slider_" + jQuery($this).attr("id")).slider({
-						range: jQuery($this).attr("numpres"),
-						min: parseInt(jQuery($this).attr("minvalue")),
-						max: parseInt(jQuery($this).attr("maxvalue")),
-						step: parseInt(jQuery($this).attr("numstep")),
-						value: parseInt(jQuery($this).val()),
-						slide: function( event, ui ) {
-							jQuery( $this ).val( ui.value );
-						}		
-					}).sliderAccess({ touchonly : false });
-				}
-			});
-	
-			jQuery("select[presentation=\'radio\']").each(function(i, select){
-				var $select = jQuery(select);
-				$select.find("option").each(function(j, option){
-					var $option = jQuery(option);
-					// Create a radio:
-					if ($option.val() != null && $option.val() != "") {
-						var $radio = jQuery("<input type=\'radio\' />");
-						// Set name and value:
-						$radio.attr("name", $select.attr("name")).attr("value", $option.val()).attr("class", "radio").attr("style","width:10%");
-						// Set checked if the option was selected
-						if ($option.attr("selected") != null && $option.attr("selected") == "selected" && $select.attr("hasselected") != null && $select.attr("hasselected") == "true" ) $radio.attr("checked", "checked");
-						//$radio.text($option.text());
-						// Insert radio before select box:
-						$select.before($radio);
-						// Insert a label:
-						$select.before(
-						  jQuery("<span />").attr("for", $select.attr("name")).text($option.text())
-						);
-						// Insert a <br />:
-						$select.before("<br/>");
-					}
-				});
-				$select.remove();
-			});
-			
-			jQuery("select[presentation=\'checkbox\']").each(function(i, select){
-				var $select = jQuery(select);
-				$select.find("option").each(function(j, option){
-					var $option = jQuery(option);
-					// Create a radio:
-					if ($option.val() != null && $option.val() != "") {
-						var $radio = jQuery("<input type=\'checkbox\' />");
-						// Set name and value:
-						$radio.attr("name", $select.attr("name") + "[" + j + "]").attr("value", $option.val()).attr("class", "checkbox").attr("style","width:10%");
-						// Set checked if the option was selected
-						if ($option.attr("selected") != null && $option.attr("selected") == "selected" && $select.attr("hasselected") != null && $select.attr("hasselected") == "true" ) $radio.attr("checked", "checked");
-						//$radio.text($option.text());
-						// Insert radio before select box:
-						$select.before($radio);
-						// Insert a label:
-						$select.before(
-						  jQuery("<span />").attr("for", $select.attr("name")).text($option.text())
-						);
-						$select.before("<br/>");
-					}
-				});
-				$select.remove();
-			});
-			jQuery("select[multiple=\'multiple\']").each(function(i, select){
-				var $select = jQuery(select);
-				$select.attr("name", $select.attr("name") + "[]");
-			});
-			
-		});
-	</script><!--unit test after checkout end-->';
-	//load our user scripts from db...
-	$wcpgsk_checkoutjs = get_option('wcpgsk_checkoutjs');
-	if ( !empty($wcpgsk_checkoutjs) ) :
+		
 		echo '<script language="javascript">';
-		echo $wcpgsk_checkoutjs;
-		echo '</script>';
+
+		echo 'jQuery(document).ready(function(){
+				jQuery("#cartitemfields").tabs();
+				var cT = "' . __('Close', WCPGSK_DOMAIN) . '";
+				var pT = "' . __('<Prev', WCPGSK_DOMAIN) . '";
+				var nT = "' . __('Next>', WCPGSK_DOMAIN) . '";
+				var cTT = "' . __('Now', WCPGSK_DOMAIN) . '";
+				var cTD = "' . __('Today', WCPGSK_DOMAIN) . '";
+				
+				var mN = ["' . __('January', WCPGSK_DOMAIN) . '", 
+					"' . __('February', WCPGSK_DOMAIN) . '",
+					"' . __('March', WCPGSK_DOMAIN) . '",
+					"' . __('April', WCPGSK_DOMAIN) . '",
+					"' . __('May', WCPGSK_DOMAIN) . '",
+					"' . __('June', WCPGSK_DOMAIN) . '",
+					"' . __('July', WCPGSK_DOMAIN) . '",
+					"' . __('August', WCPGSK_DOMAIN) . '",
+					"' . __('September', WCPGSK_DOMAIN) . '",
+					"' . __('October', WCPGSK_DOMAIN) . '",
+					"' . __('November', WCPGSK_DOMAIN) . '",
+					"' . __('December', WCPGSK_DOMAIN) . '"];
+
+				var mNS = ["' . __('Jan', WCPGSK_DOMAIN) . '", 
+					"' . __('Feb', WCPGSK_DOMAIN) . '",
+					"' . __('Mar', WCPGSK_DOMAIN) . '",
+					"' . __('Apr', WCPGSK_DOMAIN) . '",
+					"' . __('May', WCPGSK_DOMAIN) . '",
+					"' . __('Jun', WCPGSK_DOMAIN) . '",
+					"' . __('Jul', WCPGSK_DOMAIN) . '",
+					"' . __('Aug', WCPGSK_DOMAIN) . '",
+					"' . __('Sep', WCPGSK_DOMAIN) . '",
+					"' . __('Oct', WCPGSK_DOMAIN) . '",
+					"' . __('Nov', WCPGSK_DOMAIN) . '",
+					"' . __('Dec', WCPGSK_DOMAIN) . '"];
+
+				var dN = ["' . __('Sunday', WCPGSK_DOMAIN) . '", 
+					"' . __('Monday', WCPGSK_DOMAIN) . '",
+					"' . __('Tuesday', WCPGSK_DOMAIN) . '",
+					"' . __('Wednesday', WCPGSK_DOMAIN) . '",
+					"' . __('Thursday', WCPGSK_DOMAIN) . '",
+					"' . __('Friday', WCPGSK_DOMAIN) . '",
+					"' . __('Saturday', WCPGSK_DOMAIN) . '"];
+
+				var dNS = ["' . __('Sun', WCPGSK_DOMAIN) . '", 
+					"' . __('Mon', WCPGSK_DOMAIN) . '",
+					"' . __('Tue', WCPGSK_DOMAIN) . '",
+					"' . __('Wed', WCPGSK_DOMAIN) . '",
+					"' . __('Thu', WCPGSK_DOMAIN) . '",
+					"' . __('Fri', WCPGSK_DOMAIN) . '",
+					"' . __('Sat', WCPGSK_DOMAIN) . '"];
+				
+
+
+				jQuery("input[display=\'date\']").each(function(i, cal) {
+					var minD = "' . $options['checkoutform']['mindate'] . '";
+					var maxD = "' . $options['checkoutform']['maxdate'] . '";
+					if (jQuery(this).attr("mindays")) minD = jQuery(this).attr("mindays");
+					if (jQuery(this).attr("maxdays")) maxD = jQuery(this).attr("maxdays");
+					
+					var dateF = "dd/mm/yy";
+					if (jQuery(this).attr("dateformat")) dateF = jQuery(this).attr("dateformat");
+					var exDays = "";
+					var exDates = "";
+					var exWeekend = "0";
+					if (jQuery(this).attr("daysexcluded")) exDays = jQuery(this).attr("daysexcluded");
+					if (jQuery(this).attr("datesexcluded")) exDates = jQuery(this).attr("datesexcluded");
+					if (jQuery(this).attr("exweekend")) exWeekend = jQuery(this).attr("exweekend");
+
+
+					if ( exDays != null && exDays != "" ) exDays = jQuery.map(exDays.split(","), jQuery.trim); 
+					if ( exDates != null && exDates != "" ) exDates = jQuery.map(exDates.split(","), jQuery.trim);
+					jQuery(this).datepicker({
+						changeMonth: true,
+						changeYear: true,
+						yearRange: "-100:+100",
+						 beforeShow: function() {
+						   if ((selDate = jQuery(this).val()).length > 0) 
+						   {
+							  iYear = selDate.substring(selDate.length - 4, selDate.length);
+							  iMonth = jQuery.inArray(selDate.substring(0, selDate.length - 5), 
+									   jQuery(this).datepicker("option", "monthNames"));
+							  jQuery(this).datepicker("option", "defaultDate", new Date(iYear, iMonth, 1));
+							  jQuery(this).datepicker("setDate", new Date(iYear, iMonth, 1));
+						   }
+						},					
+						beforeShowDay: function(date) {
+							show = true;
+							if ( exWeekend == "1" ) {
+								show = jQuery.datepicker.noWeekends(date)[0];
+							}
+							if ( show && exDays != null && exDays != "" && exDays.length > 0 ) {
+								
+								if ( jQuery.inArray( date.getDay().toString(), exDays ) !== -1 ) show = false;
+							}
+							if ( show && exDates != null && exDates != "" && exDates.length > 0 ) { 
+								checkDate = jQuery.datepicker.formatDate(dateF, date);
+								if ( jQuery.inArray( checkDate.toString(), exDates ) !== -1 ) show = false;
+							}
+							return [show, "", (!show) ? "' . __('Date excluded', WCPGSK_DOMAIN) . '" : ""];
+						},
+						dateFormat: dateF,
+						minDate: minD,
+						maxDate: maxD,
+						dayNamesShort: dNS,
+						dayNames: dN,
+						monthNamesShort: mNS,
+						monthNames: mN,				
+						closeText: cT,
+						prevText: pT,
+						nextText: nT,
+						currentText: cTD,
+						firstDay: 1
+					});		
+				});
+
+				jQuery("input[display=\'time\']").each(function() {
+					var hMax = 23;
+					var hMin = 0;
+					if (jQuery(this).attr("maxhour")) hMax = parseInt(jQuery(this).attr("maxhour"));
+					if (jQuery(this).attr("minhour")) hMin = parseInt(jQuery(this).attr("minhour"));
+					
+					jQuery(this).timepicker({
+						timeFormat: "HH:mm",
+						hourMax: hMax,
+						hourMin: hMin,
+						stepHour: parseInt(jQuery(this).attr("hoursteps")),
+						stepMinute: parseInt(jQuery(this).attr("minutesteps")),
+						addSliderAccess: true,
+						sliderAccessArgs: { touchonly: false },
+						timeText: "' . __('Time', WCPGSK_DOMAIN) . '",
+						hourText: "' . __('Hour', WCPGSK_DOMAIN) . '",
+						minuteText: "' . __('Minute', WCPGSK_DOMAIN) . '",
+						currentText: cTT,
+						closeText: cT,
+						timeOnlyTitle: "' . __('Choose Time', WCPGSK_DOMAIN) . '"
+					});		
+				});
+
+				jQuery("input[display=\'number\']").each(function() {
+					var $this = this;
+					jQuery(this).after("<div id=\'slider_" + jQuery(this).attr("id") + "\'></div>");
+
+					if (jQuery($this).attr("numpres") == "true") {
+						jQuery("#slider_" + jQuery($this).attr("id")).slider({
+							range: true,
+							min: parseInt(jQuery($this).attr("minvalue")),
+							max: parseInt(jQuery($this).attr("maxvalue")),
+							step: parseInt(jQuery($this).attr("numstep")),
+							values: [ parseInt(jQuery($this).val()), parseInt(jQuery($this).attr("rangemax")) ],
+							slide: function( event, ui ) {
+								jQuery( $this ).val( ui.values[0] + " - " +  ui.values[1]);
+							}		
+						});
+					}
+					else {
+						jQuery("#slider_" + jQuery($this).attr("id")).slider({
+							range: jQuery($this).attr("numpres"),
+							min: parseInt(jQuery($this).attr("minvalue")),
+							max: parseInt(jQuery($this).attr("maxvalue")),
+							step: parseInt(jQuery($this).attr("numstep")),
+							value: parseInt(jQuery($this).val()),
+							slide: function( event, ui ) {
+								jQuery( $this ).val( ui.value );
+							}		
+						}).sliderAccess({ touchonly : false });
+					}
+				});
+		
+				jQuery("select[presentation=\'radio\']").each(function(i, select){
+					var $select = jQuery(select);
+					$select.find("option").each(function(j, option){
+						var $option = jQuery(option);
+						// Create a radio:
+						if ($option.val() != null && $option.val() != "") {
+							var $radio = jQuery("<input type=\'radio\' />");
+							// Set name and value:
+							$radio.attr("name", $select.attr("name")).attr("value", $option.val()).attr("class", "radio").attr("style","width:10%");
+							// Set checked if the option was selected
+							if ($option.attr("selected") != null && $option.attr("selected") == "selected" && $select.attr("hasselected") != null && $select.attr("hasselected") == "true" ) $radio.attr("checked", "checked");
+							//$radio.text($option.text());
+							// Insert radio before select box:
+							$select.before($radio);
+							// Insert a label:
+							$select.before(
+							  jQuery("<span />").attr("for", $select.attr("name")).text($option.text())
+							);
+							// Insert a <br />:
+							$select.before("<br/>");
+						}
+					});
+					$select.remove();
+				});
+				
+				jQuery("select[presentation=\'checkbox\']").each(function(i, select){
+					var $select = jQuery(select);
+					$select.find("option").each(function(j, option){
+						var $option = jQuery(option);
+						// Create a radio:
+						if ($option.val() != null && $option.val() != "") {
+							var $radio = jQuery("<input type=\'checkbox\' />");
+							// Set name and value:
+							$radio.attr("name", $select.attr("name") + "[" + j + "]").attr("value", $option.val()).attr("class", "checkbox").attr("style","width:10%");
+							// Set checked if the option was selected
+							if ($option.attr("selected") != null && $option.attr("selected") == "selected" && $select.attr("hasselected") != null && $select.attr("hasselected") == "true" ) $radio.attr("checked", "checked");
+							//$radio.text($option.text());
+							// Insert radio before select box:
+							$select.before($radio);
+							// Insert a label:
+							$select.before(
+							  jQuery("<span />").attr("for", $select.attr("name")).text($option.text())
+							);
+							$select.before("<br/>");
+						}
+					});
+					$select.remove();
+				});
+				jQuery("select[multiple=\'multiple\']").each(function(i, select){
+					var $select = jQuery(select);
+					$select.attr("name", $select.attr("name") + "[]");
+				});
+				
+			});
+		</script><!--unit test after checkout end-->';
+		//load our user scripts from db...
+		$wcpgsk_checkoutjs = get_option('wcpgsk_checkoutjs');
+		if ( !empty($wcpgsk_checkoutjs) ) :
+			echo '<script language="javascript">';
+			echo $wcpgsk_checkoutjs;
+			echo '</script>';
+		endif;
 	endif;
-	
 }
 
 }

@@ -51,7 +51,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				add_action('wp_ajax_get_locale_field_form', array($this, 'get_locale_field_form_callback'));	
 				
 				add_action('wp_ajax_wcpgsk_save_checkoutjs', array($this, 'wcpgsk_save_checkoutjs_callback'));	
-
+				add_action( 'wcpgsk_settings_page_email', array( $this, 'wcpgsk_settings_page_email_wcpgsk' ), 10, 1 );
+				add_action( 'wcpgsk_settings_page_labels', array( $this, 'wcpgsk_page_labels' ), 10, 1 );
+				
 			endif;
 			
 			//billing and shipping filters
@@ -93,11 +95,360 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			add_filter( 'woocommerce_user_column_shipping_address', array($this, 'wcpgsk_order_formatted_shipping_address'), 99 );
 
 			add_filter( 'woocommerce_customer_meta_fields', array($this, 'wcpgsk_customer_meta_fields'), 99 );
+			//add_filter( 'woocommerce_customer_meta_fields', array($this, 'wcpgsk_customer_meta_fields'), 99 );
+
+			add_filter( 'woocommerce_email_headers', array( $this, 'wcpgsk_email_headers' ), PHP_INT_MAX, 3 );
 			
 			add_action( 'wp_print_scripts', array($this, 'wcpgsk_handle_scripts'), 100 );
-			add_action( 'wp_enqueue_scripts', array($this, 'wcpgsk_degenerate'), 100 );			
+			add_action( 'wp_enqueue_scripts', array($this, 'wcpgsk_degenerate'), 100 );		
+			
+			add_filter( 'woocommerce_sale_flash', array( $this, 'wcpgsk_sale_flash' ), 10, 3 );
+			add_action( 'woocommerce_proceed_to_checkout', array( $this, 'wcpgsk_after_cart' ), 10 );
+			
+			add_action( 'woocommerce_init', array( $this, 'wcpgsk_empty_cart' ), PHP_INT_MAX );
+			
+
 		}
 
+		/**
+		 * Process empty cart request
+		 *
+		 * @since 1.9.7
+		 *
+		 * @access public
+		 */
+		public function wcpgsk_empty_cart() {
+			if ( isset( $_POST['wcpgsk_empty_cart'] ) ) {				
+				global $woocommerce;
+				$woocommerce->cart->empty_cart();
+			}
+		}
+		
+		/**
+		 * Add empty cart form
+		 *
+		 * @since 1.9.7
+		 *
+		 * @access public
+		 */
+		public function wcpgsk_after_cart( ) {
+			$options = get_option( 'wcpgsk_settings' );
+			if ( isset( $options['cart']['addemptycart'] ) && $options['cart']['addemptycart'] ) :
+				if ( isset( $options['process']['confirmemptycart'] ) && !empty( $options['process']['confirmemptycart'] ) ) :
+					$eclabel = isset( $options['process']['emptycartlabel'] ) && !empty( $options['process']['emptycartlabel'] ) ? $options['process']['emptycartlabel'] : "Empty cart"; 
+					$cclabel = isset( $options['process']['confirmemptycart'] ) && !empty( $options['process']['confirmemptycart'] ) ? $options['process']['confirmemptycart'] : "Yes, empty cart"; 
+					echo '<div style="float:left;display:inline-block;padding:0 5px 0 5px;" class="wcpgsk_empty_cart"><input type="button" class="button" style="width:100%" id="wcpgsk_confirm_empty_cart" value="' . __( $eclabel, WCPGSK_DOMAIN) . '"/></div>';
+					echo '<div style="float:left;display:inline-block;padding:0 5px 0 5px;" class="wcpgsk_empty_cart"><input type="submit" class="button" style="display:none;width:100%" id="wcpgsk_empty_cart" name="wcpgsk_empty_cart" value="' . __( $cclabel, WCPGSK_DOMAIN) . '"></div>';
+				else :
+					$eclabel = isset( $options['process']['emptycartlabel'] ) && !empty( $options['process']['emptycartlabel'] ) ? $options['process']['emptycartlabel'] : "Empty cart"; 
+					echo '<div style="float:left;display:inline-block;padding:0 5px 0 5px;" class="wcpgsk_empty_cart"><input type="submit" class="button" name="wcpgsk_empty_cart" value="' . __( $eclabel, WCPGSK_DOMAIN) . '"></div>';
+				endif;
+			endif;
+		}
+		
+		
+		
+		/**
+		 * Sale flash text
+		 *
+		 * @since 1.9.7
+		 *
+		 * @access public
+		 * @param string $flash
+		 * @param mixed $post
+		 * @param mixed $product
+		 * @return string
+		 */
+		public function wcpgsk_sale_flash( $flash, $post, $product ) {
+			$options = get_option( 'wcpgsk_settings' );
+			if ( isset( $options['process']['onsalelabel'] ) && !empty( $options['process']['onsalelabel'] ) ) :
+				$flash = '<span class="onsale">' . __( $options['process']['onsalelabel'], WCPGSK_DOMAIN ) . '</span>';
+			endif;
+			return $flash;
+		}
+		
+		/**
+		 * Add additional email headers
+		 *
+		 * @since 1.9.7
+		 *
+		 * @access public
+		 * @param string $headers (existing)
+		 * @param string $context
+		 * @param mixed $email
+		 * @return string
+		 */
+		public function wcpgsk_email_headers( $headers = '', $context = '', $email = array() ) {
+			$options = get_option( 'wcpgsk_settings' );
+			if ( isset( $headers ) && !empty( $headers ) ) :
+				$headers = explode( "\r\n", $headers );
+			else :
+				$headers = array();
+			endif;
+			if ( isset( $options['email']['wc_cc_email'] ) && !empty( $options['email']['wc_cc_email'] ) && is_email( $options['email']['wc_cc_email'] ) ) :
+				$headers[] = "Cc: " . $options['email']['wc_cc_email'];
+			endif;
+			if ( isset($options['email']['wc_bcc_email']) && !empty( $options['email']['wc_bcc_email'] ) && is_email( $options['email']['wc_bcc_email'] ) ) :			
+				$headers[] = "Bcc: " . $options['email']['wc_bcc_email'];			
+			endif;
+			
+			return implode( "\r\n", $headers);
+		}
+		
+		/**
+		 * Email configuration settings
+		 *
+		 * @since 1.9.7
+		 *
+		 * @access public
+		 * @param array $options 
+		 */
+		public function wcpgsk_settings_page_email_wcpgsk( $options ) {
+			if ( isset( $options['email']['wc_cc_email'] ) && !empty( $options['email']['wc_cc_email'] ) ) :			
+				$emails = explode( ',', str_replace( ';', ',', $options['email']['wc_cc_email'] ) );
+				$options['email']['wc_cc_email'] = isset( $emails[0] ) ? $emails[0] : '';
+			else :
+				$options['email']['wc_cc_email'] = '';				
+			endif;
+			if ( isset($options['email']['wc_bcc_email']) && !empty( $options['email']['wc_bcc_email'] ) ) :			
+				$emails = explode( ',', str_replace( ';', ',', $options['email']['wc_bcc_email'] ) );
+				$options['email']['wc_bcc_email'] = isset( $emails[0] ) ? $emails[0] : '';
+			else :
+				$options['email']['wc_bcc_email'] = '';
+			endif;
+		?>
+			<h3 class="wcpgsk_acc_header"><?php echo __('Email Settings',WCPGSK_DOMAIN); ?></h3>
+			<div>
+				<table class="widefat" border="1" >
+				<thead>
+					<tr>
+						<th><?php _e('Settings Name', WCPGSK_DOMAIN);  ?></th>
+						<th><?php _e('Data', WCPGSK_DOMAIN);  ?></th>		
+						<th><?php _e('Comments', WCPGSK_DOMAIN);  ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td width="25%"><?php _e( 'Carbon Copy Email (CC) Recipient', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[email][wc_cc_email]" id="wcpgsk_wc_cc_email" type="email" value="<?php echo $options['email']['wc_cc_email'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Specify a valid email address that will receive copies of all WooCommerce emails.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Blind Carbon Copy (BCC) Email Recipient', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[email][wc_bcc_email]" id="wcpgsk_wc_bcc_email" type="email" value="<?php echo $options['email']['wc_bcc_email'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Specify a valid email address that will receive hidden copies of all WooCommerce emails.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr><td colspan="3"><?php _e('WooCommerce Rich Guys Swiss Knife includes more email options, e.g. context dependent cc and bcc email recipients, etc.', WCPGSK_DOMAIN); ?></td></tr>	
+				</tbody>
+				</table>
+				<?php submit_button( __( 'Save Changes', WCPGSK_DOMAIN ) ); ?>
+
+			</div>
+		<?php
+		}
+
+		/**
+		 * Label configuration settings
+		 *
+		 * @since 1.9.7
+		 *
+		 * @access public
+		 * @param array $options 
+		 */
+		public function wcpgsk_page_labels( $options ) {
+		?>
+			<h3 class="wcpgsk_acc_header"><?php echo __('Label Settings',WCPGSK_DOMAIN); ?></h3>
+			<div>
+				<table class="widefat" border="1" >
+				<thead>
+					<tr>
+						<th><?php _e('Settings Name', WCPGSK_DOMAIN);  ?></th>
+						<th><?php _e('Data', WCPGSK_DOMAIN);  ?></th>		
+						<th><?php _e('Comments', WCPGSK_DOMAIN);  ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php do_action( 'wcpgsk_settings_labels_before', $options ); ?>
+					<tr>
+						<td width="25%"><?php _e( 'On Sale Label', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[process][onsalelabel]" type="text" id="wcpgsk_onsalelabel" value="<?php echo $options['process']['onsalelabel'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the on sale label. (You may need to adapt css!)', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Add to Cart Button Label', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[process][fastcheckoutbtn]" type="text" id="wcpgsk_fastcheckout_btn" value="<?php echo $options['process']['fastcheckoutbtn'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the label for the Add to Cart button.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Read more Button Label', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[process][readmorebtn]" type="text" id="wcpgsk_readmore_btn" value="<?php echo $options['process']['readmorebtn'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the label for the Read more button.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'View products Button Label', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[process][viewproductsbtn]" type="text" id="wcpgsk_viewproducts_btn" value="<?php echo $options['process']['viewproductsbtn'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the label for the View products button.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Select options Button Label', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[process][selectoptionsbtn]" type="text" id="wcpgsk_selectoptions_btn" value="<?php echo $options['process']['selectoptionsbtn'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the label for the Select options button.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Buy product Button Label', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[process][buyproductbtn]" type="text" id="wcpgsk_buyproduct_btn" value="<?php echo $options['process']['buyproductbtn'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the label for the Buy product button.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Out of stock Button Label', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[process][outofstockbtn]" type="text" id="wcpgsk_outofstock_btn" value="<?php echo $options['process']['outofstockbtn'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the label for the Out of stock button.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Tax Label', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_countries_tax_or_vat]" type="text" id="wcpgsk_woocommerce_countries_tax_or_vat" value="<?php echo $options['filters']['woocommerce_countries_tax_or_vat'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the tax label.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Includes tax message', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_countries_inc_tax_or_vat]" type="text" id="wcpgsk_woocommerce_countries_inc_tax_or_vat" value="<?php echo $options['filters']['woocommerce_countries_inc_tax_or_vat'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the tax included message.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Tax excluded message', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_countries_ex_tax_or_vat]" type="text" id="wcpgsk_woocommerce_countries_ex_tax_or_vat" value="<?php echo $options['filters']['woocommerce_countries_ex_tax_or_vat'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the tax excluded message.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Product Description Tab Label', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_product_description_tab_title]" type="text" id="wcpgsk_woocommerce_product_description_tab_title" value="<?php echo $options['filters']['woocommerce_product_description_tab_title'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the label for the product description tab.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Product Description Header', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_product_description_heading]" type="text" id="wcpgsk_woocommerce_product_description_heading" value="<?php echo $options['filters']['woocommerce_product_description_heading'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the product description header.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Product Additional Information Tab Label', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_product_additional_information_tab_title]" type="text" id="wcpgsk_woocommerce_product_additional_information_tab_title" value="<?php echo $options['filters']['woocommerce_product_additional_information_tab_title'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the label for the product additional information tab.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Product Additional Information Header', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_product_additional_information_heading]" type="text" id="wcpgsk_woocommerce_product_additional_information_heading" value="<?php echo $options['filters']['woocommerce_product_additional_information_heading'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the product additional information header.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td><?php _e('Set Order Button Text', WCPGSK_DOMAIN); ?>:</td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_order_button_text]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_order_button_text'])) echo esc_attr( $options['filters']['woocommerce_order_button_text'] ); ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Set the order button text.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td><?php _e('Set Login required message', WCPGSK_DOMAIN); ?>:</td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_checkout_must_be_logged_in_message]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_checkout_must_be_logged_in_message'])) echo esc_attr( $options['filters']['woocommerce_checkout_must_be_logged_in_message'] ); ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Change the login required message for the checkout form.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td><?php _e('Set Login possible message', WCPGSK_DOMAIN); ?>:</td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_checkout_login_message]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_checkout_login_message'])) echo esc_attr( $options['filters']['woocommerce_checkout_login_message'] ); ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Change the returning customer login message for the checkout form.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td><?php _e('Set Coupon message', WCPGSK_DOMAIN); ?>:</td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_checkout_coupon_message]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_checkout_coupon_message'])) echo esc_attr( $options['filters']['woocommerce_checkout_coupon_message'] ); ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Change the coupon message for the checkout form.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					
+					<?php do_action( 'wcpgsk_settings_labels_after', $options ); ?>					
+				</tbody>
+				</table>
+				<?php submit_button( __( 'Save Changes', WCPGSK_DOMAIN ) ); ?>
+
+			</div>
+		<?php		
+		}
+		
 		/**
 		 * Hook available and WCPGSK configured WooCommerce filters
 		 *
@@ -112,6 +463,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				endforeach;
 			endif;
 		}
+		
+		
+		
 		/**
 		 * Run available WooCommerce filters
 		 *
@@ -573,33 +927,31 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
 			$shipping_fields = $this->wcpgsk_additional_data($order, 'shipping');
 			?>
-			<table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0">
+			<table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0" class="wcpgsk_customer_data">
 
 				<tr>
 					<?php 
 					if ( isset($billing_fields) && !empty($billing_fields) ) : 
 					?>
-					<td valign="top" width="50%">
+					<td valign="top" width="50%" class="billing_data">
 
 						<?php if ( !empty($options['checkoutform']['morebillingtitle']) ) : ?>
 						<h3><?php _e( $options['checkoutform']['morebillingtitle'], 'woocommerce' ); ?></h3>
 						<?php endif; ?>
 
-						<p>
+						<dl>
 						<?php 
-							//$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
-							//if ( isset($billing_fields) && !empty($billing_fields) ) :
 							foreach ($billing_fields as $key => $field) :
 								$key_type = "billing_" . $key;
 								$label = !empty($field['label']) ? $field['label'] . ": " : "";
-								//if ( isset($options['woofields']['type_' . $key_type]) && $options['woofields']['type_' . $key_type] == 'fileupload' ) :
-								//else :
-								echo $label . $field['captured'] . '<br />';
-								//endif;
+								if ( is_array( $field['captured'] ) ) :
+									echo '<dt>' . $label . '</dt><dd>' . implode( '<br />', $field['captured'] ) . '</dd>';
+								else :
+									echo '<dt>' . $label . '</dt><dd>' . $field['captured'] . '</dd>';
+								endif;
 							endforeach;
-							//endif;
 						?>
-						</p>
+						</dl>
 
 					</td>
 
@@ -608,23 +960,24 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					if ( get_option( 'woocommerce_ship_to_billing_address_only' ) == 'no' && isset($shipping_fields) && !empty($shipping_fields) ) : 
 					?>
 
-					<td valign="top" width="50%">
+					<td valign="top" width="50%" class="shipping_data">
 						<?php if ( !empty($options['checkoutform']['moreshippingtitle']) ) : ?>
 						<h3><?php _e( $options['checkoutform']['moreshippingtitle'], 'woocommerce' ); ?></h3>
 						<?php endif; ?>
 
-						<p>
+						<dl>
 						<?php 
 							foreach ($shipping_fields as $key => $field) :
 								$key_type = "shipping_" . $key;
 								$label = !empty($field['label']) ? $field['label'] . ": " : "";
-								//if ( isset($options['woofields']['type_' . $key_type]) && $options['woofields']['type_' . $key_type] == 'fileupload' ) :
-								//else :
-									echo $label . $field['captured'] . '<br />';
-								//endif;
+								if ( is_array( $field['captured'] ) ) :
+									echo '<dt>' . $label . '</dt><dd>' . implode( '<br />', $field['captured'] ) . '</dd>';
+								else :
+									echo '<dt>' . $label . '</dt><dd>' . $field['captured'] . '</dd>';
+								endif;
 							endforeach;
 						?>
-						</p>
+						</dl>
 
 					</td>
 
@@ -653,13 +1006,13 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					<?php 
 					if ( isset($billing_fields) && !empty($billing_fields) ) : 
 					?>
-					<td valign="top" width="50%">
+					<td valign="top" width="50%" class="billing_data">
 
 						<?php if ( !empty($options['checkoutform']['morebillingtitle']) ) : ?>
 						<h3><?php _e( $options['checkoutform']['morebillingtitle'], 'woocommerce' ); ?></h3>
 						<?php endif; ?>
 
-						<p>
+						<dl>
 						<?php 
 							//$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
 							//if ( isset($billing_fields) && !empty($billing_fields) ) :
@@ -668,12 +1021,12 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								$label = !empty($field['label']) ? $field['label'] . ": " : "";
 								//if ( isset($options['woofields']['type_' . $key_type]) && $options['woofields']['type_' . $key_type] == 'fileupload' ) :
 								//else :
-									echo $label . $field['captured'] . '<br />';
+									echo '<dt>' . $label . '</dt><dd>' . $field['captured'] . '</dd>';
 								//endif;
 							endforeach;
 							//endif;
 						?>
-						</p>
+						</dl>
 
 					</td>
 
@@ -682,22 +1035,22 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					if ( get_option( 'woocommerce_ship_to_billing_address_only' ) == 'no' && isset($shipping_fields) && !empty($shipping_fields) ) : 
 					?>
 
-					<td valign="top" width="50%">
+					<td valign="top" width="50%" class="shipping_data">
 						<?php if ( !empty($options['checkoutform']['moreshippingtitle']) ) : ?>
 						<h3><?php _e( $options['checkoutform']['moreshippingtitle'], 'woocommerce' ); ?></h3>
 						<?php endif; ?>
-						<p>
+						<dl>
 						<?php 
 							foreach ($shipping_fields as $key => $field) :
 								$key_type = "shipping_" . $key;
 								$label = !empty($field['label']) ? $field['label'] . ": " : "";
 								//if ( isset($options['woofields']['type_' . $key_type]) && $options['woofields']['type_' . $key_type] == 'fileupload' ) :
 								//else :
-									echo $label . $field['captured'] . '<br />';
+									echo '<dt>' . $label . '</dt><dd>' . $field['captured'] . '</dd>';
 								//endif;
 							endforeach;
 						?>
-						</p>
+						</dl>
 
 					</td>
 
@@ -835,6 +1188,17 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						$options['process']['viewproductsbtn'] = isset($options['process']['viewproductsbtn']) ? $options['process']['viewproductsbtn'] : '';
 						$options['process']['selectoptionsbtn'] = isset($options['process']['selectoptionsbtn']) ? $options['process']['selectoptionsbtn'] : '';
 						$options['process']['outofstockbtn'] = isset($options['process']['outofstockbtn']) ? $options['process']['outofstockbtn'] : '';	
+						if ( !isset( $options['process']['onsalelabel'] ) ) :
+							$options['process']['onsalelabel'] = __( 'Sale!', WCPGSK_DOMAIN );
+						endif;
+						if ( !isset( $options['process']['emptycartlabel'] ) ) :
+							$options['process']['emptycartlabel'] = __( 'Empty cart?', WCPGSK_DOMAIN );
+						endif;
+						if ( !isset( $options['process']['confirmemptycart'] ) ) :
+							$options['process']['confirmemptycart'] = __( 'Yes, empty cart', WCPGSK_DOMAIN );
+						endif;
+						
+						
 						//add options if necessary
 						//unset( $options['filters'] );
 						if ( !isset( $options['filters'] ) || empty( $options['filters'] ) ) :
@@ -871,128 +1235,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							</tr>
 						</thead>
 						<tbody>
-							<?php do_action( 'wcpgsk_settings_shop_before', $options ); ?>
-							<tr>
-								<td width="25%"><?php _e( 'Add to Cart Button Label', WCPGSK_DOMAIN ); ?></td>
-								<td>
-									<input name="wcpgsk_settings[process][fastcheckoutbtn]" id="wcpgsk_fastcheckout_btn" value="<?php echo $options['process']['fastcheckoutbtn'] ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Define the label for the Add to Cart button.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td width="25%"><?php _e( 'Read more Button Label', WCPGSK_DOMAIN ); ?></td>
-								<td>
-									<input name="wcpgsk_settings[process][readmorebtn]" id="wcpgsk_readmore_btn" value="<?php echo $options['process']['readmorebtn'] ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Define the label for the Read more button.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td width="25%"><?php _e( 'View products Button Label', WCPGSK_DOMAIN ); ?></td>
-								<td>
-									<input name="wcpgsk_settings[process][viewproductsbtn]" id="wcpgsk_viewproducts_btn" value="<?php echo $options['process']['viewproductsbtn'] ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Define the label for the View products button.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td width="25%"><?php _e( 'Select options Button Label', WCPGSK_DOMAIN ); ?></td>
-								<td>
-									<input name="wcpgsk_settings[process][selectoptionsbtn]" id="wcpgsk_selectoptions_btn" value="<?php echo $options['process']['selectoptionsbtn'] ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Define the label for the Select options button.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td width="25%"><?php _e( 'Buy product Button Label', WCPGSK_DOMAIN ); ?></td>
-								<td>
-									<input name="wcpgsk_settings[process][buyproductbtn]" id="wcpgsk_buyproduct_btn" value="<?php echo $options['process']['buyproductbtn'] ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Define the label for the Buy product button.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td width="25%"><?php _e( 'Out of stock Button Label', WCPGSK_DOMAIN ); ?></td>
-								<td>
-									<input name="wcpgsk_settings[process][outofstockbtn]" id="wcpgsk_outofstock_btn" value="<?php echo $options['process']['outofstockbtn'] ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Define the label for the Out of stock button.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td width="25%"><?php _e( 'Tax Label', WCPGSK_DOMAIN ); ?></td>
-								<td>
-									<input name="wcpgsk_settings[filters][woocommerce_countries_tax_or_vat]" id="wcpgsk_woocommerce_countries_tax_or_vat" value="<?php echo $options['filters']['woocommerce_countries_tax_or_vat'] ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Define the tax label.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td width="25%"><?php _e( 'Includes tax message', WCPGSK_DOMAIN ); ?></td>
-								<td>
-									<input name="wcpgsk_settings[filters][woocommerce_countries_inc_tax_or_vat]" id="wcpgsk_woocommerce_countries_inc_tax_or_vat" value="<?php echo $options['filters']['woocommerce_countries_inc_tax_or_vat'] ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Define the tax included message.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td width="25%"><?php _e( 'Tax excluded message', WCPGSK_DOMAIN ); ?></td>
-								<td>
-									<input name="wcpgsk_settings[filters][woocommerce_countries_ex_tax_or_vat]" id="wcpgsk_woocommerce_countries_ex_tax_or_vat" value="<?php echo $options['filters']['woocommerce_countries_ex_tax_or_vat'] ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Define the tax excluded message.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td width="25%"><?php _e( 'Product Description Tab Label', WCPGSK_DOMAIN ); ?></td>
-								<td>
-									<input name="wcpgsk_settings[filters][woocommerce_product_description_tab_title]" id="wcpgsk_woocommerce_product_description_tab_title" value="<?php echo $options['filters']['woocommerce_product_description_tab_title'] ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Define the label for the product description tab.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td width="25%"><?php _e( 'Product Description Header', WCPGSK_DOMAIN ); ?></td>
-								<td>
-									<input name="wcpgsk_settings[filters][woocommerce_product_description_heading]" id="wcpgsk_woocommerce_product_description_heading" value="<?php echo $options['filters']['woocommerce_product_description_heading'] ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Define the product description header.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td width="25%"><?php _e( 'Product Additional Information Tab Label', WCPGSK_DOMAIN ); ?></td>
-								<td>
-									<input name="wcpgsk_settings[filters][woocommerce_product_additional_information_tab_title]" id="wcpgsk_woocommerce_product_additional_information_tab_title" value="<?php echo $options['filters']['woocommerce_product_additional_information_tab_title'] ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Define the label for the product additional information tab.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td width="25%"><?php _e( 'Product Additional Information Header', WCPGSK_DOMAIN ); ?></td>
-								<td>
-									<input name="wcpgsk_settings[filters][woocommerce_product_additional_information_heading]" id="wcpgsk_woocommerce_product_additional_information_heading" value="<?php echo $options['filters']['woocommerce_product_additional_information_heading'] ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Define the product additional information header.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
 							<tr>
 								<td><?php _e('Product items per page', WCPGSK_DOMAIN); ?>:</td>
 								<td>
-									<input name="wcpgsk_settings[filters][loop_shop_per_page]" type="text" value="<?php if (isset($options['filters']['loop_shop_per_page'])) echo esc_attr( $options['filters']['loop_shop_per_page'] ); ?>" size="2" class="regular-text" />
+									<input name="wcpgsk_settings[filters][loop_shop_per_page]" type="number" value="<?php if (isset($options['filters']['loop_shop_per_page'])) echo esc_attr( $options['filters']['loop_shop_per_page'] ); ?>" size="3" class="regular-text" />
 								</td>
 								<td>
 									<span class="description"><?php esc_attr(_e('Specify the number of items you want to show on a shop page.', WCPGSK_DOMAIN)); ?></span>
@@ -1001,7 +1247,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							<tr>
 								<td><?php _e('Product columns per page', WCPGSK_DOMAIN); ?>:</td>
 								<td>
-									<input name="wcpgsk_settings[filters][loop_shop_columns]" type="text" value="<?php if (isset($options['filters']['loop_shop_columns'])) echo esc_attr( $options['filters']['loop_shop_columns'] ); ?>" size="2" class="regular-text" />
+									<input name="wcpgsk_settings[filters][loop_shop_columns]" type="number" value="<?php if (isset($options['filters']['loop_shop_columns'])) echo esc_attr( $options['filters']['loop_shop_columns'] ); ?>" size="2" class="regular-text" />
 								</td>
 								<td>
 									<span class="description"><?php esc_attr(_e('Specify the number of product columns you want to show on a shop page.', WCPGSK_DOMAIN)); ?></span>
@@ -1010,7 +1256,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							<tr>
 								<td><?php _e('Product thumbnail columns per page', WCPGSK_DOMAIN); ?>:</td>
 								<td>
-									<input name="wcpgsk_settings[filters][woocommerce_product_thumbnails_columns]" type="text" value="<?php if (isset($options['filters']['woocommerce_product_thumbnails_columns'])) echo esc_attr( $options['filters']['woocommerce_product_thumbnails_columns'] ); ?>" size="2" class="regular-text" />
+									<input name="wcpgsk_settings[filters][woocommerce_product_thumbnails_columns]" type="number" value="<?php if (isset($options['filters']['woocommerce_product_thumbnails_columns'])) echo esc_attr( $options['filters']['woocommerce_product_thumbnails_columns'] ); ?>" size="2" class="regular-text" />
 								</td>
 								<td>
 									<span class="description"><?php esc_attr(_e('Specify the number of product thumbnail columns you want to show on a shop page.', WCPGSK_DOMAIN)); ?></span>
@@ -1054,6 +1300,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						<?php submit_button( __( 'Save Changes', WCPGSK_DOMAIN ) ); ?>
 					
 					</div>
+					<?php do_action( 'wcpgsk_settings_page_labels', $options ); ?>
+					<?php do_action( 'wcpgsk_settings_page_email', $options ); ?>
 					
 					<?php do_action( 'wcpgsk_settings_page_two', $options ); ?>
 
@@ -1069,6 +1317,35 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						</thead>
 						<tbody>
 							<?php do_action( 'wcpgsk_settings_cart_before', $options ); ?>							
+							<tr>
+								<td><?php _e('Add empty cart button to cart', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[cart][addemptycart]" type="hidden" value="0" />
+									<input name="wcpgsk_settings[cart][addemptycart]" type="checkbox" value="1" <?php if (  1 == ($options['cart']['addemptycart'])) echo "checked='checked'"; ?> />
+								</td>
+								<td>
+									<span class="description"><?php _e('Allow your customers to empty the cart.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'Empty Cart Label', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[process][emptycartlabel]" type="text" id="wcpgsk_emptycartlabel" value="<?php echo isset( $options['process']['emptycartlabel'] ) ? $options['process']['emptycartlabel'] : ''; ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Label for the empty cart button.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%"><?php _e( 'Confirm Empty Cart Label', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input name="wcpgsk_settings[process][confirmemptycart]" type="text" id="wcpgsk_confirmemptycart" value="<?php echo isset( $options['process']['confirmemptycart'] ) ? $options['process']['confirmemptycart'] : ''; ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('Leave this blank to allow empty cart action without confirmation.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							
 							<tr>
 								<td><?php _e('Minimum cart items', WCPGSK_DOMAIN); ?>:</td>
 								<td>
@@ -1184,10 +1461,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									<span class="description"><?php echo $descr ; ?></span>
 								</td>
 							</tr>
-							
-						<?php	
+						<?php
 							endforeach;
 						?>
+							
 						<?php do_action( 'wcpgsk_settings_cart_after', $options ); ?>
 
 						</tbody>
@@ -1223,42 +1500,6 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								</td>
 								<td>
 									<span class="description"><?php _e('For date fields you can specify a maximum offset in number of days.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td><?php _e('Set Order Button Text', WCPGSK_DOMAIN); ?>:</td>
-								<td>
-									<input name="wcpgsk_settings[filters][woocommerce_order_button_text]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_order_button_text'])) echo esc_attr( $options['filters']['woocommerce_order_button_text'] ); ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Set the order button text.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td><?php _e('Set Login required message', WCPGSK_DOMAIN); ?>:</td>
-								<td>
-									<input name="wcpgsk_settings[filters][woocommerce_checkout_must_be_logged_in_message]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_checkout_must_be_logged_in_message'])) echo esc_attr( $options['filters']['woocommerce_checkout_must_be_logged_in_message'] ); ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Change the login required message for the checkout form.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td><?php _e('Set Login possible message', WCPGSK_DOMAIN); ?>:</td>
-								<td>
-									<input name="wcpgsk_settings[filters][woocommerce_checkout_login_message]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_checkout_login_message'])) echo esc_attr( $options['filters']['woocommerce_checkout_login_message'] ); ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Change the returning customer login message for the checkout form.', WCPGSK_DOMAIN); ?></span>
-								</td>
-							</tr>
-							<tr>
-								<td><?php _e('Set Coupon message', WCPGSK_DOMAIN); ?>:</td>
-								<td>
-									<input name="wcpgsk_settings[filters][woocommerce_checkout_coupon_message]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_checkout_coupon_message'])) echo esc_attr( $options['filters']['woocommerce_checkout_coupon_message'] ); ?>" class="regular-text" />
-								</td>
-								<td>
-									<span class="description"><?php _e('Change the coupon message for the checkout form.', WCPGSK_DOMAIN); ?></span>
 								</td>
 							</tr>
 							<tr>
@@ -2499,7 +2740,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					$billing_fields[$fieldkey] = $fields[$fieldkey];
 				else:
 					if ($key != 'billing_email_validator' && $field['hideorder'] == 0) :
-						if ($options['woofields']['billing'][$key]['custom_' . $key]) :
+						if ( isset( $options['woofields']['billing'][$key]['custom_' . $key] ) && $options['woofields']['billing'][$key]['custom_' . $key] ) :
 							$configField = $this->createCustomStandardField($key, 'billing', $options['woofields']['type_' . $key]);
 							if (isset($configField['class'])) unset($configField['class']);
 							if (isset($configField['clear'])) unset($configField['clear']);
@@ -2577,7 +2818,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					$shipping_fields[$fieldkey] = $fields[$fieldkey];
 				else:
 					if ($key != 'shipping_email_validator') :
-						if ($options['woofields']['shipping'][$key]['custom_' . $key]) :
+						if ( isset( $options['woofields']['shipping'][$key]['custom_' . $key] ) && $options['woofields']['shipping'][$key]['custom_' . $key] ) :
 							$configField = $this->createCustomStandardField($key, 'shipping', $options['woofields']['type_' . $key]);
 							//unset(configField['placeholder']);
 							if (isset($configField['class'])) unset($configField['class']);
@@ -3731,7 +3972,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					'wcpgsk_forms' => array( array(
 						'label'  => __( 'Label', WCPGSK_DOMAIN ),
 						'placeholder' => __( 'Placeholder', WCPGSK_DOMAIN ))),
-					'cart' => array( 
+					'cart' => array(
+						'addemptycart' => 0,
 						'minmaxstepproduct' => 0,
 						'minitemscart' => 1,
 						'maxitemscart' => 3,
@@ -3774,7 +4016,13 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						'fastcheckoutbtn' => '',
 						'fastcart' => 0,
 						'fastcheckout' => 0,
-						'paymentgateways' => 0),
+						'paymentgateways' => 0,
+						'onsalelabel' => 'Sale!',
+						'emptycartlabel' => 'Empty cart?',
+						'confirmemptycart' => 'Yes, empty cart'),
+					'email' => array(
+						'wc_cc_email' => '',
+						'wc_bcc_email' => ''),
 					);
 				//add default woocommerce billing and shipping field settings to wcpgsk settings to fix the problem of fields not showing up after activation of our plugin
 				$checkout_fields = array_merge($woocommerce->countries->get_address_fields( $woocommerce->countries->get_base_country(), 'billing_' ), $woocommerce->countries->get_address_fields( $woocommerce->countries->get_base_country(), 'shipping_' ));
@@ -3833,7 +4081,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			//first check that woo exists to prevent fatal errors
 			if ( function_exists( 'is_woocommerce' ) ) :
 				//dequeue scripts and styles
-				if ( !is_cart() && !is_checkout() && !is_account_page() ) :
+				if ( is_cart() ) :
+					wp_enqueue_script( 'wcpgsk-cart', plugins_url('/assets/js/wcpgsk-cart.js', $this->file) , array('jquery'), '', false);
 				endif;
 				if ( is_checkout() || is_account_page() ) :
 					wp_enqueue_script( 'jquery-ui-dialog' );

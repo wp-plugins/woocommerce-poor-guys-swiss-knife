@@ -1,10 +1,10 @@
 === WooCommerce Poor Guys Swiss Knife ===
 Contributors: ulih
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KJ4K2X953H8CC
-Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization
+Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization, label, label definition, email recipients
 Requires at least: Wordpress 3.1 and WooCommerce 2.0
 Tested up to: 3.9.1
-Stable tag: 1.9.6
+Stable tag: 1.9.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,30 +21,29 @@ WooCommerce Poor Guys Swiss Knife comes packaged with real value and no restrict
 Checkout / My Account:
 
 * WooCommerce Checkout form customization (works also for billing and shipping fields on the customer's "My Account" page)
-* Drag and Drop for all Checkout form fields to order all fields (WooCommerce build-in fields and your custom fields)
+* Drag and Drop for all Checkout form fields to order all fields (WooCommerce built-in fields and your custom fields)
 * Support for all input types and data (select, checkbox, radio, text, textarea, date picker, time picker, number ranges, password, email) without restrictions
 * Full i18n support to allow localization and translation of all labels, placeholders
-* Remove WooCommerce build-in fields
+* Remove WooCommerce built-in fields
 * Manage required state for all fields
 * Handle minimum and maximum calendar offset for date fields
-* Separate build-in billing and shipping fields from your own custom fields adding a custom title
-* Manage build-in and custom field alignment and span for each field (left, right, full)
-* Add second email validator field for build-in email field
-* Add second validator field to custom input fields for passwords, additional email inputs, etc. 
+* Separate built-in billing and shipping fields from your own custom fields adding a custom title
+* Manage built-in and custom field alignment and span for each field (left, right, full)
+* Add second email validator field for built-in email field
+* Add second validator field to custom input fields for passwords, custom email fields, etc. 
 * Hide captured data in emails and receipts on a per field basis
 * Load values and options into inputs and selects via custom javascript
 * Restrict payment gateways on a per product basis loading the most restrictive set of gateways if customer cart holds more than one product
 
 Localization:
 
-* Configure and handle behaviour of vital build in fields for enabled countries (checkout form reconfigures dynamically when customer switches billing or shipping country and this allows you to handle labels and placeholders for enabled countries)
+* Configure and handle behaviour of vital built-in fields for enabled countries (checkout form reconfigures dynamically when customer switches billing or shipping country and this allows you to handle labels and placeholders for enabled countries)
 
 General:
 
-* Set labels for shop buttons (Add to Cart, Read more, Select options, tax, etc.) 
+* Set labels for shop buttons (Add to Cart, Read more, On Sale, Select options, tax, etc.) 
 * Manage available payment gateways on a per product basis with intelligent filter to show the most restrictive combination when a customer has more than one product in his cart
-* Configure number of items on shop pages, etc.
-* Filter products to be displayed on main shop page
+* Add one cc and one bcc email to all emails send by WooCommerce
 
 Cart:
 
@@ -52,6 +51,7 @@ Cart:
 * Aggregate required minimum / allowed maximum based on item quantities
 * Set minimum, maximum and incremental steps on a per product basis
 * Switch off quantity input for product types
+* Add empty cart button with/without confirmation
 
 = Features available with WooCommerce Rich Guys Swiss Knife (WCRGSK) =
 
@@ -64,10 +64,12 @@ Cart:
 * Add Variation description
 * Html injects (Add whatever you want in between your checkout form fields)
 * Color picker field
-* Acceptable terms and conditions on per product basis
+* Acceptable terms and conditions on per product basis in checkout form
 * File uploads for checkout form sections and on a per product basis
-* Product terms and conditions
 * Advanced quantity and backorder management for products and variations
+* Filter products to be displayed on main shop page
+* Advanced email management to add more email recipients for specific contexts like new order, processing order, out of stock, backorder, etc.
+* Set minimum amount and maximum amount needed or necessary to checkout a cart
 
 Data captured via customized (added) form fields is available within your order administration and will be added in the appropriate sections of the individual orders. What shows up can be configured for each individual custom field. Data captured will be shown to the customer on the order receipt page and in emails.
 
@@ -77,25 +79,33 @@ The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more to
 
 = What's new? =
 	
-* Product display filters for main shop page
+* Add one CC and/or BCC email recipient to all WooCommerce emails
 * Global minimum and maximum for item quantities
 * Year and month dropdown selection for calendars
 * Improved min/max/step settings with support for 0 for quantity inputs in all contexts
+* Stylable representation of captured data
 
 = What's on its way? =
 
-Priceable fields for products and variations
+* Priceable fields for products and variations will be available with version 1.5.0 of Woocommerce Rich Guys Swiss Knife
+* Woocommerce Poor Guys Swiss Knife will include a package as gift along with gift text as appetizer
 
 == Usage ==
 
 = Shop Settings =
 
-* Set cart button label
 * Enable Fast Cart (show cart after a customer added something to the cart in the shop. Also available in WooCommerce)
 * Enable Fast Checkout (go directly to checkout, when a customer adds a product from the shop)
 * Enable Payment Gateways (allows you to restrict the available payment gateways on a per product basis)
 * Filter products to be displayed on main shop page based on categories and attributes
 
+= Label Settings =
+
+* Set cart button labels
+* Set order button label
+* Set product button labels
+* Set on sale label
+* And a lot more labels
 
 = Variation Overload and Bulk Settings =
 
@@ -172,13 +182,16 @@ Find instructions under "Other Notes"
 
 More Tools for your WooCommerce Swiss Knife are available with the Rich Guys Swiss Knife for WooCommerce:
 
+* 
 * Item personalization during checkout
 * Custom fields on a per product and per variation basis using Item personalization options
 * Bulk operations for variations
 * Variation Extender which allows to attach virtual variations meaningful to customers and to map these variations back to a more reduced set of internal variations. This allows you to overcome the resource (runtime) and management limits that most e-commerce stores show in the context of variable products.
-* File upload
+* File upload (single and multiple)
+* Html inject for checkout form
 * Color picker support for fields
 * Advanced (conditional) quantity input and backorder management for products and variations
+* Advanced email handling: More than one cc and bcc email; specify contexts in which to use cc and bcc emails
 
 == Upgrade Notice ==
 
@@ -245,6 +258,12 @@ Plugins like Jetpack preconfigure the main query in the context of "infinite scr
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.9.7 =
+
+* Enhancement: Structured presentation of captured data in order-received page and email
+* Enhancement: Add one CC and/or BCC email to all emails send out by WooCommerce
+* Enhancement: Add empty cart button to cart
 
 = 1.9.6 =
 
