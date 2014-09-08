@@ -267,6 +267,7 @@ Plugins like Jetpack preconfigure the main query in the context of "infinite scr
 * Enhancement: Add filter to allow local load of jquery-ui.css 
 * Enhancement: Add client side pattern attribute support for custom text input fields
 * Enhancement: Add pattern attribute support for Safari to mimic client side browser validation of other browsers
+* Minor changes
 
 = 1.9.7 =
 
