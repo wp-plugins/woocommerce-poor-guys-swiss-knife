@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization, WooCommerce labels, WooCommerce email recipients
 Requires at least: Wordpress 3.1 and WooCommerce 2.0
 Tested up to: 4.0
-Stable tag: 1.9.7
+Stable tag: 1.9.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,7 +78,8 @@ WooCommerce Poor Guys Swiss Knife has been developed in cooperation with [Nicest
 The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more tools to your swiss knife like custom fields on a per product and per variation basis for checkout forms and a lot more.
 
 = What's new? =
-	
+
+* input pattern attribute support with fallback for Safari browser	
 * Add one CC and/or BCC email recipient to all WooCommerce emails
 * Global minimum and maximum for item quantities
 * Year and month dropdown selection for calendars
@@ -182,7 +183,6 @@ Find instructions under "Other Notes"
 
 More Tools for your WooCommerce Swiss Knife are available with the Rich Guys Swiss Knife for WooCommerce:
 
-* 
 * Item personalization during checkout
 * Custom fields on a per product and per variation basis using Item personalization options
 * Bulk operations for variations
@@ -258,6 +258,15 @@ Plugins like Jetpack preconfigure the main query in the context of "infinite scr
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.9.8 =
+
+* Bugfix: Remove javascript alert when adding new custom fields
+* Bugfix: Fix date selection for WCPGSK default dateformat yyyy/mm/dd for custom date fields
+* Bugfix/Enhancement: Better behaviour for the WCPGSK validation modal window on the checkout form
+* Enhancement: Add filter to allow local load of jquery-ui.css 
+* Enhancement: Add client side pattern attribute support for custom text input fields
+* Enhancement: Add pattern attribute support for Safari to mimic client side browser validation of other browsers
 
 = 1.9.7 =
 

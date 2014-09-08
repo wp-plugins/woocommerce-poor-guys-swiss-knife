@@ -305,7 +305,6 @@ jQuery(document).ready(function() {
 				});
 				//fix new field problem
 				var newfield = new_row.find('[name$="[label_' + new_id + ']"]').val();
-				alert(newfield);
 				var nfcnt = 1;
 				table.children('tbody').children('tr.wcpgsk_order_row').each(function() {
 					jQuery(this).find('[name*="[label_"]').each(function(){

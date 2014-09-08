@@ -890,8 +890,8 @@ function wcpgsk_after_checkout_form($checkout) {
 					if (jQuery(this).attr("mindays")) minD = jQuery(this).attr("mindays");
 					if (jQuery(this).attr("maxdays")) maxD = jQuery(this).attr("maxdays");
 					
-					var dateF = "dd/mm/yy";
-					if (jQuery(this).attr("dateformat")) dateF = jQuery(this).attr("dateformat");
+					var dateF = "yy/mm/dd";
+					if (jQuery(this).attr("dateformat") && jQuery(this).attr("dateformat") != null && jQuery(this).attr("dateformat") != "") dateF = jQuery(this).attr("dateformat");
 					var exDays = "";
 					var exDates = "";
 					var exWeekend = "0";

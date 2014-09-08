@@ -137,11 +137,11 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				if ( isset( $options['process']['confirmemptycart'] ) && !empty( $options['process']['confirmemptycart'] ) ) :
 					$eclabel = isset( $options['process']['emptycartlabel'] ) && !empty( $options['process']['emptycartlabel'] ) ? $options['process']['emptycartlabel'] : "Empty cart"; 
 					$cclabel = isset( $options['process']['confirmemptycart'] ) && !empty( $options['process']['confirmemptycart'] ) ? $options['process']['confirmemptycart'] : "Yes, empty cart"; 
-					echo '<div style="float:left;display:inline-block;padding:0 5px 0 5px;" class="wcpgsk_empty_cart"><input type="button" class="button" style="width:100%" id="wcpgsk_confirm_empty_cart" value="' . __( $eclabel, WCPGSK_DOMAIN) . '"/></div>';
-					echo '<div style="float:left;display:inline-block;padding:0 5px 0 5px;" class="wcpgsk_empty_cart"><input type="submit" class="button" style="display:none;width:100%" id="wcpgsk_empty_cart" name="wcpgsk_empty_cart" value="' . __( $cclabel, WCPGSK_DOMAIN) . '"></div>';
+					echo '<div class="wcpgsk_empty_cart"><input type="button" class="button" style="width:100%" id="wcpgsk_confirm_empty_cart" value="' . __( $eclabel, WCPGSK_DOMAIN) . '"/></div>';
+					echo '<div class="wcpgsk_empty_cart"><input type="submit" class="button" style="display:none;width:100%" id="wcpgsk_empty_cart" name="wcpgsk_empty_cart" value="' . __( $cclabel, WCPGSK_DOMAIN) . '"></div>';
 				else :
 					$eclabel = isset( $options['process']['emptycartlabel'] ) && !empty( $options['process']['emptycartlabel'] ) ? $options['process']['emptycartlabel'] : "Empty cart"; 
-					echo '<div style="float:left;display:inline-block;padding:0 5px 0 5px;" class="wcpgsk_empty_cart"><input type="submit" class="button" name="wcpgsk_empty_cart" value="' . __( $eclabel, WCPGSK_DOMAIN) . '"></div>';
+					echo '<div class="wcpgsk_empty_cart"><input type="submit" class="button" name="wcpgsk_empty_cart" value="' . __( $eclabel, WCPGSK_DOMAIN) . '"></div>';
 				endif;
 			endif;
 		}
@@ -945,9 +945,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								$key_type = "billing_" . $key;
 								$label = !empty($field['label']) ? $field['label'] . ": " : "";
 								if ( is_array( $field['captured'] ) ) :
-									echo '<dt>' . $label . '</dt><dd>' . implode( '<br />', $field['captured'] ) . '</dd>';
+									echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( implode( '<br />', $field['captured'] ) ) ) . '</dd>';
 								else :
-									echo '<dt>' . $label . '</dt><dd>' . $field['captured'] . '</dd>';
+									echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( $field['captured'] ) ) . '</dd>';
 								endif;
 							endforeach;
 						?>
@@ -971,9 +971,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								$key_type = "shipping_" . $key;
 								$label = !empty($field['label']) ? $field['label'] . ": " : "";
 								if ( is_array( $field['captured'] ) ) :
-									echo '<dt>' . $label . '</dt><dd>' . implode( '<br />', $field['captured'] ) . '</dd>';
+									echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( implode( '<br />', $field['captured'] ) ) ) . '</dd>';
 								else :
-									echo '<dt>' . $label . '</dt><dd>' . $field['captured'] . '</dd>';
+									echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( $field['captured'] ) ) . '</dd>';
 								endif;
 							endforeach;
 						?>
@@ -1019,10 +1019,11 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							foreach ($billing_fields as $key => $field) :
 								$key_type = "billing_" . $key;
 								$label = !empty($field['label']) ? $field['label'] . ": " : "";
-								//if ( isset($options['woofields']['type_' . $key_type]) && $options['woofields']['type_' . $key_type] == 'fileupload' ) :
-								//else :
-									echo '<dt>' . $label . '</dt><dd>' . $field['captured'] . '</dd>';
-								//endif;
+								if ( is_array( $field['captured'] ) ) :
+									echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( implode( '<br />', $field['captured'] ) ) ) . '</dd>';
+								else :
+									echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( $field['captured'] ) ) . '</dd>';
+								endif;
 							endforeach;
 							//endif;
 						?>
@@ -1044,10 +1045,11 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							foreach ($shipping_fields as $key => $field) :
 								$key_type = "shipping_" . $key;
 								$label = !empty($field['label']) ? $field['label'] . ": " : "";
-								//if ( isset($options['woofields']['type_' . $key_type]) && $options['woofields']['type_' . $key_type] == 'fileupload' ) :
-								//else :
-									echo '<dt>' . $label . '</dt><dd>' . $field['captured'] . '</dd>';
-								//endif;
+								if ( is_array( $field['captured'] ) ) :
+									echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( implode( '<br />', $field['captured'] ) ) ) . '</dd>';
+								else :
+									echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( $field['captured'] ) ) . '</dd>';
+								endif;
 							endforeach;
 						?>
 						</dl>
@@ -1899,13 +1901,12 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			</div>
 
 			<div id="wcpgsk_dialog_form_text" title="Configure Text Field" class="wcpgsk_dialog_forms">
-			<p class="validateTips"><?php echo $validateTip ; ?></p>
 			<form for="wcpgsk_dlg_form_text">
 			<table class="wcpgsfieldkconfig">
 			<tr class="field_option">
 				<td class="label">
 					<label><?php _e('Maximum characters', WCPGSK_DOMAIN) ; ?></label>
-					<p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
+					<p><?php _e('Maxlength attribute for input tag. Value has to be a number.', WCPGSK_DOMAIN) ; ?></p>
 					
 				</td>
 				<td>
@@ -1915,10 +1916,19 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			<tr class="field_option">
 				<td class="label">
 					<label><?php _e('Size', WCPGSK_DOMAIN) ; ?></label>
-					<p><?php _e('Value has to be a number', WCPGSK_DOMAIN) ; ?></p>
+					<p><?php _e('Size attribute for input tag. Value has to be a number.', WCPGSK_DOMAIN) ; ?></p>
 				</td>
 				<td>
 					<input type="text" for="wcpgsk_add_size" value="" />
+				</td>
+			</tr>
+			<tr class="field_option">
+				<td class="label">
+					<label><?php _e('Pattern attribute', WCPGSK_DOMAIN) ; ?></label>
+					<p><?php _e('Value has to be a regular expression. A regular expression can be used to establish or substitute validation. Example: .{3,5} will require at least 3 characters and allow for a maximum of five. Examples for html5 pattern attributes can be found <a href="http://html5pattern.com/" target="_blank">here</a>. In some circumstances, the symbols ^ in front and $ at the end provide some magical improvements for your regular expressions. Please test on all browsers!', WCPGSK_DOMAIN) ; ?></p>					
+				</td>
+				<td>
+					<input type="text" for="wcpgsk_add_pattern" value="" />
 				</td>
 			</tr>
 			<tr class="field_option">
@@ -1948,6 +1958,16 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				</td>
 				<td>
 					<ul class="wcpgsk-radio-list radio horizontal"><li><label><input id="wcpgsk_add_repeat_field_0" for="wcpgsk_add_repeat_field" value="0" type="radio" checked="&quot;checked&quot;" data-checked="&quot;checked&quot;" ><?php _e('No', WCPGSK_DOMAIN) ; ?></label></li><li><label><input id="wcpgsk_add_repeat_field_1" for="wcpgsk_add_repeat_field" value="1" type="radio"><?php _e('Yes', WCPGSK_DOMAIN) ; ?></label></li></ul>	
+				</td>
+			</tr>
+			<tr class="field_option">
+				<td class="label">
+					<label><?php _e('Minimum characters', WCPGSK_DOMAIN) ; ?></label>
+					<p><?php _e('Minlength attribute of the input tag. Value has to be a number. (In the Html5 specification but not supported by most browsers)', WCPGSK_DOMAIN) ; ?></p>
+					
+				</td>
+				<td>
+					<input type="text" for="wcpgsk_add_minlength" value="" />
 				</td>
 			</tr>
 
@@ -2013,7 +2033,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				</td>
 				<td>
 					<select for="wcpgsk_add_dateformat">
-						<option value="">yyyy/mm/dd</option>
+						<option value="yy/mm/dd">yyyy/mm/dd</option>
 						<option value="mm/dd/yy">mm/dd/yyyy</option>
 						<option value="dd/mm/yy">dd/mm/yyyy</option>
 					</select>
@@ -3277,6 +3297,25 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				
 				elseif ( ( isset($options['woofields']['billing'][$key]['custom_' . $key]) && $options['woofields']['billing'][$key]['custom_' . $key] ) || ( isset( $options['woofields']['shipping'][$key]['custom_' . $key] ) && $options['woofields']['shipping'][$key]['custom_' . $key] ) ) :
 					//validate date fields
+					/*
+					if ( $options['woofields']['type_' . $key] == 'text' && !empty($_POST[$key]) ) :
+						if ( isset( $params['pattern'] ) && !empty( $params['pattern'] ) ) :
+							$pregex = @preg_match('/' . str_replace( "/", "\/", $params['pattern'] ) . '/', $_POST[$key]);
+							if ($pregex === false || $pregex === 0) :
+								// the regex failed and is likely invalid
+								$forLabel = $_POST[$key];
+								if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
+									$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+								endif;
+								wcpgsk_add_error(  '<strong>' . sprintf(__('Value of <em style="color:red">%s</em> does not fulfil the established pattern test: <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $params['pattern'] ) . '</strong>');														
+							else :
+								wcpgsk_add_error(  '<strong>Pattern matched?</strong>');																											
+							endif;
+						else :
+							wcpgsk_add_error(  '<strong>No pattern</strong>');																				
+						endif;
+					endif;
+					*/
 					if ( $options['woofields']['type_' . $key] == 'date' && !empty($_POST[$key]) ) :
 						//transform back based on field setting
 						$params = $this->explodeParameters($options['woofields']['settings_' . $key]);
@@ -4075,6 +4114,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		/**
 		 * Optimize load by dequeue if not necessary.
 		 * @since 1.9.0
+		 * @changed 1.9.8
 		 * @return  void
 		 */
 		public function wcpgsk_handle_scripts() {
@@ -4083,6 +4123,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				//dequeue scripts and styles
 				if ( is_cart() ) :
 					wp_enqueue_script( 'wcpgsk-cart', plugins_url('/assets/js/wcpgsk-cart.js', $this->file) , array('jquery'), '', false);
+					wp_enqueue_style( 'wcpgsk-cart-css', plugins_url('/assets/css/wcpgsk-cart.css', $this->file) , '', '', false);
 				endif;
 				if ( is_checkout() || is_account_page() ) :
 					wp_enqueue_script( 'jquery-ui-dialog' );
@@ -4097,8 +4138,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					wp_enqueue_script( 'wcpgsk-validate', plugins_url('/assets/js/wcpgsk-validate.js', $this->file) , '', '', false);
 					wp_enqueue_script( 'wcpgsk-userjs', plugins_url('wcpgsk-user.js', $this->file) , '', '', false);
 
+					$jquery_version = isset( $wp_scripts->registered['jquery-ui-core']->ver ) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
+					wp_enqueue_style( 'jquery-ui-style', apply_filters('wcpgsk_jquery_ui', '//ajax.googleapis.com/ajax/libs/jqueryui/' . $jquery_version . '/themes/smoothness/jquery-ui.css', plugins_url('/assets/css/jquery-ui.css', $this->file) ), '', '', false );
 					
-					wp_enqueue_style( 'jquery-ui', "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css" , '', '', false);
 					wp_enqueue_style( 'jquery-ui-timepicker-addon', plugins_url('/assets/css/jquery-ui-timepicker-addon.css', $this->file) , '', '', false);
 				endif;
 			endif;

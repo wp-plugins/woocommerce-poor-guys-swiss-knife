@@ -2,9 +2,11 @@ jQuery(document).ready(function() {
 	
 	//store actual border color
 	var recCss = jQuery('form[name="checkout"]').children().find(':input[validate]').first().css('border-color');
+	var patCss = jQuery('form[name="checkout"]').children().find(':input[pattern]').first().css('border-color');
 	//attach handler to be triggered by woocommerce
 	jQuery('form[name="checkout"]').on('checkout_place_order', function(e) {		
 		//e.preventDefault(e);
+		$patternsearch = jQuery(this);
 		var count = 0;
 		var validated = true;
 		jQuery(this).children().find(':input[validate]').each(function() {		
@@ -66,17 +68,37 @@ jQuery(document).ready(function() {
 						
 				}
 			}
+			//pattern validation for safari as long as safari does not support pattern attribute
+			var is_safari = navigator.userAgent.indexOf("Safari") > -1;
+			if ( is_safari ) {
+				$patternsearch.children().find(':input[pattern]').each(function() {		
+					if(!jQuery(this).prop('pattern')) { 
+						//nothing right now
+					}
+					else {
+						if( ( !jQuery(this).val().match( new RegExp( jQuery(this).attr('pattern') ) ) ) ) {
+							jQuery(this).css( "border-color", "red" );
+							validated = false;			
+						}				
+						else {
+							jQuery(this).css( "border-color", patCss );
+						}
+					}
+				});
+			}
+			
 		});
+
 		if (!validated) {	
 			jQuery('html, body').animate({
-				scrollTop: (jQuery('body').offset().top)
-			}, 1000);
-			jQuery('#wcpgsk-dialog-validation-errors').dialog( "option", "position", { of: jQuery('body'), collision: 'none' } );
-			jQuery('#wcpgsk-dialog-validation-errors').dialog( 'open' );
+				scrollTop: (jQuery('body').offset().top),
+			}, 1000, 'linear', function() {
+				jQuery('#wcpgsk-dialog-validation-errors').dialog( "option", "position", { center: 60 } );
+				jQuery('#wcpgsk-dialog-validation-errors').dialog( 'open' );				
+			});
 			return false;
 		} else true;
 	});
-	
 	jQuery( "#wcpgsk-dialog-validation-errors" ).dialog({
 		autoOpen: false,
 		height: 200,
