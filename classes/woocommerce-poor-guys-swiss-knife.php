@@ -106,8 +106,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			add_action( 'woocommerce_proceed_to_checkout', array( $this, 'wcpgsk_after_cart' ), 10 );
 			
 			add_action( 'woocommerce_init', array( $this, 'wcpgsk_empty_cart' ), PHP_INT_MAX );
-			
-
+		
 		}
 
 		/**
