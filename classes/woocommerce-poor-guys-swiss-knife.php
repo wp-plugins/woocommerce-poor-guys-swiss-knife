@@ -106,7 +106,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			add_action( 'woocommerce_proceed_to_checkout', array( $this, 'wcpgsk_after_cart' ), 10 );
 			
 			add_action( 'woocommerce_init', array( $this, 'wcpgsk_empty_cart' ), PHP_INT_MAX );
-		
+			add_action( 'woocommerce_checkout_update_order_meta', array( $this, 'wcpgsk_checkout_update_order_meta' ), 10, 2 );
 		}
 
 		/**
@@ -3295,26 +3295,6 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					unset($_POST[$key]);
 				
 				elseif ( ( isset($options['woofields']['billing'][$key]['custom_' . $key]) && $options['woofields']['billing'][$key]['custom_' . $key] ) || ( isset( $options['woofields']['shipping'][$key]['custom_' . $key] ) && $options['woofields']['shipping'][$key]['custom_' . $key] ) ) :
-					//validate date fields
-					/*
-					if ( $options['woofields']['type_' . $key] == 'text' && !empty($_POST[$key]) ) :
-						if ( isset( $params['pattern'] ) && !empty( $params['pattern'] ) ) :
-							$pregex = @preg_match('/' . str_replace( "/", "\/", $params['pattern'] ) . '/', $_POST[$key]);
-							if ($pregex === false || $pregex === 0) :
-								// the regex failed and is likely invalid
-								$forLabel = $_POST[$key];
-								if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
-									$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
-								endif;
-								wcpgsk_add_error(  '<strong>' . sprintf(__('Value of <em style="color:red">%s</em> does not fulfil the established pattern test: <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $params['pattern'] ) . '</strong>');														
-							else :
-								wcpgsk_add_error(  '<strong>Pattern matched?</strong>');																											
-							endif;
-						else :
-							wcpgsk_add_error(  '<strong>No pattern</strong>');																				
-						endif;
-					endif;
-					*/
 					if ( $options['woofields']['type_' . $key] == 'date' && !empty($_POST[$key]) ) :
 						//transform back based on field setting
 						$params = $this->explodeParameters($options['woofields']['settings_' . $key]);
@@ -3419,6 +3399,22 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			
 		}
 		
+		function wcpgsk_checkout_update_order_meta( $order_id, $posted ) {
+			global $woocommerce;
+			global $wcpgsk_session;
+			if ( function_exists('WC') ) :
+				WC()->session->set('post', $_POST);
+			else :
+				$wcpgsk_session->post = $_POST;
+			endif;			
+			$options = get_option( 'wcpgsk_settings' );
+			foreach($posted as $key => $val) :
+				if ( isset($options['woofields']['billing'][$key]['custom_' . $key] ) || isset($options['woofields']['billing'][$key]['custom_' . $key] ) ) :
+					update_post_meta( $order_id, "_" . $key, $val );
+				endif;
+			endforeach;
+		
+		}
 		
 		public function createCustomStandardField($customkey, $context, $type) {
 			$options = get_option( 'wcpgsk_settings' );
