@@ -412,6 +412,16 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						</td>
 					</tr>
 					<tr>
+						<td><?php _e('Pay Order Button Text', WCPGSK_DOMAIN); ?>:</td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_pay_order_button_text]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_pay_order_button_text'])) echo esc_attr( $options['filters']['woocommerce_pay_order_button_text'] ); ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Set the pay order button text.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					
+					<tr>
 						<td><?php _e('Set Login required message', WCPGSK_DOMAIN); ?>:</td>
 						<td>
 							<input name="wcpgsk_settings[filters][woocommerce_checkout_must_be_logged_in_message]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_checkout_must_be_logged_in_message'])) echo esc_attr( $options['filters']['woocommerce_checkout_must_be_logged_in_message'] ); ?>" class="regular-text" />
@@ -438,7 +448,24 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							<span class="description"><?php _e('Change the coupon message for the checkout form.', WCPGSK_DOMAIN); ?></span>
 						</td>
 					</tr>
-					
+					<tr>
+						<td><?php _e('Set Coupon link message', WCPGSK_DOMAIN); ?>:</td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_checkout_coupon_link_message]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_checkout_coupon_link_message'])) echo esc_attr( $options['filters']['woocommerce_checkout_coupon_link_message'] ); ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Change the coupon link message for the checkout form. (WC 2.2+ only)', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td><?php _e('Define order received message', WCPGSK_DOMAIN); ?>:</td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_thankyou_order_received_text]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_thankyou_order_received_text'])) echo esc_attr( $options['filters']['woocommerce_thankyou_order_received_text'] ); ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the order received thank you message.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
 					<?php do_action( 'wcpgsk_settings_labels_after', $options ); ?>					
 				</tbody>
 				</table>
@@ -469,9 +496,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 * Run available WooCommerce filters
 		 *
 		 * @since 1.9.2
+		 * @changed 1.9.83
 		 * @return configured string value
 		 */
-		public function wcpgsk_apply_woocommerce_filter( $filterval ) {
+		public function wcpgsk_apply_woocommerce_filter( $filterval, $param2 = null ) {
 			$options = get_option( 'wcpgsk_settings' );
 
 			$the_filter = current_filter();
@@ -494,12 +522,30 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							$filterval = intval( $configval );
 						endif;
 					break;
+					case "woocommerce_checkout_coupon_message" :
+						$current_wc_version = get_option( 'woocommerce_db_version' );
+
+						if ( version_compare( $current_wc_version, '2.2.0', '>=' ) ) :
+							//make translatable
+							if ( !empty( $configval ) ) :
+								if ( isset( $options['filters']['woocommerce_checkout_coupon_link_message'] ) && !empty( $options['filters']['woocommerce_checkout_coupon_link_message'] ) ) :
+									$filterval = __($configval, WCPGSK_DOMAIN) . ' <a href="#" class="showcoupon">' . __( $options['filters']['woocommerce_checkout_coupon_link_message'], WCPGSK_DOMAIN ) . '</a>';
+								else :
+									$filterval = __($configval, WCPGSK_DOMAIN) . ' <a href="#" class="showcoupon">' . __( 'Click here to enter your code', 'woocommerce' ) . '</a>';								
+								endif;
+							endif;
+						else :
+							//make translatable
+							if ( !empty( $configval ) ) :
+								$filterval = __($configval, WCPGSK_DOMAIN);
+							endif;
+						endif;
+						
+					break;					
 					default :
 						//make translatable
 						if ( !empty( $configval ) ) :
 							$filterval = __($configval, WCPGSK_DOMAIN);
-						else :
-							$filterval = "";
 						endif;
 					break;
 				endswitch;
@@ -1213,8 +1259,14 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								'woocommerce_product_additional_information_heading' => __( 'Additional Information', 'woocommerce' ),
 								'woocommerce_checkout_must_be_logged_in_message' => __( 'You must be logged in to checkout.', 'woocommerce' ),
 								'woocommerce_checkout_login_message' => __( 'Returning customer?', 'woocommerce' ),
+								
 								'woocommerce_checkout_coupon_message' => __( 'Have a coupon?', 'woocommerce' ),
+								'woocommerce_checkout_coupon_link_message' => __( 'Click here to enter your code', 'woocommerce' ),
+								
 								'woocommerce_order_button_text' => __( 'Place order', 'woocommerce' ),
+								'woocommerce_pay_order_button_text' => __( 'Pay for order', 'woocommerce' ),
+								'woocommerce_thankyou_order_received_text' => __( 'Thank you. Your order has been received.', 'woocommerce' ),						
+								
 								'woocommerce_countries_tax_or_vat' => $this->WC()->countries->tax_or_vat(),
 								'woocommerce_countries_inc_tax_or_vat' => $this->WC()->countries->inc_tax_or_vat(),
 								'woocommerce_countries_ex_tax_or_vat' => $this->WC()->countries->ex_tax_or_vat(),
@@ -3995,10 +4047,17 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						'woocommerce_product_description_heading' => __( 'Product Description', 'woocommerce' ),
 						'woocommerce_product_additional_information_tab_title' => __('Additional Information', 'woocommerce'),
 						'woocommerce_product_additional_information_heading' => __( 'Additional Information', 'woocommerce' ),
+						
 						'woocommerce_checkout_must_be_logged_in_message' => __( 'You must be logged in to checkout.', 'woocommerce' ),
+						
 						'woocommerce_checkout_login_message' => __( 'Returning customer?', 'woocommerce' ),
+						
 						'woocommerce_checkout_coupon_message' => __( 'Have a coupon?', 'woocommerce' ),
+						'woocommerce_checkout_coupon_link_message' => __( 'Click here to enter your code', 'woocommerce' ),
+						
 						'woocommerce_order_button_text' => __( 'Place order', 'woocommerce' ),
+						'woocommerce_pay_order_button_text' => __( 'Pay for order', 'woocommerce' ),
+						'woocommerce_thankyou_order_received_text' => __( 'Thank you. Your order has been received.', 'woocommerce' ),						
 						'woocommerce_countries_tax_or_vat' => $this->WC()->countries->tax_or_vat(),
 						'woocommerce_countries_inc_tax_or_vat' => $this->WC()->countries->inc_tax_or_vat(),
 						'woocommerce_countries_ex_tax_or_vat' => $this->WC()->countries->ex_tax_or_vat(),

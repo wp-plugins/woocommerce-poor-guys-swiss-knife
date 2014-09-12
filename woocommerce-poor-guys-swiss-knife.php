@@ -7,7 +7,7 @@
  * Contributor: ulih
  * Author: Uli Hake
  * Author URI: http://takebarcelona.com/authorship/uli-hake
- * Version: 1.9.82
+ * Version: 1.9.83
  * @package WordPress
  * @subpackage WooCommerce Poor Guys Swiss Knife
  * @author Uli Hake
@@ -67,16 +67,30 @@ function wcpgsk_plugin_activation_message() {
 	//step out with message
 	global $wcpgsk_woocommerce_active;
 	if ( !$wcpgsk_woocommerce_active ) :
+		deactivate_plugins( plugin_basename( __FILE__ ) );			
 		$html = '<div class="error">';
 			$html .= '<p>';
 				$html .= __( 'You have to install and activate WooCommerce before you can use <strong>' . WCPGSK_NAME . '</strong>', WCPGSK_DOMAIN );
 			$html .= '</p>';
 		$html .= '</div><!-- /.updated -->';
-		echo $html;	
+		echo $html;
+		
 	endif;
 }
 }
 
+//register_activation_hook( __FILE__, 'wcpgsk_activation' );
+
+if ( !function_exists( 'wcpgsk_activation' ) ) {
+	function wcpgsk_activation() {
+		global $wcpgsk_woocommerce_active;
+		if ( !$wcpgsk_woocommerce_active ) :
+			deactivate_plugins( plugin_basename( __FILE__ ) );	
+			return new WP_Error( 'dependency', __( 'You have to install and activate WooCommerce before you can use <strong>' . WCPGSK_NAME . '</strong>', WCPGSK_DOMAIN ) );			
+			//wp_die(  );
+		endif;
+	}
+}
 //Check if WooCommerce is available and place a admin message if not
 if ( ! function_exists('wcpgsk_woocommerce_version_message') ) {
 function wcpgsk_woocommerce_version_message() {
@@ -106,7 +120,7 @@ function wcpgsk_init() {
 		endif;
 		//load into our global
 		$wcpgsk = new WCPGSK_Main( __FILE__ );
-		$wcpgsk->version = '1.9.82';	
+		$wcpgsk->version = '1.9.83';	
 		$wcpgsk->wcpgsk_hook_woocommerce_filters();
 		
 		

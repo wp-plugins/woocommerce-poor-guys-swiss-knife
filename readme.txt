@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization, WooCommerce labels, WooCommerce email recipients
 Requires at least: Wordpress 3.1 and WooCommerce 2.0
 Tested up to: 4.0
-Stable tag: 1.9.82
+Stable tag: 1.9.83
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -155,7 +155,8 @@ You need to upgrade to WooCommerce Rich Guys Swiss Knife to add an additional Sh
 
 = Checkout Item Personalization Forms =
  
-You need to upgrade to WooCommerce Rich Guys Swiss Knife to add personalization forms for individual products but also for variations
+You need to upgrade to WooCommerce Rich Guys Swiss Knife to add personalization forms for individual products and variations.
+This allows you to add conditional, product based input fields on your checkout page.
 
 == Installation ==
 
@@ -259,6 +260,12 @@ Plugins like Jetpack preconfigure the main query in the context of "infinite scr
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 1.9.83 =
+
+* Service release for WooCommerce 2.2 fixing coupon link on checkout page
+* Minor bugfix: Show WooCommerce default label text if WCPGSK configuration for label is empty
+* Enhancement: Additional label settings
 
 = 1.9.82 =
 
