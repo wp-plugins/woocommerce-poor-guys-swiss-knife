@@ -3461,11 +3461,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			endif;			
 			$options = get_option( 'wcpgsk_settings' );
 			foreach($posted as $key => $val) :
-				if ( isset($options['woofields']['billing'][$key]['custom_' . $key] ) || isset($options['woofields']['billing'][$key]['custom_' . $key] ) ) :
+				if ( ( isset($options['woofields']['billing'][$key]['custom_' . $key]) && $options['woofields']['billing'][$key]['custom_' . $key] ) || ( isset( $options['woofields']['shipping'][$key]['custom_' . $key] ) && $options['woofields']['shipping'][$key]['custom_' . $key] ) ) :
 					update_post_meta( $order_id, "_" . $key, $val );
 				endif;
 			endforeach;
-		
 		}
 		
 		public function createCustomStandardField($customkey, $context, $type) {
