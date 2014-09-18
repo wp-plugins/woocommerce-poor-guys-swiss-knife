@@ -3515,14 +3515,14 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								break;
 
 							case 'value':
-								if (!empty($value) || $value == 0) $default = $value;
+								if (!empty($value) || $value === 0) $default = $value;
 								break;
 							
 							case 'repeat_field':
 								//not necessary here?
 								break;
 							default:
-								if (!empty($value) || $value == 0)
+								if (!empty($value) || $value === 0)
 									$custom_attributes[$key] = $value;
 						}
 					}
@@ -3690,7 +3690,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							case 'selected':
 								if ( !empty($value) ) :
 									foreach($value as $keyval => $option) {
-										if (!empty($option) || $value == 0) $selected = $option;
+										//if (!empty($option) || $value == 0) $selected = $option;
+										if (!empty($keyval)) $selected = $keyval;
 									}
 								endif;
 								break;
@@ -3700,11 +3701,11 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								break;
 
 							case 'value':
-								if (!empty($value) || $value == 0) $default = $value;
+								if (!empty($value) || $value === 0) $default = $value;
 								break;
 							
 							default:
-								if (!empty($value) || $value == 0)
+								if (!empty($value) || $value === 0)
 									$custom_attributes[$key] = $value;
 						}
 					}
