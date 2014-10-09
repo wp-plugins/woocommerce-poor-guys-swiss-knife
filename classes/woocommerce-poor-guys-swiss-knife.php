@@ -75,7 +75,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			endif;
 			
 			
-			add_action( 'woocommerce_checkout_process', array($this, 'wcpgsk_checkout_process'), 99 );
+			add_action( 'woocommerce_checkout_process', array($this, 'wcpgsk_checkout_process'), 9 );
 
 			add_filter( 'woocommerce_load_order_data', array($this, 'wcpgsk_load_order_data'), 5,  1);
 			add_action( 'woocommerce_checkout_init', array($this, 'wcpgsk_checkout_init'), 10, 1 );
@@ -522,9 +522,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							$filterval = intval( $configval );
 						endif;
 					break;
+					
 					case "woocommerce_checkout_coupon_message" :
 						$current_wc_version = get_option( 'woocommerce_db_version' );
-
+						
 						if ( version_compare( $current_wc_version, '2.2.0', '>=' ) ) :
 							//make translatable
 							if ( !empty( $configval ) ) :
@@ -541,7 +542,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							endif;
 						endif;
 						
-					break;					
+					break;
+					
 					default :
 						//make translatable
 						if ( !empty( $configval ) ) :
@@ -780,7 +782,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					$stepqty = isset($stepqty) && !empty($stepqty) ? $stepqty : 0;
 					*/
 					$style = 'width:125px;padding:5px 5px 5px 5px;font-size:inherit !important;font-family:inherit !important;font-face:inherit !important;line-height: 18px !important;';
-					$style_before = 'height:auto !important;vertical-align:sub;padding: 0 3px 0 0 !important;font:400 20px/1 dashicons !important;line-height: 18px !important;content:"\f204";';
+					$style_before = 'height:auto !important;vertical-align:sub;padding: 0 3px 0 0 !important;font:400 20px/1 dashicons !important;line-height: 18px !important;content:"\f163";';
 					$active_style = '';					
 					?>
 					<style type="text/css">
@@ -1136,7 +1138,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			foreach ($checkout_fields as $key => $field) : 
 				//$fieldLabel = $field['displaylabel'];
 				$fieldkey = str_replace('billing_', '', $key);
-				if ($key != 'billing_email_validator' && $field['hideorder'] == 0 && $key != 'billing_phone' && $key != 'billing_email') :
+				if ($key != 'billing_email_validator' && $field['hideorder'] == 0 && $key != 'billing_phone' && $key != 'billing_email' && !$field['hideorder'] ) :
 					if ( isset($options['woofields'][$fortype][$key]['custom_' . $key]) && $options['woofields'][$fortype][$key]['custom_' . $key]) :
 						$configField['label'] = isset($checkout_fields[$key]['label']) && !empty($checkout_fields[$key]['label']) ? __($checkout_fields[$key]['label'], WCPGSK_DOMAIN) : "";
 						$captured_value = $order->$key;
@@ -1694,7 +1696,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									<th><?php _e('Field Name', WCPGSK_DOMAIN);  ?></th>
 									<th><?php _e('Remove Field', WCPGSK_DOMAIN);  ?></th>		
 									<th><?php _e('Required Field', WCPGSK_DOMAIN);  ?></th>
-									<th><?php _e('Hide in Emails/Receipts', WCPGSK_DOMAIN);  ?></th>
+									<th><?php _e('Hide in Receipts', WCPGSK_DOMAIN);  ?></th>
+									<th><span title="<?php esc_attr_e('Store only in customer context, do not include in order', WCPGSK_DOMAIN); ?>"><?php _e('Customer data', WCPGSK_DOMAIN);  ?></span></th>
 									<th class="wcpgsk_replace"><?php _e('Label', WCPGSK_DOMAIN);  ?></th>
 									<th class="wcpgsk_replace"><?php _e('Placeholder', WCPGSK_DOMAIN);  ?></th>
 									<th class="wcpgsk_replace"><?php _e('Display', WCPGSK_DOMAIN);  ?></th>
@@ -1707,6 +1710,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									<td></td>
 									<td><input type="checkbox" class="select_removes" for="removes_<?php echo $section ;?>" id="select_remove_<?php echo $section ;?>" value="1" /> <?php _e('Select All', WCPGSK_DOMAIN);  ?></td>
 									<td><input type="checkbox" class="select_required" for="required_<?php echo $section ;?>" id="select_required_<?php echo $section ;?>" value="1" /> <?php _e('Select All', WCPGSK_DOMAIN);  ?></td>
+									<td></td>
 									<td></td>
 									<td></td>
 									<td></td>
@@ -1739,6 +1743,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 										//before required defreq
 										$checkout_fields[$key]['defreq'] = ((isset($checkout_fields[$key]['required']) && $checkout_fields[$key]['required'] == 1) ? $defchecked : $defunchecked);
 										$checkout_fields[$key]['required'] = ((isset($options['woofields']['required_' . $key])) ? $options['woofields']['required_' . $key] : $checkout_fields[$key]['required']);
+										$checkout_fields[$key]['customeronly'] = ((isset($options['woofields']['customeronly_' . $key])) ? $options['woofields']['customeronly_' . $key] : 0);
 										$checkout_fields[$key]['hideorder'] = ((isset($options['woofields']['hideorder_' . $key])) ? $options['woofields']['hideorder_' . $key] : 0);
 										$checkout_fields[$key]['type'] = ((isset($options['woofields']['type_' . $key]) && !empty($options['woofields']['type_' . $key])) ? $options['woofields']['type_' . $key] : ((!empty($checkout_fields[$key]['type'])) ? $checkout_fields[$key]['type'] : 'text') );
 										
@@ -1783,6 +1788,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 										</td>
 										<td><input name="wcpgsk_settings[woofields][hideorder_<?php echo $field['fieldkey']; ?>]" type="hidden" value="0" />
 											<input name="wcpgsk_settings[woofields][hideorder_<?php echo $field['fieldkey']; ?>]" type="checkbox" class="hideorder_<?php echo $section ;?>" value="1" <?php if (  1 == $field['hideorder'] ) echo "checked='checked'"; ?> />
+										</td>
+										<td><input name="wcpgsk_settings[woofields][customeronly_<?php echo $field['fieldkey']; ?>]" type="hidden" value="0" />
+											<input name="wcpgsk_settings[woofields][customeronly_<?php echo $field['fieldkey']; ?>]" type="checkbox" class="customeronly_<?php echo $section ;?>" value="1" <?php if ( isset( $field['customeronly'] ) && 1 == $field['customeronly'] ) echo "checked='checked'"; ?> />
 										</td>
 										<td><input type="text" name="wcpgsk_settings[woofields][label_<?php echo $field['fieldkey']; ?>]" class="wcpgsk_textfield" 
 											value="<?php echo esc_attr( $field['label'] ); ?>" /></td>
@@ -1833,6 +1841,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 										</td>
 										<td><input convert="wcpgsk_settings[woofields][hideorder_<?php echo $custom; ?>]" type="hidden" value="0" />
 											<input convert="wcpgsk_settings[woofields][hideorder_<?php echo $custom; ?>]" type="checkbox" class="hideorder_<?php echo $section ;?>" value="1" />
+										</td>
+										<td><input convert="wcpgsk_settings[woofields][customeronly_<?php echo $custom; ?>]" type="hidden" value="0" />
+											<input convert="wcpgsk_settings[woofields][customeronly_<?php echo $custom; ?>]" type="checkbox" class="customeronly_<?php echo $section ;?>" value="1" />
 										</td>
 										<td><input type="text" convert="wcpgsk_settings[woofields][label_<?php echo $custom; ?>]" class="wcpgsk_textfield" value="<?php echo $newField; ?>" /></td>
 										<td><input type="text" convert="wcpgsk_settings[woofields][placeholder_<?php echo $custom; ?>]" class="wcpgsk_textfield" value="<?php echo $newField; ?>" /></td>
@@ -2810,7 +2821,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					//@TODO: this will never return nothing as $fields does not hold any keys according to $fieldkey
 					$billing_fields[$fieldkey] = $fields[$fieldkey];
 				else:
-					if ($key != 'billing_email_validator' && $field['hideorder'] == 0) :
+					//if ($key != 'billing_email_validator' && $field['hideorder'] == 0) :
+					if ($key != 'billing_email_validator') :
 						if ( isset( $options['woofields']['billing'][$key]['custom_' . $key] ) && $options['woofields']['billing'][$key]['custom_' . $key] ) :
 							$configField = $this->createCustomStandardField($key, 'billing', $options['woofields']['type_' . $key]);
 							if (isset($configField['class'])) unset($configField['class']);
@@ -2827,10 +2839,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							//textarea is not recognized by woocommerce in order billing address context
 							if ( !empty($configField['type']) && $configField['type'] == 'textarea' ) $configField['type'] = 'text';
 							//if ( !empty($configField['type']) && $configField['type'] == 'fileupload' ) $configField['type'] = 'text';
-							if ($field['hideorder'] == 0)
+							//if ($field['hideorder'] == 0)
 								$configField['show'] = true;
-							else
-								$configField['show'] = false;
+							//else
+							//	$configField['show'] = false;
 								
 							$billing_fields[$fieldkey] = $configField;
 						endif;
@@ -2905,10 +2917,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							if ( !empty($configField['type']) && $configField['type'] == 'select' ) $configField['type'] = 'text';
 							//textarea is not recognized by woocommerce in order billing address context
 							if ( !empty($configField['type']) && $configField['type'] == 'textarea' ) $configField['type'] = 'text';
-							if ($field['hideorder'] == 0)
+							//if ($field['hideorder'] == 0)
 								$configField['show'] = true;
-							else
-								$configField['show'] = false;
+							//else
+							//	$configField['show'] = false;
 								
 							
 							$shipping_fields[$fieldkey] = $configField;
@@ -3048,7 +3060,16 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$lastClass = array();
 			foreach ($fields['billing'] as $key => $field) {
 				if (isset($options['woofields']['remove_' . $key]) && $options['woofields']['remove_' . $key] == 1) {
-					unset($fields['billing'][$key]);
+					if ( $key == 'billing_country' ) :
+						$countries = $woocommerce->countries->get_allowed_countries();
+						if ( isset( $countries ) && is_array( $countries ) && count( $countries ) == 1 ) :
+							$fields['billing'][$key]['class'] = array('hidecountry');
+						elseif ( isset( $countries ) && is_array( $countries ) && count( $countries ) > 2 ) :
+							//incorrect admin setting, do nothing
+						endif;						
+					else :
+						unset($fields['billing'][$key]);					
+					endif;
 				}
 				else {
 				
@@ -3155,7 +3176,16 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			
 			foreach ($fields['shipping'] as $key => $field) {
 				if (isset($options['woofields']['remove_' . $key]) && $options['woofields']['remove_' . $key] == 1) {
-					unset($fields['shipping'][$key]);
+					if ( $key == 'shipping_country' ) :
+						$countries = $woocommerce->countries->get_shipping_countries();
+						if ( isset( $countries ) && is_array( $countries ) && count( $countries ) == 1 ) :
+							$fields['shipping'][$key]['class'] = array('hidecountry');
+						elseif ( isset( $countries ) && is_array( $countries ) && count( $countries ) > 2 ) :
+							//incorrect admin setting, do nothing
+						endif;						
+					else :
+						unset($fields['shipping'][$key]);
+					endif;
 				}
 				else {
 				
@@ -3462,7 +3492,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$options = get_option( 'wcpgsk_settings' );
 			foreach($posted as $key => $val) :
 				if ( ( isset($options['woofields']['billing'][$key]['custom_' . $key]) && $options['woofields']['billing'][$key]['custom_' . $key] ) || ( isset( $options['woofields']['shipping'][$key]['custom_' . $key] ) && $options['woofields']['shipping'][$key]['custom_' . $key] ) ) :
-					update_post_meta( $order_id, "_" . $key, $val );
+					if ( !isset( $options['woofields']['customeronly_' . $key] ) || ( isset( $options['woofields']['customeronly_' . $key] ) && $options['woofields']['customeronly_' . $key] == 0 ) ) :
+						update_post_meta( $order_id, "_" . $key, $val );
+					endif;
 				endif;
 			endforeach;
 		}
@@ -3964,8 +3996,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		public function wcpgsk_admin_scripts( $hook_suffix ) {
 			if ( $hook_suffix == 'woocommerce_page_wcpgsk' ) {
 
-				if(!wp_script_is('jquery-ui-accordion', 'queue')){
-						wp_enqueue_script('jquery-ui-accordion');
+				if( !wp_script_is('jquery-ui-accordion', 'queue') ) {
+					wp_enqueue_script('jquery-ui-accordion');
 				}
 
 				wp_enqueue_script( 'wcpgsk_admin', plugins_url( '/assets/js/wcpgsk_admin.js', $this->file ), '', '' );
@@ -3976,6 +4008,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				if(!wp_script_is('jquery-ui-dialog', 'queue')){
 						wp_enqueue_script('jquery-ui-dialog');
 				}
+				wp_enqueue_script( 'chosen-order', plugins_url( '/assets/js/chosen.order.jquery.min.js', $this->file ), '', '' );
 				
 				wp_register_script('accordion-js', plugins_url( '/assets/js/accordion.js', $this->file ), '', '', false);
 				wp_register_style('accordion-styles', plugins_url( '/assets/css/accordion_styles.css', $this->file ), '', '');
@@ -4172,33 +4205,6 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 * @return  void
 		 */
 		public function wcpgsk_handle_scripts() {
-			//first check that woo exists to prevent fatal errors
-			if ( function_exists( 'is_woocommerce' ) ) :
-				//dequeue scripts and styles
-				if ( is_cart() ) :
-					wp_enqueue_script( 'wcpgsk-cart', plugins_url('/assets/js/wcpgsk-cart.js', $this->file) , array('jquery'), '', false);
-					wp_enqueue_style( 'wcpgsk-cart-css', plugins_url('/assets/css/wcpgsk-cart.css', $this->file) , '', '', false);
-				endif;
-				if ( is_checkout() || is_account_page() ) :
-					wp_enqueue_script( 'jquery-ui-dialog' );
-					wp_enqueue_script( 'jquery-ui-datepicker' );
-					wp_enqueue_script( 'jquery-ui-slider' );
-					wp_enqueue_script( 'jquery-ui-button' );
-					wp_enqueue_script( 'jquery-ui-tabs' );
-	
-					wp_enqueue_script( 'jquery-ui-sliderAccess', plugins_url('/assets/js/jquery-ui-sliderAccess.js', $this->file) , '', '', false);
-					wp_enqueue_script( 'jquery-ui-timepicker-addon', plugins_url('/assets/js/jquery-ui-timepicker-addon.js', $this->file) , array('jquery'), '', true);
-
-					wp_enqueue_script( 'wcpgsk-validate', plugins_url('/assets/js/wcpgsk-validate.js', $this->file) , '', '', false);
-					wp_enqueue_script( 'wcpgsk-userjs', plugins_url('wcpgsk-user.js', $this->file) , '', '', false);
-
-					$jquery_version = isset( $wp_scripts->registered['jquery-ui-core']->ver ) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
-					wp_enqueue_style( 'jquery-ui-style', apply_filters('wcpgsk_jquery_ui', '//ajax.googleapis.com/ajax/libs/jqueryui/' . $jquery_version . '/themes/smoothness/jquery-ui.css', plugins_url('/assets/css/jquery-ui.css', $this->file) ), '', '', false );
-					
-					wp_enqueue_style( 'jquery-ui-timepicker-addon', plugins_url('/assets/css/jquery-ui-timepicker-addon.css', $this->file) , '', '', false);
-				endif;
-			endif;
-			
 
 		}				
 
@@ -4224,11 +4230,34 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 * @return  void
 		 */		
 		public function wcpgsk_degenerate() { 
-			if ( function_exists( 'is_woocommerce' ) ) { 
-				//if (!is_woocommerce()) {
-					//remove_action( 'wp_head', array( $GLOBALS['woocommerce'], 'generator' ) ); 
-				//} 
-			} 
+			global $wp_scripts;		
+			//first check that woo exists to prevent fatal errors
+			if ( function_exists( 'is_woocommerce' ) ) :
+				//dequeue scripts and styles
+				if ( is_cart() ) :
+					wp_enqueue_script( 'wcpgsk-cart', plugins_url('/assets/js/wcpgsk-cart.js', $this->file) , array('jquery'), '', false);
+					wp_enqueue_style( 'wcpgsk-cart-css', plugins_url('/assets/css/wcpgsk-cart.css', $this->file) , array(), '');
+				endif;
+				if ( is_checkout() || is_account_page() ) :
+					wp_enqueue_script( 'jquery-ui-dialog' );
+					wp_enqueue_script( 'jquery-ui-datepicker' );
+					wp_enqueue_script( 'jquery-ui-slider' );
+					wp_enqueue_script( 'jquery-ui-button' );
+					//wp_enqueue_script( 'jquery-ui-tabs' );
+	
+					wp_enqueue_script( 'jquery-ui-sliderAccess', plugins_url('/assets/js/jquery-ui-sliderAccess.js', $this->file) , '', '', false);
+					wp_enqueue_script( 'jquery-ui-timepicker-addon', plugins_url('/assets/js/jquery-ui-timepicker-addon.js', $this->file) , array('jquery'), '', true);
+
+					wp_enqueue_script( 'wcpgsk-validate', plugins_url('/assets/js/wcpgsk-validate.js', $this->file) , '', '', false);
+					wp_enqueue_script( 'wcpgsk-userjs', plugins_url('wcpgsk-user.js', $this->file) , '', '', false);
+
+					$jquery_version = isset( $wp_scripts->registered['jquery-ui-core']->ver ) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
+					wp_enqueue_style( 'jquery-ui-style', apply_filters('wcpgsk_jquery_ui', '//ajax.googleapis.com/ajax/libs/jqueryui/' . $jquery_version . '/themes/smoothness/jquery-ui.css', plugins_url('/assets/css/jquery-ui.css', $this->file) ), array(), '');
+					
+					wp_enqueue_style( 'jquery-ui-timepicker-addon', plugins_url('/assets/css/jquery-ui-timepicker-addon.css', $this->file) , array(), '');
+					wp_enqueue_style( 'wcpgsk-country', plugins_url('/assets/css/wcpgsk-checkout.css', $this->file) , array(), '');
+				endif;
+			endif;
 		}		
 	}	
 }

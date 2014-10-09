@@ -1,10 +1,10 @@
 === WooCommerce Poor Guys Swiss Knife ===
 Contributors: ulih
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KJ4K2X953H8CC
-Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization, WooCommerce labels, WooCommerce email recipients
+Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization, WooCommerce labels, WooCommerce email recipients, priceable extras, member registration, extras, product extras
 Requires at least: Wordpress 3.1 and WooCommerce 2.0
 Tested up to: 4.0
-Stable tag: 1.9.86
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,6 +55,11 @@ Cart:
 
 = Features available with WooCommerce Rich Guys Swiss Knife (WCRGSK) =
 
+* Priceable product extras which show up on the product page before adding products to cart
+* Additional customer/party members 
+* Repeater sections for item personalization to allow customers to provide several data sets for cart items
+* Automatic user registration for additional users/members notified for a product item
+* Add as many item personalizations form sections as you want
 * Checkout personalization on a per product and variation basis
 * Min/Max/Step quantity settings and backorder support for variations
 * Product filters based on categories and/or attributes for shop page
@@ -89,8 +94,8 @@ The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more to
 
 = What's on its way? =
 
-* Priceable fields for products and variations will be available with version 1.5.0 of Woocommerce Rich Guys Swiss Knife
-* Woocommerce Poor Guys Swiss Knife will include a package as gift along with gift text as appetizer
+* Tax exempt support with WooCommerce Rich Guys Swiss Knife
+* Anticipation payments
 
 == Usage ==
 
@@ -260,6 +265,13 @@ Plugins like Jetpack preconfigure the main query in the context of "infinite scr
 3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
  
 == Changelog ==
+
+= 2.0.0 =
+
+* Service release for WooCommerce Rich Guys Swiss Knife 2.0
+* Bugfix: If only one country enabled soft fix if country is removed by administration to avoid WooCommerce error for states/regions
+* Enhancement: Data storage restriction for billing and shipping custom fields, restrict to user or add to order as well
+* Enhancement: Customer data displayed in edit mode on "My account page" includes custom field data
 
 = 1.9.86 =
 

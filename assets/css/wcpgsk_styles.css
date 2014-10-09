@@ -82,3 +82,11 @@ ul.wcpgsk-radio-list.radio.horizontal li > label > input {
 	margin-right:5px;
 	font-size:0.9em;
 }
+
+#wcpgsk_accordion .ui-accordion-content {
+	padding: 0 !important;
+}
+
+#wcpgsk_item_fieldset_accordion {
+	padding: 0 0.6em !important; 
+}

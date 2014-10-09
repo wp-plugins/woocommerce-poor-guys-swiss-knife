@@ -27,7 +27,7 @@ else :
 	add_filter( 'out_of_stock_add_to_cart_text', 'wcpgsk_outofstock_cart_button_text', 10, 1 );
 	add_filter( 'add_to_cart_text', 'wcpgsk_cart_button_text', 10, 1 );
 endif;
-add_action( 'woocommerce_after_checkout_form','wcpgsk_after_checkout_form', 10, 1 );
+add_action( 'woocommerce_after_checkout_form','wcpgsk_after_checkout_form', 10, 2 );
 
 //add_action( 'woocommerce_after_cart_item_quantity_update', 'wcpgsk_after_cart_item_quantity_update', 10, 2 );
 add_filter( 'woocommerce_add_cart_item', 'wcpgsk_add_cart_item', 10, 2 );
@@ -388,12 +388,6 @@ function wcpgsk_check_qty_config( $return, $product ) {
 			if(isset($options['cart']['variableproductnoqty']) && $options['cart']['variableproductnoqty'] == 1)
 				$switch = true;
 			break;
-		/* does not apply
-		case 'grouped' :
-			 if( isset($options['cart']['groupedproductnoqty']) && $options['cart']['groupedproductnoqty'] == 1)
-				$switch = true;
-			break;
-		*/
 		case 'external' :
 			if( isset($options['cart']['externalproductnoqty']) && $options['cart']['externalproductnoqty'] == 1)
 				$switch = true;
@@ -721,7 +715,6 @@ function wcpgsk_after_checkout_form($checkout) {
 		echo '<script language="javascript">';
 
 		echo 'jQuery(document).ready(function(){
-				jQuery("#cartitemfields").tabs();
 				var cT = "' . __('Close', WCPGSK_DOMAIN) . '";
 				var pT = "' . __('<Prev', WCPGSK_DOMAIN) . '";
 				var nT = "' . __('Next>', WCPGSK_DOMAIN) . '";
@@ -787,6 +780,7 @@ function wcpgsk_after_checkout_form($checkout) {
 					if (jQuery(this).attr("datesexcluded")) exDates = jQuery(this).attr("datesexcluded");
 					if (jQuery(this).attr("exweekend")) exWeekend = jQuery(this).attr("exweekend");
 
+					jQuery(this).prop("readonly", "readonly");
 
 					if ( exDays != null && exDays != "" ) exDays = jQuery.map(exDays.split(","), jQuery.trim); 
 					if ( exDates != null && exDates != "" ) exDates = jQuery.map(exDates.split(","), jQuery.trim);
@@ -795,14 +789,6 @@ function wcpgsk_after_checkout_form($checkout) {
 						changeYear: true,
 						yearRange: "-100:+100",
 						 beforeShow: function() {
-						   if ((selDate = jQuery(this).val()).length > 0) 
-						   {
-							  iYear = selDate.substring(selDate.length - 4, selDate.length);
-							  iMonth = jQuery.inArray(selDate.substring(0, selDate.length - 5), 
-									   jQuery(this).datepicker("option", "monthNames"));
-							  jQuery(this).datepicker("option", "defaultDate", new Date(iYear, iMonth, 1));
-							  jQuery(this).datepicker("setDate", new Date(iYear, iMonth, 1));
-						   }
 						},					
 						beforeShowDay: function(date) {
 							show = true;
@@ -839,6 +825,8 @@ function wcpgsk_after_checkout_form($checkout) {
 					var hMin = 0;
 					if (jQuery(this).attr("maxhour")) hMax = parseInt(jQuery(this).attr("maxhour"));
 					if (jQuery(this).attr("minhour")) hMin = parseInt(jQuery(this).attr("minhour"));
+					
+					jQuery(this).prop("readonly", "readonly");
 					
 					jQuery(this).timepicker({
 						timeFormat: "HH:mm",
