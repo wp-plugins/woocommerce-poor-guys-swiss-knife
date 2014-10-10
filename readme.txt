@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization, WooCommerce labels, WooCommerce email recipients, priceable extras, member registration, extras, product extras
 Requires at least: Wordpress 3.1 and WooCommerce 2.0
 Tested up to: 4.0
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,6 +76,10 @@ Cart:
 * Advanced email management to add more email recipients for specific contexts like new order, processing order, out of stock, backorder, etc.
 * Set minimum amount and maximum amount needed or necessary to checkout a cart
 
+= Features available with WooCommerce Extra Guys Swiss Knife (WCEGSK) =
+
+* Priceable product extras which show up on the product page before adding products to cart
+
 Data captured via customized (added) form fields is available within your order administration and will be added in the appropriate sections of the individual orders. What shows up can be configured for each individual custom field. Data captured will be shown to the customer on the order receipt page and in emails.
 
 WooCommerce Poor Guys Swiss Knife has been developed in cooperation with [Nicestay](http://www.nicestay.net) to set up a transfer and shuttle service website related with their short term rental business of apartments in Barcelona.
@@ -91,6 +95,8 @@ The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more to
 * Year and month dropdown selection for calendars
 * Improved min/max/step settings with support for 0 for quantity inputs in all contexts
 * Stylable representation of captured data
+* Priceable product extras with WooCommerce Rich and WooCommerce Extra Guys Swiss Knife
+* Dataset repeater sections with WooCommerce Rich Guys Swiss Knife to capture several datasets (students, party members, etc.) in the context of a product item in the customer cart
 
 = What's on its way? =
 
@@ -163,6 +169,15 @@ You need to upgrade to WooCommerce Rich Guys Swiss Knife to add an additional Sh
 You need to upgrade to WooCommerce Rich Guys Swiss Knife to add personalization forms for individual products and variations.
 This allows you to add conditional, product based input fields on your checkout page.
 
+= Priceable Product Extras =
+ 
+You need to upgrade to WooCommerce Rich Guys Swiss Knife or WooCommerce Extra Guys Swiss Knife to add priceable extra packages to products and variations.
+
+= Repeater Sections and additional users (customer) registration =
+ 
+You need to upgrade to WooCommerce Rich Guys Swiss Knife to use this feature in the context of item personalization during checkout.
+
+
 == Installation ==
 
 = Minimum Requirements =
@@ -199,6 +214,18 @@ More Tools for your WooCommerce Swiss Knife are available with the Rich Guys Swi
 * Color picker support for fields
 * Advanced (conditional) quantity input and backorder management for products and variations
 * Advanced email handling: More than one cc and bcc email; specify contexts in which to use cc and bcc emails
+
+= Priceable product extras =
+
+WooCommerce Extra Guys Swiss Knife for WooCommerce:
+
+* Product extras
+* All field types and file upload, color picker, html inject and terms
+* Customer price
+* Extra quantity input and possibility to bind extra to product quantity
+* Shows up before customers add a product to the cart
+* Optional/Conditional presentation
+* Extras are grouped into extra packages and you can attach as many extra packages to a product or product variation as you want.
 
 == Upgrade Notice ==
 
@@ -258,13 +285,22 @@ Not at all. Labels, fields, everything you configure are available for translati
 
 = I've configured a number for the items to be displayed on the shop page, but it doesn't work. What's wrong? =
 Plugins like Jetpack preconfigure the main query in the context of "infinite scroll" function for example. That's not a bug, your template should display your products using "infinite scroll".
+
 == Screenshots ==
 
 1. Settings Page WooCommerce Poor Guys Swiss Knife.
-2. WooCommerce Rich Guys Swiss Knife (Due date 2013/12/20)
-3. Example form using WooCommerce Poor Guys Swiss Knife and WooCommerce Rich Guys Swiss Knife
+2. WooCommerce Poor Guys Swiss Knife checkout page example.
+3. Settings page with WooCommerce Rich Guys Swiss Knife enabled
+4. WooCommerce Rich Guys Swiss Knife checkout example
+5. WooCommerce Extra and Rich Guys Swiss Knife product extras configuration
+6. Product with Product Extras presentation
  
 == Changelog ==
+
+= 2.0.1 =
+
+* Bugfix: Include css file that was not commited correctly in the last update
+* Bugfix: Fix problem for quantity management and Add to cart when is_sold_individually is true
 
 = 2.0.0 =
 
@@ -486,6 +522,7 @@ Development start
 == Links ==
 * [TakeBarcelona](http://takebarcelona.com): the home of "Tessa Authorship" and more plugins and themes.
 * [WooCommerce Poor Guys Swiss Knife](http://takebarcelona.com/woocommerce-poor-guys-swiss-knife/): Home of this plugin.
+* [WooCommerce Extra Guys Swiss Knife](http://takebarcelona.com/woocommerce-extra-guys-swiss-knife/): The sandwich brother of this plugin. It offers you priceable product extras
 * [WooCommerce Rich Guys Swiss Knife](http://takebarcelona.com/woocommerce-rich-guys-swiss-knife/): The big brother of this plugin. Most of you will have enough with the little one...
 * [Tessa Authorship](http://takebarcelona.com/tessa-authorship/): A tool to reflect WordPress user independent authorship information, biographies.
 * [Tessa Theme](http://takebarcelona.com/tessa-theme/): Tessa maximizes content and scales gracefully from mobile devices to desktop fullscreen. Tessa is ideal for photography, art and design presentation. "Tessa" has builtin WooCommerce Support and plays nicely with WPML as well.

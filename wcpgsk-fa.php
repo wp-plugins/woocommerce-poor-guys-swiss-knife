@@ -48,7 +48,8 @@ function woocommerce_quantity_input( $args = array(), $product = null, $echo = t
 		unset( $args['max_value'] );
 	endif;
 	$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
-
+	
+	
 	if ( isset($options['cart']['minmaxstepproduct']) && $options['cart']['minmaxstepproduct'] == 1 && isset($selectqty) && $selectqty == 'yes' ) :
 	
 		$minqty = get_post_meta($product_id, '_wcpgsk_minqty', true);

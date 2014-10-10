@@ -405,17 +405,21 @@ if ( !function_exists('wcpgsk_qtyselector_max') ) {
 function wcpgsk_qtyselector_max( $whatever, $product ) {
 	global $wcpgsk_session;
 	$options = get_option( 'wcpgsk_settings' );	
-	$maxqty = isset($options['cart']['maxqty_' . $product->product_type]) && $options['cart']['maxqty_' . $product->product_type] != 0 ? $options['cart']['maxqty_' . $product->product_type] : '';	
-	if ( isset($options['cart']['minmaxstepproduct']) && $options['cart']['minmaxstepproduct'] == 1 ) :
-		$product_id = $product->post->ID;		
-		$maxval = get_post_meta($product_id, '_wcpgsk_maxqty', true);
-		if ( isset($maxval) && $maxval > 0 ) :
-			$maxqty = $maxval;
+	if ( $product->is_sold_individually() ) :
+		$maxqty = 1;
+	else :
+		$maxqty = isset($options['cart']['maxqty_' . $product->product_type]) && $options['cart']['maxqty_' . $product->product_type] != 0 ? $options['cart']['maxqty_' . $product->product_type] : '';	
+		if ( isset($options['cart']['minmaxstepproduct']) && $options['cart']['minmaxstepproduct'] == 1 ) :
+			$product_id = $product->post->ID;		
+			$maxval = get_post_meta($product_id, '_wcpgsk_maxqty', true);
+			if ( isset($maxval) && $maxval > 0 ) :
+				$maxqty = $maxval;
+			endif;
 		endif;
+		if ($maxqty == '' && isset($wcpgsk_session->qtyargs['max_value']) ) {
+			$maxqty = $wcpgsk_session->qtyargs['max_value'];
+		}
 	endif;
-	if ($maxqty == '' && isset($wcpgsk_session->qtyargs['max_value']) ) {
-		$maxqty = $wcpgsk_session->qtyargs['max_value'];
-	}
 	return $maxqty;
 }
 }
@@ -424,17 +428,21 @@ if ( !function_exists('wcpgsk_qtyselector_min') ) {
 function wcpgsk_qtyselector_min( $whatever, $product ) {
 	global $wcpgsk_session;
 	$options = get_option( 'wcpgsk_settings' );
-	$minqty = isset($options['cart']['minqty_' . $product->product_type]) && $options['cart']['minqty_' . $product->product_type] != 0 ? $options['cart']['minqty_' . $product->product_type] : 0;
-	if ( isset($options['cart']['minmaxstepproduct']) && $options['cart']['minmaxstepproduct'] == 1 ) :
-		$product_id = $product->post->ID;		
-		$minval = get_post_meta($product_id, '_wcpgsk_minqty', true);
-		if ( isset($minval) && $minval > 0 ) :
-			$minqty = $minval;
+	if ( $product->is_sold_individually() ) :
+		$minqty = 1;
+	else :
+		$minqty = isset($options['cart']['minqty_' . $product->product_type]) && $options['cart']['minqty_' . $product->product_type] != 0 ? $options['cart']['minqty_' . $product->product_type] : 0;
+		if ( isset($options['cart']['minmaxstepproduct']) && $options['cart']['minmaxstepproduct'] == 1 ) :
+			$product_id = $product->post->ID;		
+			$minval = get_post_meta($product_id, '_wcpgsk_minqty', true);
+			if ( isset($minval) && $minval > 0 ) :
+				$minqty = $minval;
+			endif;
 		endif;
+		if ($minqty == '' && isset($wcpgsk_session->qtyargs['min_value']) ) {
+			$minqty = $wcpgsk_session->qtyargs['min_value'];
+		}
 	endif;
-	if ($minqty == '' && isset($wcpgsk_session->qtyargs['min_value']) ) {
-		$minqty = $wcpgsk_session->qtyargs['min_value'];
-	}
 	return $minqty;
 }
 }
@@ -443,13 +451,16 @@ if ( !function_exists('wcpgsk_quantity_input_step') ) {
 function wcpgsk_quantity_input_step( $whatever, $product ) {
 	global $wcpgsk_session;
 	$options = get_option( 'wcpgsk_settings' );
-	
-	$stepqty = isset($options['cart']['stepqty_' . $product->product_type]) && $options['cart']['stepqty_' . $product->product_type] != 0 ? $options['cart']['stepqty_' . $product->product_type] : 1;
-	if ( isset($options['cart']['minmaxstepproduct']) && $options['cart']['minmaxstepproduct'] == 1 ) :
-		$product_id = $product->post->ID;		
-		$stepval = get_post_meta($product_id, '_wcpgsk_stepqty', true);
-		if ( isset($stepval) && $stepval > 0 ) :
-			$stepqty = $stepval;
+	if ( $product->is_sold_individually() ) :
+		$stepqty = 1;
+	else :		
+		$stepqty = isset($options['cart']['stepqty_' . $product->product_type]) && $options['cart']['stepqty_' . $product->product_type] != 0 ? $options['cart']['stepqty_' . $product->product_type] : 1;
+		if ( isset($options['cart']['minmaxstepproduct']) && $options['cart']['minmaxstepproduct'] == 1 ) :
+			$product_id = $product->post->ID;		
+			$stepval = get_post_meta($product_id, '_wcpgsk_stepqty', true);
+			if ( isset($stepval) && $stepval > 0 ) :
+				$stepqty = $stepval;
+			endif;
 		endif;
 	endif;
 	return $stepqty;
