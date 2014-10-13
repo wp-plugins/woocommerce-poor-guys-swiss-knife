@@ -12,6 +12,7 @@ jQuery(document).ready(function(){
 		collapsible: true,
 		active: false,
 	});
+	
 });
 /*
 var icons = {
