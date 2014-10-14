@@ -300,7 +300,7 @@ Plugins like Jetpack preconfigure the main query in the context of "infinite scr
 = 2.0.2 =
 
 * Compatibility: Make some filter functions saver to avoid errors with other third party plugins
-* Revision: Number customer field handling 
+* Revision: More consistent behavior for custom number fields
 
 = 2.0.1 =
 
