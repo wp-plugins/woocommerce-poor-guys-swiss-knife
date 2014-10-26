@@ -1,10 +1,10 @@
 === WooCommerce Poor Guys Swiss Knife ===
 Contributors: ulih
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KJ4K2X953H8CC
-Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization, WooCommerce labels, WooCommerce email recipients, priceable extras, member registration, extras, product extras
+Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization, WooCommerce labels, WooCommerce email recipients, priceable extras, member registration, extras, product extras, price labels, custom price labels
 Requires at least: Wordpress 3.1 and WooCommerce 2.0
 Tested up to: 4.0
-Stable tag: 2.0.2
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,8 @@ General:
 * Set labels for shop buttons (Add to Cart, Read more, On Sale, Select options, tax, etc.) 
 * Manage available payment gateways on a per product basis with intelligent filter to show the most restrictive combination when a customer has more than one product in his cart
 * Add one cc and one bcc email to all emails send by WooCommerce
+* Price labels including labels for free price and free sales price on a per product basis
+* Extend all price labels appending or prefixing your text on a per product basis
 
 Cart:
 
@@ -88,6 +90,7 @@ The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more to
 
 = What's new? =
 
+* Manage price labels on per product basis
 * WooCommerce 2.2 compatibility	
 * input pattern attribute support with fallback for Safari browser	
 * Add one CC and/or BCC email recipient to all WooCommerce emails
@@ -296,6 +299,13 @@ Plugins like Jetpack preconfigure the main query in the context of "infinite scr
 6. Product with Product Extras presentation
  
 == Changelog ==
+
+= 2.1.0 =
+
+* Bugfix: A required email validator caused an error when editing the billing address on the "My Account" page
+* Enhancement: Override "On Sale" label on per product basis
+* Enhancement: Extend product price on per product basis
+* Enhancement: Set free labels (for regular price and on sale price) on per product basis
 
 = 2.0.2 =
 

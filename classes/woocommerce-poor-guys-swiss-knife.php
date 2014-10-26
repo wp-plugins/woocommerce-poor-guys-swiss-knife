@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * WooCommercePoorGuysSwissKnife Main Class
  *
  * @class 		WCPGSK_Main
- * @version		1.3
+ * @version		1.4
  * @package		WooCommerce-Poor-Guys-Swiss-Knife/Classes
  * @category	Class
  * @author 		Uli Hake
@@ -44,6 +44,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				add_action( 'admin_menu', array($this, 'wcpgsk_admin_menu') );				
 				$wcpgsk_about = new WCPGSK_About( $this->file );
 				//add_action( 'add_meta_boxes', array($this, 'wcpgsk_add_meta_box_minmaxstep'), 10 );
+				add_action('woocommerce_product_options_general_product_data', array( $this, 'wcpgsk_set_price_html' ), 99 );
+				
 				add_action( 'woocommerce_product_write_panel_tabs', array( $this, 'wcpgsk_product_write_panel_tab' ), 99 );
 				add_action( 'woocommerce_product_write_panels',     array( $this, 'wcpgsk_product_write_panels' ), 99 );
 				add_action( 'woocommerce_process_product_meta', array( $this, 'wcpgsk_process_product_meta' ), 99);
@@ -107,6 +109,12 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			
 			add_action( 'woocommerce_init', array( $this, 'wcpgsk_empty_cart' ), PHP_INT_MAX );
 			add_action( 'woocommerce_checkout_update_order_meta', array( $this, 'wcpgsk_checkout_update_order_meta' ), 10, 2 );
+			
+			add_filter('woocommerce_get_price_html', array( $this, 'wcpgsk_get_price_html' ), 10, 2 );
+			add_filter('woocommerce_empty_price_html', array( $this, 'wcpgsk_empty_price_html' ), PHP_INT_MAX, 2);
+			add_filter('woocommerce_free_sale_price_html', array( $this, 'wcpgsk_free_sale_price_html' ), PHP_INT_MAX, 2);
+			add_filter('woocommerce_free_price_html', array( $this, 'wcpgsk_free_price_html' ), PHP_INT_MAX, 2);
+			
 		}
 
 		/**
@@ -159,7 +167,17 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 * @return string
 		 */
 		public function wcpgsk_sale_flash( $flash, $post, $product ) {
-			$options = get_option( 'wcpgsk_settings' );
+			$options = get_option( 'wcpgsk_settings' );					
+			//$lp = get_product( $product->post->ID );
+			if ( $product->get_price() === '' || $product->get_price() == 0 ) :
+				return '';
+			endif;			
+			$product_id = $product->post->ID;
+			$onsale_label = get_post_meta($product_id, '_wcpgsk_onsale_html', true);
+			if ( isset( $onsale_label ) && !empty( $onsale_label ) ) :
+				return '<span class="onsale">' . __( $onsale_label, WCPGSK_DOMAIN ) . '</span>';
+			endif;
+			
 			if ( isset( $options['process']['onsalelabel'] ) && !empty( $options['process']['onsalelabel'] ) ) :
 				$flash = '<span class="onsale">' . __( $options['process']['onsalelabel'], WCPGSK_DOMAIN ) . '</span>';
 			endif;
@@ -254,6 +272,119 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		<?php
 		}
 
+		
+		/**
+		 * Add extended amount information
+		 *
+		 * @since 2.1.0
+		 *
+		 * @access public
+		 * @output fields
+		 */
+		public function wcpgsk_set_price_html() {
+			woocommerce_wp_text_input(array('id' => '_wcpgsk_extend_price', 'label' => __('Specify extended price data', WCPGSK_DOMAIN) ));
+			$placements = array( 
+				'after' => __( 'After price', WCPGSK_DOMAIN ),
+				'before' => __( 'Before price', WCPGSK_DOMAIN ),
+				'newline' => __( 'On newline', WCPGSK_DOMAIN ),
+			);
+			woocommerce_wp_select(array('id' => '_wcpgsk_extend_price_placement', 'label' => __('Select placement of extended price data', WCPGSK_DOMAIN), 'options' => $placements ));
+			woocommerce_wp_text_input(array('id' => '_wcpgsk_onsale_html', 'label' => __('Specify on sale label', WCPGSK_DOMAIN) ));
+			woocommerce_wp_text_input(array('id' => '_wcpgsk_empty_price_html', 'label' => __('Specify empty price label', WCPGSK_DOMAIN) ));
+			woocommerce_wp_text_input(array('id' => '_wcpgsk_free_price_html', 'label' => __('Specify free price label', WCPGSK_DOMAIN) ));
+			woocommerce_wp_text_input(array('id' => '_wcpgsk_free_sale_html', 'label' => __('Specify free sales label', WCPGSK_DOMAIN) ));
+		}
+		
+		/**
+		 * Display extended price information
+		 *
+		 * @since 2.1.0
+		 *
+		 * @access public
+		 * @param string $price
+		 * @param mixed $product
+		 * @return string $price extended
+		 */
+		public function wcpgsk_get_price_html($price, $product) {
+			$product_id = $product->post->ID;
+			$extend_price_data = get_post_meta($product_id, '_wcpgsk_extend_price', true);
+			if ( isset( $extend_price_data ) && !empty( $extend_price_data ) ) :
+				$extend_price_placement = get_post_meta($product_id, '_wcpgsk_extend_price_placement', true);
+				switch ( $extend_price_placement ) :
+					case "before" :
+						$price = '<span class="wcpgsk-extend-price-data">' . __( $extend_price_data, WCPGSK_DOMAIN ) . '</span> ' . $price;
+					break;
+					case "newline" :
+						$price = $price . '<div class="wcpgsk-extend-price-data">' . __( $extend_price_data, WCPGSK_DOMAIN ) . '</div>';
+					break;
+					default :
+						$price = $price . ' <span class="wcpgsk-extend-price-data">' . __( $extend_price_data, WCPGSK_DOMAIN ) . '</span>';						
+					break;
+				endswitch;
+			endif;
+
+			return $price;
+		}
+
+		/**
+		 * Display empty price label if defined as label or for product
+		 *
+		 * @since 2.1.0
+		 *
+		 * @access public
+		 * @param string $empty
+		 * @param mixed $product
+		 * @return string $price label for empty
+		 */
+		public function wcpgsk_empty_price_html( $empty, $product ) {
+			$options = get_option( 'wcpgsk_settings' );		
+			$product_id = $product->post->ID;
+			$g_empty_price = isset( $options['process']['empty_price_html'] ) && !empty( $options['process']['empty_price_html'] ) ? $options['process']['empty_price_html'] : '';
+			$p_empty_price = get_post_meta($product_id, '_wcpgsk_empty_price_html', true);
+			if ( isset( $p_empty_price ) && !empty( $p_empty_price ) ) :
+				return $p_empty_price;
+			endif;
+			return $g_empty_price;
+		}
+
+		/**
+		 * Display free sales price label if defined for a product
+		 *
+		 * @since 2.1.0
+		 *
+		 * @access public
+		 * @param string $empty
+		 * @param mixed $product
+		 * @return string $price label for empty
+		 */
+		public function wcpgsk_free_sale_price_html( $price, $product ) {
+			$product_id = $product->post->ID;
+			$free_sales_label = get_post_meta($product_id, '_wcpgsk_free_sale_html', true);
+			if ( isset( $free_sales_label ) && !empty( $free_sales_label ) ) :
+				$price = str_replace( __( 'Free!', 'woocommerce' ), __( $free_sales_label, WCPGSK_DOMAIN ), $price );
+			endif;
+			return $price;
+		}
+
+		/**
+		 * Display free price label if defined for a product
+		 *
+		 * @since 2.1.0
+		 *
+		 * @access public
+		 * @param string $empty
+		 * @param mixed $product
+		 * @return string $price label for empty
+		 */
+		public function wcpgsk_free_price_html( $price, $product ) {
+			$product_id = $product->post->ID;
+			$free_price_label = get_post_meta($product_id, '_wcpgsk_free_price_html', true);
+			if ( isset( $free_price_label ) && !empty( $free_price_label ) ) :
+				$price = __( $free_price_label, WCPGSK_DOMAIN );
+			endif;
+			return $price;
+		}
+		
 		/**
 		 * Label configuration settings
 		 *
@@ -466,6 +597,15 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							<span class="description"><?php _e('Define the order received thank you message.', WCPGSK_DOMAIN); ?></span>
 						</td>
 					</tr>
+					<tr>
+						<td><?php _e('Define empty price label', WCPGSK_DOMAIN); ?>:</td>
+						<td>
+							<input name="wcpgsk_settings[process][empty_price_html]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['process']['empty_price_html'])) echo esc_attr( $options['process']['empty_price_html'] ); ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define a empty price label.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
 					<?php do_action( 'wcpgsk_settings_labels_after', $options ); ?>					
 				</tbody>
 				</table>
@@ -496,7 +636,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 * Run available WooCommerce filters
 		 *
 		 * @since 1.9.2
-		 * @changed 1.9.83
+		 * @changed 2.1.0
 		 * @return configured string value
 		 */
 		public function wcpgsk_apply_woocommerce_filter( $filterval, $param2 = null ) {
@@ -847,6 +987,34 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				update_post_meta( $post_id, '_wcpgsk_maxqty', $maxqty );
 				update_post_meta( $post_id, '_wcpgsk_stepqty', $stepqty );
 			endif;
+			if ( isset( $_POST['_wcpgsk_extend_price'] ) && $_POST['_wcpgsk_extend_price'] ) :
+				update_post_meta( $post_id, '_wcpgsk_extend_price', wp_kses_post( $_POST['_wcpgsk_extend_price'] ) );
+				update_post_meta( $post_id, '_wcpgsk_extend_price_placement', $_POST['_wcpgsk_extend_price_placement'] );			
+			else :
+				update_post_meta( $post_id, '_wcpgsk_extend_price', '' );
+				update_post_meta( $post_id, '_wcpgsk_extend_price_placement', 'after' );				
+			endif;
+			if ( isset( $_POST['_wcpgsk_empty_price_html'] ) && $_POST['_wcpgsk_empty_price_html'] ) :
+				update_post_meta( $post_id, '_wcpgsk_empty_price_html', wp_kses_post( $_POST['_wcpgsk_empty_price_html'] ) );			
+			else :
+				update_post_meta( $post_id, '_wcpgsk_empty_price_html', '' );			
+			endif;
+			if ( isset( $_POST['_wcpgsk_free_sale_html'] ) && $_POST['_wcpgsk_free_sale_html'] ) :
+				update_post_meta( $post_id, '_wcpgsk_free_sale_html', wp_kses_post( $_POST['_wcpgsk_free_sale_html'] ) );			
+			else :
+				update_post_meta( $post_id, '_wcpgsk_free_sale_html', '' );			
+			endif;
+			if ( isset( $_POST['_wcpgsk_free_price_html'] ) && $_POST['_wcpgsk_free_price_html'] ) :
+				update_post_meta( $post_id, '_wcpgsk_free_price_html', wp_kses_post( $_POST['_wcpgsk_free_price_html'] ) );			
+			else :
+				update_post_meta( $post_id, '_wcpgsk_free_price_html', '' );			
+			endif;
+			if ( isset( $_POST['_wcpgsk_onsale_html'] ) && $_POST['_wcpgsk_onsale_html'] ) :
+				update_post_meta( $post_id, '_wcpgsk_onsale_html', wp_kses_post( $_POST['_wcpgsk_onsale_html'] ) );			
+			else :
+				update_post_meta( $post_id, '_wcpgsk_onsale_html', '' );			
+			endif;
+			
 		}
 
 		/**
@@ -1188,7 +1356,6 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				//echo "<h1>mumpits</h1>";
 			}
 			do_action( 'wcpgsk_settings_update', $options );
-			
 			// Now display the settings editing screen
 			//get some reused labels
 			 
@@ -2378,10 +2545,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					$address[$key]['label'] = '';
 					$address[$key]['required'] = false;
 
-				elseif ( $key == 'billing_email_validator' ) :
-					$address[$key]['custom_attributes'] = array('style' => 'display:none');
-					$address[$key]['label'] = '';
-					$address[$key]['required'] = false;
+				//elseif ( $key == 'billing_email_validator' ) :
+					//$address[$key]['custom_attributes'] = array('style' => 'display:none');
+					//$address[$key]['label'] = '';
+					//$address[$key]['required'] = false;
 				else :
 					
 					$is_billing = strpos($key, 'billing_');
@@ -4145,7 +4312,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						'paymentgateways' => 0,
 						'onsalelabel' => 'Sale!',
 						'emptycartlabel' => 'Empty cart?',
-						'confirmemptycart' => 'Yes, empty cart'),
+						'confirmemptycart' => 'Yes, empty cart',
+						'empty_price_html' => ''),
 					'email' => array(
 						'wc_cc_email' => '',
 						'wc_bcc_email' => ''),
