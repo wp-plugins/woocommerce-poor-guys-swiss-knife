@@ -542,6 +542,7 @@ Development start
 * [WooCommerce Rich Guys Swiss Knife](http://takebarcelona.com/woocommerce-rich-guys-swiss-knife/): The big brother of this plugin. Most of you will have enough with the little one...
 * [Tessa Authorship](http://takebarcelona.com/tessa-authorship/): A tool to reflect WordPress user independent authorship information, biographies.
 * [Tessa Theme](http://takebarcelona.com/tessa-theme/): Tessa maximizes content and scales gracefully from mobile devices to desktop fullscreen. Tessa is ideal for photography, art and design presentation. "Tessa" has builtin WooCommerce Support and plays nicely with WPML as well.
+* [Tessa Powerpack](http://www.takebarcelona.com/tessa_powerpack/): A Jetpack by Wordpress.com fork which does not rely on wordpress.com. Continues the discontinued SlimJetpack plugin.
 * [Nicestay](http://www.nicestay.net): Sponsor website that offers short term rentals of apartments for holidays and business in Barcelona, Madrid, Catalonia and the rest of Spain. 
 
 == Updates ==
