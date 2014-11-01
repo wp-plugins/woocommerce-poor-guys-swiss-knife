@@ -536,6 +536,7 @@ Development start
 
 == Links ==
 * [TakeBarcelona](http://takebarcelona.com): the home of "Tessa Authorship" and more plugins and themes.
+* [Stripe for Easy Digital Downloads](http://www.takebarcelona.com/downloads/stripe-for-easy-digital-downloads/): A simple, yet versatile Stripe payment gateway for Easy Digital Downloads
 * [WooCommerce Poor Guys Swiss Knife](http://takebarcelona.com/woocommerce-poor-guys-swiss-knife/): Home of this plugin.
 * [WooCommerce Extra Guys Swiss Knife](http://takebarcelona.com/woocommerce-extra-guys-swiss-knife/): The sandwich brother of this plugin. It offers you priceable product extras
 * [WooCommerce Rich Guys Swiss Knife](http://takebarcelona.com/woocommerce-rich-guys-swiss-knife/): The big brother of this plugin. Most of you will have enough with the little one...
