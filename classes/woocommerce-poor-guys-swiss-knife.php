@@ -683,7 +683,12 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						endif;
 						
 					break;
-					
+					case "woocommerce_product_description_heading" :
+						$filterval = __($configval, WCPGSK_DOMAIN);
+					break;
+					case "woocommerce_product_additional_information_heading" :
+						$filterval = __($configval, WCPGSK_DOMAIN);
+					break;
 					default :
 						//make translatable
 						if ( !empty( $configval ) ) :
@@ -2483,7 +2488,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 
 			
 			//@todo:could be a string, but not vital
-			if (empty($input['checkoutform']['mindate']) || !ctype_digit($input['checkoutform']['mindate'])) $input['checkoutform']['mindate'] = 2;
+			if (empty($input['checkoutform']['mindate']) || !ctype_digit($input['checkoutform']['mindate'])) $input['checkoutform']['mindate'] = 0;
 			if (empty($input['checkoutform']['maxdate']) || !ctype_digit($input['checkoutform']['maxdate'])) $input['checkoutform']['maxdate'] = 365;
 			
 			$checkout_fields = $woocommerce->countries->get_address_fields( $woocommerce->countries->get_base_country(), 'billing_' );
