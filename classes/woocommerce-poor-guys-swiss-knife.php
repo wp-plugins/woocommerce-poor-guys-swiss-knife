@@ -111,10 +111,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			add_action( 'woocommerce_checkout_update_order_meta', array( $this, 'wcpgsk_checkout_update_order_meta' ), 10, 2 );
 			
 			add_filter('woocommerce_get_price_html', array( $this, 'wcpgsk_get_price_html' ), 10, 2 );
-			add_filter('woocommerce_empty_price_html', array( $this, 'wcpgsk_empty_price_html' ), PHP_INT_MAX, 2);
-			add_filter('woocommerce_free_sale_price_html', array( $this, 'wcpgsk_free_sale_price_html' ), PHP_INT_MAX, 2);
-			add_filter('woocommerce_free_price_html', array( $this, 'wcpgsk_free_price_html' ), PHP_INT_MAX, 2);
-			
+			add_filter('woocommerce_empty_price_html', array( $this, 'wcpgsk_empty_price_html' ), PHP_INT_MAX, 2 );
+			add_filter('woocommerce_free_sale_price_html', array( $this, 'wcpgsk_free_sale_price_html' ), PHP_INT_MAX, 2 );
+			add_filter('woocommerce_free_price_html', array( $this, 'wcpgsk_free_price_html' ), PHP_INT_MAX, 2 );
+			add_filter('woocommerce_after_my_account', array( $this, 'wcpgsk_after_my_account' ), 10 );
 		}
 
 		/**
@@ -322,6 +322,11 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					break;
 				endswitch;
 			endif;
+			$hdl_backorder = $product->get_availability();
+			$options = get_option( 'wcpgsk_settings' );					
+			if ( $hdl_backorder['class'] == 'available-on-backorder' && isset( $options['process']['backorderlabel'] ) && !empty( $options['process']['backorderlabel'] ) ) :
+				$price = $price . '<div class="wcpgsk-extend-price-data">' . __( $options['process']['backorderlabel'], WCPGSK_DOMAIN ) . '</div>';
+			endif;
 
 			return $price;
 		}
@@ -414,6 +419,15 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						</td>
 						<td>
 							<span class="description"><?php _e('Define the on sale label. (You may need to adapt css!)', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
+						<td width="25%"><?php _e( 'Backorder Label', WCPGSK_DOMAIN ); ?></td>
+						<td>
+							<input name="wcpgsk_settings[process][backorderlabel]" type="text" id="wcpgsk_backorderlabel" value="<?php echo $options['process']['backorderlabel'] ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define the backorder label. (You may need to adapt css!)', WCPGSK_DOMAIN); ?></span>
 						</td>
 					</tr>
 					<tr>
@@ -1284,6 +1298,79 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			<?php
 		}
 		
+		/**
+		 * Display billing and shipping custom fields for user meta on my-account page.
+		 *
+		 * @access public
+		 * @since 2.1.2
+		 * @output html
+		 */		
+		public function wcpgsk_after_my_account() {
+			$options = get_option( 'wcpgsk_settings' );
+			$billing_fields = $this->wcpgsk_additional_data_user('billing');
+			$shipping_fields = $this->wcpgsk_additional_data_user('shipping');
+			$col = 1;
+			
+			if ( get_option( 'woocommerce_ship_to_billing_address_only' ) == 'no' && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) echo '<div class="col2-set addresses">';			
+			?>
+				<div class="col-<?php echo ( ( $col = $col * -1 ) < 0 ) ? 1 : 2; ?> address billing_data">
+		
+				<?php 
+				if ( isset($billing_fields) && !empty($billing_fields) ) : 
+				?>
+
+					<?php if ( !empty($options['checkoutform']['morebillingtitle']) ) : ?>
+					<h3><?php _e( $options['checkoutform']['morebillingtitle'], 'woocommerce' ); ?></h3>
+					<?php endif; ?>
+
+					<dl>
+					<?php 
+						//$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
+						//if ( isset($billing_fields) && !empty($billing_fields) ) :
+						foreach ($billing_fields as $key => $field) :
+							$key_type = "billing_" . $key;
+							$label = !empty($field['label']) ? $field['label'] . ": " : "";
+							if ( is_array( $field['captured'] ) ) :
+								echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( implode( '<br />', $field['captured'] ) ) ) . '</dd>';
+							else :
+								echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( $field['captured'] ) ) . '</dd>';
+							endif;
+						endforeach;
+						//endif;
+					?>
+					</dl>
+				</div>
+				<?php 
+				endif;
+				if ( get_option( 'woocommerce_ship_to_billing_address_only' ) == 'no' && isset($shipping_fields) && !empty($shipping_fields) ) : 
+				
+				?>
+					<div class="col-<?php echo ( ( $col = $col * -1 ) < 0 ) ? 1 : 2; ?> address shipping_data">
+					<?php if ( !empty($options['checkoutform']['moreshippingtitle']) ) : ?>
+					<h3><?php _e( $options['checkoutform']['moreshippingtitle'], 'woocommerce' ); ?></h3>
+					<?php endif; ?>
+					<dl>
+					<?php 
+						foreach ($shipping_fields as $key => $field) :
+							$key_type = "shipping_" . $key;
+							$label = !empty($field['label']) ? $field['label'] . ": " : "";
+							if ( is_array( $field['captured'] ) ) :
+								echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( implode( '<br />', $field['captured'] ) ) ) . '</dd>';
+							else :
+								echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( $field['captured'] ) ) . '</dd>';
+							endif;
+						endforeach;
+					?>
+					</dl>
+
+					</div>
+
+				<?php endif; ?>
+
+			<?php
+			if ( get_option( 'woocommerce_ship_to_billing_address_only' ) == 'no' && get_option( 'woocommerce_calc_shipping' ) !== 'no' ) echo '</div>';
+			
+		}
 		
 		/**
 		 * Update our order billing address.
@@ -1311,6 +1398,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			foreach ($checkout_fields as $key => $field) : 
 				//$fieldLabel = $field['displaylabel'];
 				$fieldkey = str_replace('billing_', '', $key);
+				$fieldkey = str_replace('shipping_', '', $key);
+				
 				if ($key != 'billing_email_validator' && $field['hideorder'] == 0 && $key != 'billing_phone' && $key != 'billing_email' && !$field['hideorder'] ) :
 					if ( isset($options['woofields'][$fortype][$key]['custom_' . $key]) && $options['woofields'][$fortype][$key]['custom_' . $key]) :
 						$configField['label'] = isset($checkout_fields[$key]['label']) && !empty($checkout_fields[$key]['label']) ? __($checkout_fields[$key]['label'], WCPGSK_DOMAIN) : "";
@@ -1329,6 +1418,51 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			return $captured_fields;	
 		}
 
+		/**
+		 * Get user meta data for billing or shipping.
+		 *
+		 * @access public
+		 * @since 2.1.2
+		 * @output Settings page
+		 */		
+		public function wcpgsk_additional_data_user($fortype) {
+			global $woocommerce;
+			$customer_id = get_current_user_id();
+			$options = get_option( 'wcpgsk_settings' );
+			$captured_fields = array();
+			$field_order = 1;	
+			$checkout_fields = $woocommerce->countries->get_address_fields( $woocommerce->countries->get_base_country(), $fortype . '_' );
+			foreach ($checkout_fields as $key => $field) :
+				$checkout_fields[$key]['order'] = ((!empty($options['woofields']['order_' . $key]) && ctype_digit($options['woofields']['order_' . $key])) ? $options['woofields']['order_' . $key] : $field_order);
+				$checkout_fields[$key]['required'] = ((isset($options['woofields']['required_' . $key])) ? $options['woofields']['required_' . $key] : $checkout_fields[$key]['required']);
+				$checkout_fields[$key]['hideorder'] = ((isset($options['woofields']['hideorder_' . $key])) ? $options['woofields']['hideorder_' . $key] : 0);
+				if (!isset($configField['label'])) $configField['label'] = __($checkout_fields[$key]['label'], WCPGSK_DOMAIN);				
+				$field_order++;
+			endforeach;
+
+			uasort($checkout_fields, array($this, "compareFieldOrder"));						
+
+			foreach ($checkout_fields as $key => $field) : 
+				//$fieldLabel = $field['displaylabel'];
+				$fieldkey = str_replace('billing_', '', $key);
+				$fieldkey = str_replace('shipping_', '', $key);
+				if ($key != 'billing_email_validator' && $key != 'billing_phone' && $key != 'billing_email' ) :
+					if ( isset($options['woofields'][$fortype][$key]['custom_' . $key]) && $options['woofields'][$fortype][$key]['custom_' . $key]) :
+						$configField['label'] = isset($checkout_fields[$key]['label']) && !empty($checkout_fields[$key]['label']) ? __($checkout_fields[$key]['label'], WCPGSK_DOMAIN) : "";
+						$captured_value = get_user_meta( $customer_id, $key, true );//$order->$key;
+						if ( isset($options['woofields']['settings_' . $key]) ) :
+							$params = $this->explodeParameters($options['woofields']['settings_' . $key]);
+							if ( isset($params) && isset($params['validate']) && !empty($params['validate']) && $params['validate'] == 'password' ) :
+								$captured_value = '*******';
+							endif;
+						endif;
+						$configField['captured'] = $captured_value;
+						$captured_fields[$fieldkey] = $configField;
+					endif;
+				endif;
+			endforeach;
+			return $captured_fields;	
+		}
 				
 		/**
 		 * Our Admin Settings Page.
@@ -1411,6 +1545,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						$options['process']['outofstockbtn'] = isset($options['process']['outofstockbtn']) ? $options['process']['outofstockbtn'] : '';	
 						if ( !isset( $options['process']['onsalelabel'] ) ) :
 							$options['process']['onsalelabel'] = __( 'Sale!', WCPGSK_DOMAIN );
+						endif;
+						if ( !isset( $options['process']['backorderlabel'] ) ) :
+							$options['process']['backorderlabel'] = '';
 						endif;
 						if ( !isset( $options['process']['emptycartlabel'] ) ) :
 							$options['process']['emptycartlabel'] = __( 'Empty cart?', WCPGSK_DOMAIN );
@@ -3444,6 +3581,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			return $fields;
 		}
 				
+		
 		/**
 		 * Process form data supplied via the checkout form.
 		 *
@@ -3563,15 +3701,25 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							endif;
 						endif;
 						if ( $this->ValidateDate($_POST[$key]) ) :
-							if ( isset($params) && isset($params['mindays']) && !empty($params['mindays']) && ctype_digit(strval($params['mindays'])) ) :
+							if ( isset($params) && isset($params['mindays']) && !empty($params['mindays']) && ( ctype_digit( strval( $params['mindays'] ) ) || is_numeric( strval( $params['mindays'] ) ) ) ) :	
 								$forLabel = '';
 								$daydiff = $this->datediffdays($_POST[$key]);
-								if ( $daydiff < $params['mindays'] ) :
-									if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
-										$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+								if ( $params['mindays'] < 0 ) :
+									if ( $daydiff < $params['mindays'] ) :
+										if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
+											$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+										endif;
+										$mindate = date('Y/m/d', strtotime(date("Y-m-d") . ' - ' . ( absint( $params['mindays'] ) - 1 ) . ' days'));
+										wcpgsk_add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be set at least to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $mindate ) . '</strong>');						
+									endif;								
+								else :	
+									if ( $daydiff < $params['mindays'] ) :
+										if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
+											$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+										endif;
+										$mindate = date('Y/m/d', strtotime(date("Y-m-d") . ' + ' . $params['mindays'] . ' days'));
+										wcpgsk_add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be set at least to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $mindate ) . '</strong>');						
 									endif;
-									$mindate = date('Y/m/d', strtotime(date("Y-m-d") . ' + ' . $params['mindays'] . ' days'));
-									wcpgsk_add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be set at least to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $mindate ) . '</strong>');						
 								endif;
 							elseif ( isset($params) && isset($params['mindays']) && !empty($params['mindays']) ) :
 								$forLabel = '';
@@ -3594,15 +3742,25 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								endif;								
 	
 							endif;
-							if ( isset($params) && isset($params['maxdays']) && !empty($params['maxdays']) && ctype_digit(strval($params['maxdays'])) ) :
+							if ( isset($params) && isset($params['maxdays']) && !empty($params['maxdays']) && ( ctype_digit( strval( $params['maxdays'] ) ) || is_numeric( strval( $params['maxdays'] ) ) ) ) :
 								$forLabel = '';
 								$daydiff = $this->datediffdays($_POST[$key]);
-								if ( $daydiff > $params['maxdays'] ) :
-									if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
-										$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+								if ( $params['maxdays'] < 0 ) :
+									if ( $daydiff > $params['maxdays'] ) :
+										if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
+											$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+										endif;
+										$maxdate = date('Y/m/d', strtotime(date("Y-m-d") . ' - ' . ( absint( $params['maxdays'] - 1 ) ) . ' days'));
+										wcpgsk_add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be priorrrr to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $maxdate ) . '</strong>');
+									endif;									
+								else :
+									if ( $daydiff > $params['maxdays'] ) :
+										if ( isset($options['woofields']['label_' . $key]) && !empty($options['woofields']['label_' . $key]) ) :
+											$forLabel = __($options['woofields']['label_' . $key], WCPGSK_DOMAIN);
+										endif;
+										$maxdate = date('Y/m/d', strtotime(date("Y-m-d") . ' + ' . ($params['maxdays'] + 1) . ' days'));
+										wcpgsk_add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be prior to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $maxdate ) . '</strong>');						
 									endif;
-									$maxdate = date('Y/m/d', strtotime(date("Y-m-d") . ' + ' . ($params['maxdays'] + 1) . ' days'));
-									wcpgsk_add_error(  '<strong>' . sprintf(__('Date value for <em style="color:red">%s</em> has to be prior to <em>%s</em>!', WCPGSK_DOMAIN), $forLabel, $maxdate ) . '</strong>');						
 								endif;
 							elseif ( isset($params) && isset($params['maxdays']) && !empty($params['maxdays']) ) :
 								$forLabel = '';
@@ -4316,6 +4474,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						'fastcheckout' => 0,
 						'paymentgateways' => 0,
 						'onsalelabel' => 'Sale!',
+						'backorderlabel' => '',
 						'emptycartlabel' => 'Empty cart?',
 						'confirmemptycart' => 'Yes, empty cart',
 						'empty_price_html' => ''),

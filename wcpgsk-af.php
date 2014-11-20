@@ -49,6 +49,7 @@ function wcpgsk_available_variation($variation_data, $product, $variation) {
 
 function wcpgsk_check_cart_items() {
 	global $woocommerce;
+	wcpgsk_clear_messages();
 	//wcpgsk_clear_messages();
 	$options = get_option( 'wcpgsk_settings' );
 	$qtycnt = 0;
