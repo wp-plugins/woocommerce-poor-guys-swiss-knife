@@ -282,6 +282,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 * @output fields
 		 */
 		public function wcpgsk_set_price_html() {
+			woocommerce_wp_text_input(array('id' => '_wcpgsk_button_label', 'label' => __('Specify button label', WCPGSK_DOMAIN) ));
 			woocommerce_wp_text_input(array('id' => '_wcpgsk_extend_price', 'label' => __('Specify extended price data', WCPGSK_DOMAIN) ));
 			$placements = array( 
 				'after' => __( 'After price', WCPGSK_DOMAIN ),
@@ -612,6 +613,15 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						</td>
 					</tr>
 					<tr>
+						<td><?php _e('Define alternative placeholder image url', WCPGSK_DOMAIN); ?>:</td>
+						<td>
+							<input name="wcpgsk_settings[filters][woocommerce_placeholder_img_src]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['filters']['woocommerce_placeholder_img_src'])) echo esc_attr( $options['filters']['woocommerce_placeholder_img_src'] ); ?>" class="regular-text" />
+						</td>
+						<td>
+							<span class="description"><?php _e('Define alternative placeholder image url.', WCPGSK_DOMAIN); ?></span>
+						</td>
+					</tr>
+					<tr>
 						<td><?php _e('Define empty price label', WCPGSK_DOMAIN); ?>:</td>
 						<td>
 							<input name="wcpgsk_settings[process][empty_price_html]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['process']['empty_price_html'])) echo esc_attr( $options['process']['empty_price_html'] ); ?>" class="regular-text" />
@@ -660,7 +670,13 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			if ( isset( $options['filters'][ $the_filter ] ) ) {
 				$configval = $options['filters'][ $the_filter ];
 				switch ( $the_filter ) :
-					
+					case "woocommerce_create_account_default_checked" :
+						if ( $configval ) :
+							$filterval = true;
+						else :
+							$filterval = false;
+						endif;
+					break;
 					case "loop_shop_per_page" :
 						if ( !empty( $configval ) && is_numeric( $configval ) && intval( $configval ) > 0 ) :
 							$filterval = intval( $configval );
@@ -1006,6 +1022,11 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				update_post_meta( $post_id, '_wcpgsk_maxqty', $maxqty );
 				update_post_meta( $post_id, '_wcpgsk_stepqty', $stepqty );
 			endif;
+			if ( isset( $_POST['_wcpgsk_button_label'] ) && $_POST['_wcpgsk_button_label'] ) :
+				update_post_meta( $post_id, '_wcpgsk_button_label', wp_kses_post( $_POST['_wcpgsk_button_label'] ) );
+			else :
+				update_post_meta( $post_id, '_wcpgsk_button_label', '' );
+			endif;
 			if ( isset( $_POST['_wcpgsk_extend_price'] ) && $_POST['_wcpgsk_extend_price'] ) :
 				update_post_meta( $post_id, '_wcpgsk_extend_price', wp_kses_post( $_POST['_wcpgsk_extend_price'] ) );
 				update_post_meta( $post_id, '_wcpgsk_extend_price_placement', $_POST['_wcpgsk_extend_price_placement'] );			
@@ -1156,71 +1177,73 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 		 * @output html
 		 */		
 		public function wcpgsk_email_after_order_table($order) {
-			global $woocommerce;
-			$options = get_option( 'wcpgsk_settings' );
-			$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
-			$shipping_fields = $this->wcpgsk_additional_data($order, 'shipping');
-			?>
-			<table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0" class="wcpgsk_customer_data">
+			if ( !isset( $order->hidecustomproductemail ) || $order->hidecustomproductemail != 'yes' ) :
+				global $woocommerce;
+				$options = get_option( 'wcpgsk_settings' );
+				$billing_fields = $this->wcpgsk_additional_data($order, 'billing');
+				$shipping_fields = $this->wcpgsk_additional_data($order, 'shipping');
+				?>
+				<table cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top;" border="0" class="wcpgsk_customer_data">
 
-				<tr>
-					<?php 
-					if ( isset($billing_fields) && !empty($billing_fields) ) : 
-					?>
-					<td valign="top" width="50%" class="billing_data">
+					<tr>
+						<?php 
+						if ( isset($billing_fields) && !empty($billing_fields) ) : 
+						?>
+						<td valign="top" width="50%" class="billing_data">
 
-						<?php if ( !empty($options['checkoutform']['morebillingtitle']) ) : ?>
-						<h3><?php _e( $options['checkoutform']['morebillingtitle'], 'woocommerce' ); ?></h3>
+							<?php if ( !empty($options['checkoutform']['morebillingtitle']) ) : ?>
+							<h3><?php _e( $options['checkoutform']['morebillingtitle'], 'woocommerce' ); ?></h3>
+							<?php endif; ?>
+
+							<dl>
+							<?php 
+								foreach ($billing_fields as $key => $field) :
+									$key_type = "billing_" . $key;
+									$label = !empty($field['label']) ? $field['label'] . ": " : "";
+									if ( is_array( $field['captured'] ) ) :
+										echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( implode( '<br />', $field['captured'] ) ) ) . '</dd>';
+									else :
+										echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( $field['captured'] ) ) . '</dd>';
+									endif;
+								endforeach;
+							?>
+							</dl>
+
+						</td>
+
+						<?php 
+						endif;
+						if ( get_option( 'woocommerce_ship_to_billing_address_only' ) == 'no' && isset($shipping_fields) && !empty($shipping_fields) ) : 
+						?>
+
+						<td valign="top" width="50%" class="shipping_data">
+							<?php if ( !empty($options['checkoutform']['moreshippingtitle']) ) : ?>
+							<h3><?php _e( $options['checkoutform']['moreshippingtitle'], 'woocommerce' ); ?></h3>
+							<?php endif; ?>
+
+							<dl>
+							<?php 
+								foreach ($shipping_fields as $key => $field) :
+									$key_type = "shipping_" . $key;
+									$label = !empty($field['label']) ? $field['label'] . ": " : "";
+									if ( is_array( $field['captured'] ) ) :
+										echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( implode( '<br />', $field['captured'] ) ) ) . '</dd>';
+									else :
+										echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( $field['captured'] ) ) . '</dd>';
+									endif;
+								endforeach;
+							?>
+							</dl>
+
+						</td>
+
 						<?php endif; ?>
 
-						<dl>
-						<?php 
-							foreach ($billing_fields as $key => $field) :
-								$key_type = "billing_" . $key;
-								$label = !empty($field['label']) ? $field['label'] . ": " : "";
-								if ( is_array( $field['captured'] ) ) :
-									echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( implode( '<br />', $field['captured'] ) ) ) . '</dd>';
-								else :
-									echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( $field['captured'] ) ) . '</dd>';
-								endif;
-							endforeach;
-						?>
-						</dl>
+					</tr>
 
-					</td>
-
-					<?php 
-					endif;
-					if ( get_option( 'woocommerce_ship_to_billing_address_only' ) == 'no' && isset($shipping_fields) && !empty($shipping_fields) ) : 
-					?>
-
-					<td valign="top" width="50%" class="shipping_data">
-						<?php if ( !empty($options['checkoutform']['moreshippingtitle']) ) : ?>
-						<h3><?php _e( $options['checkoutform']['moreshippingtitle'], 'woocommerce' ); ?></h3>
-						<?php endif; ?>
-
-						<dl>
-						<?php 
-							foreach ($shipping_fields as $key => $field) :
-								$key_type = "shipping_" . $key;
-								$label = !empty($field['label']) ? $field['label'] . ": " : "";
-								if ( is_array( $field['captured'] ) ) :
-									echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( implode( '<br />', $field['captured'] ) ) ) . '</dd>';
-								else :
-									echo '<dt>' . $label . '</dt><dd>' . wp_kses_post( make_clickable( $field['captured'] ) ) . '</dd>';
-								endif;
-							endforeach;
-						?>
-						</dl>
-
-					</td>
-
-					<?php endif; ?>
-
-				</tr>
-
-			</table>
-			<?php
+				</table>
+				<?php
+			endif;
 		}
 		
 		/**
@@ -1555,6 +1578,9 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						if ( !isset( $options['process']['confirmemptycart'] ) ) :
 							$options['process']['confirmemptycart'] = __( 'Yes, empty cart', WCPGSK_DOMAIN );
 						endif;
+						if ( !isset( $options['checkoutform']['cssclass'] ) ) :
+							$options['cssclass']['cssclass'] = '';
+						endif;
 						
 						
 						//add options if necessary
@@ -1564,6 +1590,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								'loop_shop_per_page' => get_option( 'posts_per_page' ),
 								'loop_shop_columns' => '4',
 								'woocommerce_product_thumbnails_columns' => '3',
+								'woocommerce_create_account_default_checked' => 0,
 								'woocommerce_product_description_tab_title' => __('Description', 'woocommerce'),
 								'woocommerce_product_description_heading' => __( 'Product Description', 'woocommerce' ),
 								'woocommerce_product_additional_information_tab_title' => __('Additional Information', 'woocommerce'),
@@ -1581,6 +1608,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								'woocommerce_countries_tax_or_vat' => $this->WC()->countries->tax_or_vat(),
 								'woocommerce_countries_inc_tax_or_vat' => $this->WC()->countries->inc_tax_or_vat(),
 								'woocommerce_countries_ex_tax_or_vat' => $this->WC()->countries->ex_tax_or_vat(),
+								'woocommerce_placeholder_img_src' => '',
 							);
 						endif;
 						
@@ -1627,6 +1655,17 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								</td>
 							</tr>
 							
+							<tr>
+								<td width="25%"><?php _e( 'Default state of create account', WCPGSK_DOMAIN ); ?></td>
+								<td>
+									<input class="checkbox" name="wcpgsk_settings[filters][woocommerce_create_account_default_checked]" id="wcpgsk_create_account" value="0" type="hidden">
+									<input class="checkbox" name="wcpgsk_settings[process][woocommerce_create_account_default_checked]" id="wcpgsk_create_account" value="1" type="checkbox" <?php if ( isset( $options['filters']['woocommerce_create_account_default_checked'] ) && 1 == ($options['filters']['woocommerce_create_account_default_checked'])) echo "checked='checked'"; ?> type="checkbox">
+								</td>
+								<td>
+									<span class="description"><?php _e('Control the default state of the create account checkbox in checkout', WCPGSK_DOMAIN); ?></span>
+								</td>
+								
+							</tr>
 							<tr>
 								<td width="25%"><?php _e( 'Enable Fast Cart', WCPGSK_DOMAIN ); ?></td>
 								<td>
@@ -1864,6 +1903,25 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								</td>
 								<td>
 									<span class="description"><?php _e('For date fields you can specify a maximum offset in number of days.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td><?php _e('Use calendar style time picker', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[checkoutform][caltimepicker]" type="hidden" value="0" />
+									<input name="wcpgsk_settings[checkoutform][caltimepicker]" type="checkbox" value="1" <?php if ( isset( $options['checkoutform']['caltimepicker'] ) && 1 == ($options['checkoutform']['caltimepicker'])) echo "checked='checked'"; ?> />
+								</td>
+								<td>
+									<span class="description"><?php _e('Use alternative presentation for time picker fields.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td><?php _e('Css class', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[checkoutform][cssclass]" type="text" class="wcpgsk_textfield" value="<?php if (!empty($options['checkoutform']['cssclass'])) echo esc_attr( $options['checkoutform']['cssclass'] ); ?>" class="regular-text" />
+								</td>
+								<td>
+									<span class="description"><?php _e('You can add one or more css classes to custom fields. Use space as separator.', WCPGSK_DOMAIN); ?></span>
 								</td>
 							</tr>
 							<tr>
@@ -3842,7 +3900,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				$validate = array();
 				$display = '';
 				$default = '';
-				
+				$class = array( $options['woofields']['class_' . $customkey] );
+				if ( isset( $options['checkoutform']['cssclass'] ) && !empty( $options['checkoutform']['cssclass'] ) ) :
+					$class = array_merge( $class, array_map( "sanitize_html_class", explode( ' ', $options['checkoutform']['cssclass'] ) ) );
+				endif;
 				if (is_array($params) && !empty($params)) {
 					foreach($params as $key => $value) {
 						switch($key) {
@@ -3901,7 +3962,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
 							'required' 			=> (($options['woofields']['required_' . $customkey] == 1) ? true : false),
 							'custom_attributes'	=> $custom_attributes,
-							'class' 			=> array( $options['woofields']['class_' . $customkey] ),
+							'class' 			=> $class,
 							'validate'			=> $validate,
 							'clear'				=> $clear
 						);
@@ -3915,7 +3976,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
 							'required' 			=> (($options['woofields']['required_' . $customkey] == 1) ? true : false),
 							'custom_attributes'	=> $custom_attributes,
-							'class' 			=> array( $options['woofields']['class_' . $customkey] ),
+							'class' 			=> $class,
 							'validate'			=> $validate,
 							'clear'				=> $clear
 						);
@@ -3930,7 +3991,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
 							'custom_attributes'	=> $custom_attributes,
 							'default'			=> $default,
-							'class' 			=> array( $options['woofields']['class_' . $customkey] ),
+							'class' 			=> $class,
 							'validate'			=> $validate,
 							'clear'				=> $clear
 						);
@@ -3944,7 +4005,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
 							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
 							'custom_attributes'	=> $custom_attributes,
-							'class' 			=> array( $options['woofields']['class_' . $customkey] ),
+							'class' 			=> $class,
 							'validate'			=> array('date'),
 							'clear'				=> $clear
 						);
@@ -3959,7 +4020,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
 							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
 							'custom_attributes'	=> $custom_attributes,
-							'class' 			=> array( $options['woofields']['class_' . $customkey] ),
+							'class' 			=> $class,
 							'validate'			=> array('time'),
 							'clear'				=> $clear
 						);
@@ -3974,7 +4035,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
 							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
 							'custom_attributes'	=> $custom_attributes,
-							'class' 			=> array( $options['woofields']['class_' . $customkey] ),
+							'class' 			=> $class,
 							'validate'			=> $validate,
 							'clear'				=> $clear
 						);
@@ -3991,7 +4052,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'options' 			=> $seloptions,
 							'default'			=> $selected,
 							'custom_attributes'	=> $custom_attributes,
-							'class' 			=> array( $options['woofields']['class_' . $customkey] ),
+							'class' 			=> $class,
 							'validate'			=> $validate,
 							'clear'				=> $clear					
 						);
@@ -4004,7 +4065,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
 							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
 							'custom_attributes'	=> $custom_attributes,
-							'class' 			=> array( $options['woofields']['class_' . $customkey] ),
+							'class' 			=> $class,
 							'validate'			=> $validate,
 							'clear'				=> $clear
 						);						
@@ -4075,8 +4136,13 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				//$options['woofields']['label_' . $customkey] = !empty($options['woofields']['label_' . $customkey]) ? $options['woofields']['label_' . $customkey] : '';
 				$options['woofields']['placeholder_' . $customkey] = !empty($options['woofields']['placeholder_' . $customkey]) ? $options['woofields']['placeholder_' . $customkey] : '';
 				$options['woofields']['required_' . $customkey] = isset($options['woofields']['required_' . $customkey]) && $options['woofields']['required_' . $customkey] == 1 ? 1 : 0; 
-				$clone_class = 'form-row-wide';
-				if ($options['woofields']['class_' . $customkey] == 'form-row-first') $clone_class = 'form-row-last';
+				$clone_class = array( 'form-row-wide' );
+				if ($options['woofields']['class_' . $customkey] == 'form-row-first') $clone_class = array( 'form-row-last' );
+				
+				if ( isset( $options['checkoutform']['cssclass'] ) && !empty( $options['checkoutform']['cssclass'] ) ) :
+					$clone_class = array_merge( $clone_class, array_map( "sanitize_html_class", explode( ' ', $options['checkoutform']['cssclass'] ) ) );
+				endif;
+				
 				$clone_label = __('Repeat value', WCPGSK_DOMAIN);
 				
 				switch($type) {
@@ -4088,7 +4154,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
 							'required' 			=> (($options['woofields']['required_' . $customkey] == 1) ? true : false),
 							'custom_attributes'	=> $custom_attributes,
-							'class' 			=> array( $clone_class ),
+							'class' 			=> $clone_class,
 							'validate'			=> $validate,
 							'clear'				=> $clear
 						);
@@ -4101,7 +4167,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
 							'required' 			=> (($options['woofields']['required_' . $customkey] == 1) ? true : false),
 							'custom_attributes'	=> $custom_attributes,
-							'class' 			=> array( $clone_class ),
+							'class' 			=> $clone_class,
 							'validate'			=> $validate,
 							'clear'				=> $clear
 						);
@@ -4116,7 +4182,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
 							'custom_attributes'	=> $custom_attributes,
 							'default'			=> $default,
-							'class' 			=> array( $clone_class ),
+							'class' 			=> $clone_class,
 							'validate'			=> $validate,
 							'clear'				=> $clear
 						);
@@ -4130,7 +4196,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
 							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
 							'custom_attributes'	=> $custom_attributes,
-							'class' 			=> array( $clone_class ),
+							'class' 			=> $clone_class,
 							'validate'			=> array('date'),
 							'clear'				=> $clear
 						);
@@ -4145,7 +4211,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
 							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
 							'custom_attributes'	=> $custom_attributes,
-							'class' 			=> array( $clone_class ),
+							'class' 			=> $clone_class,
 							'validate'			=> array('time'),
 							'clear'				=> $clear
 						);
@@ -4160,7 +4226,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'placeholder' 		=> __( $options['woofields']['placeholder_' . $customkey], WCPGSK_DOMAIN ),
 							'required' 			=> ( ($options['woofields']['required_' . $customkey] == 1) ? true : false),
 							'custom_attributes'	=> $custom_attributes,
-							'class' 			=> array( $clone_class ),
+							'class' 			=> $clone_class,
 							'validate'			=> $validate,
 							'clear'				=> $clear
 						);
@@ -4176,7 +4242,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							'options' 			=> $seloptions,
 							'default'			=> $selected,
 							'custom_attributes'	=> $custom_attributes,
-							'class' 			=> array( $clone_class ),
+							'class' 			=> $clone_class,
 							'validate'			=> $validate,
 							'clear'				=> $clear					
 						);
@@ -4463,8 +4529,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						'billingemailvalidator' => 0,
 						'mindate' => 2,
 						'maxdate' => 450,
+						'caltimepicker' => 0,
 						'enabletooltips' => 1,
-						'enabletimesliders' => 1),
+						'enabletimesliders' => 1,
+						'cssclass' => ''),
 					'variations' => array(
 						'extendattributes' => 1,
 						'sortextendattributes' => 1),
@@ -4565,6 +4633,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			global $wp_scripts;		
 			//first check that woo exists to prevent fatal errors
 			if ( function_exists( 'is_woocommerce' ) ) :
+				$options = get_option( 'wcpgsk_settings' );
+			
 				//dequeue scripts and styles
 				if ( is_cart() ) :
 					wp_enqueue_script( 'wcpgsk-cart', plugins_url('/assets/js/wcpgsk-cart.js', $this->file) , array('jquery'), '', false);
@@ -4575,10 +4645,14 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					wp_enqueue_script( 'jquery-ui-datepicker' );
 					wp_enqueue_script( 'jquery-ui-slider' );
 					wp_enqueue_script( 'jquery-ui-button' );
-					//wp_enqueue_script( 'jquery-ui-tabs' );
 	
 					wp_enqueue_script( 'jquery-ui-sliderAccess', plugins_url('/assets/js/jquery-ui-sliderAccess.js', $this->file) , '', '', false);
-					wp_enqueue_script( 'jquery-ui-timepicker-addon', plugins_url('/assets/js/jquery-ui-timepicker-addon.js', $this->file) , array('jquery'), '', true);
+					if ( isset( $options['checkoutform']['caltimepicker'] ) && 1 == $options['checkoutform']['caltimepicker'] ) :
+						wp_enqueue_style( 'jquery-ui-timepicker-css', plugins_url('/assets/css/jquery.ui.timepicker.css', $this->file) , array(), '');
+						wp_enqueue_script( 'jquery-ui-timepicker-addon', plugins_url('/assets/js/jquery.ui.timepicker.js', $this->file) , array('jquery'), '', true);											
+					else :
+						wp_enqueue_script( 'jquery-ui-timepicker-addon', plugins_url('/assets/js/jquery-ui-timepicker-addon.js', $this->file) , array('jquery'), '', true);
+					endif;
 
 					wp_enqueue_script( 'wcpgsk-validate', plugins_url('/assets/js/wcpgsk-validate.js', $this->file) , '', '', false);
 					wp_enqueue_script( 'wcpgsk-userjs', plugins_url('wcpgsk-user.js', $this->file) , '', '', false);

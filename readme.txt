@@ -1,10 +1,10 @@
 === WooCommerce Poor Guys Swiss Knife ===
 Contributors: ulih
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KJ4K2X953H8CC
-Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization, WooCommerce labels, WooCommerce email recipients, priceable extras, member registration, extras, product extras, price labels, custom price labels
+Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization, WooCommerce labels, WooCommerce email recipients, priceable extras, member registration, extras, product extras, price labels, custom price labels, ecommerce, e-commerce, product notifications, product email
 Requires at least: Wordpress 3.1 and WooCommerce 2.0
 Tested up to: 4.0
-Stable tag: 2.1.2
+Stable tag: 2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,6 +81,7 @@ Cart:
 = Features available with WooCommerce Extra Guys Swiss Knife (WCEGSK) =
 
 * Priceable product extras which show up on the product page before adding products to cart
+* Customizable product notifications for suppliers and others, product stock notifications for suppliers and third parties
 
 Data captured via customized (added) form fields is available within your order administration and will be added in the appropriate sections of the individual orders. What shows up can be configured for each individual custom field. Data captured will be shown to the customer on the order receipt page and in emails.
 
@@ -99,6 +100,7 @@ The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more to
 * Improved min/max/step settings with support for 0 for quantity inputs in all contexts
 * Stylable representation of captured data
 * Priceable product extras with WooCommerce Rich and WooCommerce Extra Guys Swiss Knife
+* Notification emails on a per product level with WooCommerce Rich Guys Swiss Knife
 * Dataset repeater sections with WooCommerce Rich Guys Swiss Knife to capture several datasets (students, party members, etc.) in the context of a product item in the customer cart
 
 = What's on its way? =
@@ -299,6 +301,17 @@ Plugins like Jetpack preconfigure the main query in the context of "infinite scr
 6. Product with Product Extras presentation
  
 == Changelog ==
+
+= 2.2 =
+
+* Enhancement: Alternative timepicker presentation
+* Enhancement: Set alternative placeholder image (url) for products
+* Enhancement: Add to cart button label on per product basis
+* Enhancement: Add custom css classes to custom fields
+* Enhancement: Manage default state for account creation checkbox on checkout form
+* Improve integration with WooCommerce Rich Guys 2.2+
+* Bugfix: Fixes for quantity notifications
+
 
 = 2.1.2 =
 

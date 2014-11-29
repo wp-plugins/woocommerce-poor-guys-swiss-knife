@@ -175,25 +175,28 @@ function wcpgsk_globalqty_cart_update( $valid, $cart_item_key, $values, $quantit
 if ( ! function_exists( 'wcpgsk_globalqty_cart_add' ) ) {
 function wcpgsk_globalqty_cart_add( $valid, $product_id, $quantity ) {	
 	global $woocommerce;
-	$options = get_option( 'wcpgsk_settings' );
-	$maxqtycart = isset( $options['cart']['maxqtycart'] ) ? $options['cart']['maxqtycart'] : 0;
-	$minqtycart = isset( $options['cart']['minqtycart'] ) ? $options['cart']['minqtycart'] : 0;
-	$qtycnt = 0;
-	$prodcnt = 0;
-	foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) :
+	//if ( !is_product() ) :
+		$options = get_option( 'wcpgsk_settings' );
+		$maxqtycart = isset( $options['cart']['maxqtycart'] ) ? $options['cart']['maxqtycart'] : 0;
+		$minqtycart = isset( $options['cart']['minqtycart'] ) ? $options['cart']['minqtycart'] : 0;
+		$qtycnt = 0;
+		$prodcnt = 0;
+		foreach ( $woocommerce->cart->get_cart() as $cart_item_key => $values ) :
+			$qtycnt += $values['quantity'];
+			$prodcnt++;
+		endforeach;
 		$qtycnt += $quantity;
-		$prodcnt++;
-	endforeach;
-	if ( $maxqtycart && is_numeric($maxqtycart) && $qtycnt > $maxqtycart ) :		
-		wcpgsk_clear_messages();
-		wcpgsk_add_message( sprintf( __( 'The overall sum for all product quantities is restricted to %s in this shop. Your overall quantity sum: %s. Please buy less quantity at least for some products.', WCPGSK_DOMAIN ), $maxqtycart, $qtycnt ) );
-		wcpgsk_set_messages();					
-	endif;
-	if ( $minqtycart && is_numeric($minqtycart) && $qtycnt < $minqtycart ) :		
-		wcpgsk_clear_messages();
-		wcpgsk_add_message( sprintf( __( 'The required minimum sum for all product quantities is set to %s in this shop. Your overall quantity sum: %s. You have to add products to your cart or buy existing products in a higher quantity.', WCPGSK_DOMAIN ), $minqtycart, $qtycnt ) );
-		wcpgsk_set_messages();					
-	endif;
+		if ( $maxqtycart && is_numeric($maxqtycart) && $qtycnt > $maxqtycart ) :		
+			wcpgsk_clear_messages();
+			wcpgsk_add_message( sprintf( __( 'The overall sum for all product quantities is restricted to %s in this shop. Your overall quantity sum: %s. Please buy less quantity at least for some products.', WCPGSK_DOMAIN ), $maxqtycart, $qtycnt ) );
+			wcpgsk_set_messages();					
+		endif;
+		if ( $minqtycart && is_numeric($minqtycart) && $qtycnt < $minqtycart ) :		
+			wcpgsk_clear_messages();
+			wcpgsk_add_message( sprintf( __( 'The required minimum sum for all product quantities is set to %s in this shop. Your overall quantity sum: %s. You have to add products to your cart or buy existing products in a higher quantity.', WCPGSK_DOMAIN ), $minqtycart, $qtycnt ) );
+			wcpgsk_set_messages();					
+		endif;
+	//endif;
 	return $valid;
 }
 }
@@ -532,8 +535,16 @@ if ( !function_exists('wcpgsk_cart_button_text') ) {
  * Personalize Add to Cart Button
  */
 function wcpgsk_cart_button_text($label) {
+	global $post;
+	
 	$options = get_option( 'wcpgsk_settings' );
 	$cart_btn_text = ((!empty($options['process']['fastcheckoutbtn'])) ? __($options['process']['fastcheckoutbtn'], WCPGSK_DOMAIN) : $label);
+	if ( isset( $post->ID ) && ( is_shop() || is_product() ) ) :
+		$button_label = get_post_meta($post->ID, '_wcpgsk_button_label', true);
+		if ( isset( $button_label ) && !empty( $button_label ) ) :
+			$cart_btn_text = "hoopie";//__( $button_label, WCPGSK_DOMAIN );
+		endif;
+	endif;
 	if ($cart_btn_text && $cart_btn_text != '')
 		return $cart_btn_text;
 	else return __('Add to Cart', WCPGSK_DOMAIN);
@@ -594,8 +605,16 @@ function wcpgsk_outofstock_cart_button_text($label) {
 
 if ( !function_exists('wcpgsk_single_cart_button_text') ) {
 function wcpgsk_single_cart_button_text($label, $ptype) {
+	global $post;	
 	$options = get_option( 'wcpgsk_settings' );
 	$cart_btn_text = ((!empty($options['process']['fastcheckoutbtn'])) ? __($options['process']['fastcheckoutbtn'], WCPGSK_DOMAIN) : 'Add to Cart');
+	if ( isset( $post->ID ) && ( is_shop() || is_product() ) ) :
+		$button_label = get_post_meta($post->ID, '_wcpgsk_button_label', true);
+		if ( isset( $button_label ) && !empty( $button_label ) ) :
+			$cart_btn_text = "hoopie";//__( $button_label, WCPGSK_DOMAIN );
+		endif;
+	endif;
+	
 	if ($cart_btn_text && $cart_btn_text != '')
 		return $cart_btn_text;
 	else return __('Add to Cart', WCPGSK_DOMAIN);
@@ -613,6 +632,12 @@ function wcpgsk_product_single_cart_button_text($label, $product) {
 		$cart_btn_text = ((!empty($options['process']['readmorebtn'])) ? __($options['process']['readmorebtn'], WCPGSK_DOMAIN) : $label);
 	elseif ($label == __( 'Add to cart', 'woocommerce' ) ) :
 		$cart_btn_text = ((!empty($options['process']['fastcheckoutbtn'])) ? __($options['process']['fastcheckoutbtn'], WCPGSK_DOMAIN) : $label);
+		if ( isset( $product->post->ID ) && ( is_shop() || is_product() ) ) :
+			$button_label = get_post_meta($product->post->ID, '_wcpgsk_button_label', true);
+			if ( isset( $button_label ) && !empty( $button_label ) ) :
+				$cart_btn_text = __( $button_label, WCPGSK_DOMAIN );
+			endif;
+		endif;		
 	elseif ($label == __( 'Buy product', 'woocommerce' ) ) :
 		$cart_btn_text = ((!empty($options['process']['buyproductbtn'])) ? __($options['process']['buyproductbtn'], WCPGSK_DOMAIN) : $label);
 	elseif ($label == __( 'View products', 'woocommerce' ) ) :
@@ -633,8 +658,20 @@ function wcpgsk_product_cart_button_text($label, $product) {
 		$cart_btn_text = ((!empty($options['process']['readmorebtn'])) ? __($options['process']['readmorebtn'], WCPGSK_DOMAIN) : $label);
 	elseif ($label == __( 'Add to cart', 'woocommerce' ) ) :
 		$cart_btn_text = ((!empty($options['process']['fastcheckoutbtn'])) ? __($options['process']['fastcheckoutbtn'], WCPGSK_DOMAIN) : $label);
+		if ( isset( $product->post->ID ) && ( is_shop() || is_product() ) ) :
+			$button_label = get_post_meta($product->post->ID, '_wcpgsk_button_label', true);
+			if ( isset( $button_label ) && !empty( $button_label ) ) :
+				$cart_btn_text = __( $button_label, WCPGSK_DOMAIN );
+			endif;
+		endif;				
 	elseif ($label == __( 'Buy product', 'woocommerce' ) ) :
 		$cart_btn_text = ((!empty($options['process']['buyproductbtn'])) ? __($options['process']['buyproductbtn'], WCPGSK_DOMAIN) : $label);
+		if ( isset( $product->post->ID ) && ( is_shop() || is_product() ) ) :
+			$button_label = get_post_meta($product->post->ID, '_wcpgsk_button_label', true);
+			if ( isset( $button_label ) && !empty( $button_label ) ) :
+				$cart_btn_text = __( $button_label, WCPGSK_DOMAIN );
+			endif;
+		endif;						
 	elseif ($label == __( 'View products', 'woocommerce' ) ) :
 		$cart_btn_text = ((!empty($options['process']['viewproductsbtn'])) ? __($options['process']['viewproductsbtn'], WCPGSK_DOMAIN) : $label);
 	elseif ($label == __( 'Select options', 'woocommerce' ) ) :
@@ -843,8 +880,30 @@ function wcpgsk_after_checkout_form($checkout) {
 						firstDay: 1
 					});		
 				});
-
-				jQuery("input[display=\'time\']").each(function() {
+			';
+			if ( isset( $options['checkoutform']['caltimepicker'] ) && 1 == $options['checkoutform']['caltimepicker'] ) :
+				echo '	jQuery("input[display=\'time\']").each(function() {
+					var hMax = 23;
+					var hMin = 0;					
+					if (jQuery(this).attr("maxhour")) hMax = parseInt(jQuery(this).attr("maxhour"));
+					if (jQuery(this).attr("minhour")) hMin = parseInt(jQuery(this).attr("minhour"));
+					jQuery(this).prop("readonly", "readonly");
+					jQuery(this).timepicker({
+						hourText: "' . __( 'Hour', WCPGSK_DOMAIN ) . '",
+						minuteText: "' . __( 'Minute', WCPGSK_DOMAIN ) . '",					
+						hours: { starts: hMin, ends: hMax  },
+						minutes: { interval: parseInt(jQuery(this).attr("minutesteps")) },
+						rows: ( parseInt(jQuery(this).attr("minutesteps")) < 5 ? 6 : ( parseInt(jQuery(this).attr("minutesteps")) < 10 ? 4 : 3 ) ),
+						showPeriodLabels: false,
+						closeButtonText: "' . __( 'Close', WCPGSK_DOMAIN ) . '",
+						showCloseButton: true,
+						
+					});;
+				});';
+			
+			else :
+			
+				echo '	jQuery("input[display=\'time\']").each(function() {
 					var hMax = 23;
 					var hMin = 0;
 					if (jQuery(this).attr("maxhour")) hMax = parseInt(jQuery(this).attr("maxhour"));
@@ -867,9 +926,10 @@ function wcpgsk_after_checkout_form($checkout) {
 						closeText: cT,
 						timeOnlyTitle: "' . __('Choose Time', WCPGSK_DOMAIN) . '"
 					});		
-				});
-
-				jQuery("input[display=\'number\']").each(function() {
+				});';
+			endif;
+			
+			echo 'jQuery("input[display=\'number\']").each(function() {
 					var $this = this;
 					jQuery(this).after("<div id=\'slider_" + jQuery(this).attr("id") + "\'></div>");
 					if ( jQuery($this).attr("minvalue") ) {
