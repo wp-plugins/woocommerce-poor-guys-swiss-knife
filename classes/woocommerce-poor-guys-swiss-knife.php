@@ -115,6 +115,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			add_filter('woocommerce_free_sale_price_html', array( $this, 'wcpgsk_free_sale_price_html' ), PHP_INT_MAX, 2 );
 			add_filter('woocommerce_free_price_html', array( $this, 'wcpgsk_free_price_html' ), PHP_INT_MAX, 2 );
 			add_filter('woocommerce_after_my_account', array( $this, 'wcpgsk_after_my_account' ), 10 );
+			
 		}
 
 		/**
@@ -323,12 +324,13 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					break;
 				endswitch;
 			endif;
-			$hdl_backorder = $product->get_availability();
-			$options = get_option( 'wcpgsk_settings' );					
-			if ( $hdl_backorder['class'] == 'available-on-backorder' && isset( $options['process']['backorderlabel'] ) && !empty( $options['process']['backorderlabel'] ) ) :
-				$price = $price . '<div class="wcpgsk-extend-price-data">' . __( $options['process']['backorderlabel'], WCPGSK_DOMAIN ) . '</div>';
+			if ( $product->managing_stock() ) :
+				$hdl_backorder = $product->get_availability();
+				$options = get_option( 'wcpgsk_settings' );					
+				if ( isset( $hdl_backorder ) && $hdl_backorder['class'] == 'available-on-backorder' && isset( $options['process']['backorderlabel'] ) && !empty( $options['process']['backorderlabel'] ) ) :
+					$price = $price . '<div class="wcpgsk-extend-price-data">' . __( $options['process']['backorderlabel'], WCPGSK_DOMAIN ) . '</div>';
+				endif;
 			endif;
-
 			return $price;
 		}
 
@@ -3080,16 +3082,17 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$options['woofields']['label_billing_email_validator'] = !empty($options['woofields']['label_billing_email_validator']) ? $options['woofields']['label_billing_email_validator'] : '';
 			$options['woofields']['placehoder_billing_email_validator'] = !empty($options['woofields']['placehoder_billing_email_validator']) ? $options['woofields']['placehoder_billing_email_validator'] : '';
 			$options['woofields']['required_billing_email_validator'] = isset($options['woofields']['required_billing_email_validator']) ? $options['woofields']['required_billing_email_validator'] : 1;
-			if (isset($options['checkoutform']['billingemailvalidator']) && $options['checkoutform']['billingemailvalidator'] == 1) {
-				$fields['billing_email_validator'] = array(
-					'type'				=> 'text',
-					'label' 			=> __( $options['woofields']['label_billing_email_validator'], WCPGSK_DOMAIN ),
-					'placeholder' 		=> __( $options['woofields']['placehoder_billing_email_validator'], WCPGSK_DOMAIN ),
-					'required' 			=> (($options['woofields']['required_billing_email_validator'] == 1) ? true : false),
-					//not necessary... 'validate'			=> 'email'
-				);
-			}
-			
+			if ( !is_user_logged_in() ) :			
+				if (isset($options['checkoutform']['billingemailvalidator']) && $options['checkoutform']['billingemailvalidator'] == 1) {
+					$fields['billing_email_validator'] = array(
+						'type'				=> 'text',
+						'label' 			=> __( $options['woofields']['label_billing_email_validator'], WCPGSK_DOMAIN ),
+						'placeholder' 		=> __( $options['woofields']['placehoder_billing_email_validator'], WCPGSK_DOMAIN ),
+						'required' 			=> (($options['woofields']['required_billing_email_validator'] == 1) ? true : false),
+						//not necessary... 'validate'			=> 'email'
+					);
+				}
+			endif;
 			if (isset($options['woofields']['billing']) && is_array($options['woofields']['billing'])) {
 				foreach($options['woofields']['billing'] as $customkey => $customconfig) {
 					//$fieldrepeater = null;
@@ -3662,14 +3665,14 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			$options = get_option( 'wcpgsk_settings' );
 			
 			//do_action('wcpgsk_checkout_process_action');
-			
-			if (isset($options['checkoutform']['billingemailvalidator']) && $options['checkoutform']['billingemailvalidator'] == 1) {
-				if ($_POST[ 'billing_email' ] && $_POST[ 'billing_email_validator' ] && strtolower($_POST[ 'billing_email' ]) != strtolower($_POST[ 'billing_email_validator' ]))
-					wcpgsk_add_error(  '<strong>' . __('Email addresses do not match', WCPGSK_DOMAIN) . ': ' . $_POST[ 'billing_email' ] . ' : ' . (empty($_POST[ 'billing_email_validator' ]) ? __('Missing validation email', WCPGSK_DOMAIN) : $_POST[ 'billing_email_validator' ]) . '</strong>');
-				elseif ($_POST[ 'billing_email' ] && !$_POST[ 'billing_email_validator' ])
-					wcpgsk_add_error(  '<strong>' . __('You have to supply a validation email for: ', WCPGSK_DOMAIN) . $_POST[ 'billing_email' ] . '</strong>');
-			}
-			
+			if ( !is_user_logged_in() ) :
+				if (isset($options['checkoutform']['billingemailvalidator']) && $options['checkoutform']['billingemailvalidator'] == 1) {
+					if ($_POST[ 'billing_email' ] && $_POST[ 'billing_email_validator' ] && strtolower($_POST[ 'billing_email' ]) != strtolower($_POST[ 'billing_email_validator' ]))
+						wcpgsk_add_error(  '<strong>' . __('Email addresses do not match', WCPGSK_DOMAIN) . ': ' . $_POST[ 'billing_email' ] . ' : ' . (empty($_POST[ 'billing_email_validator' ]) ? __('Missing validation email', WCPGSK_DOMAIN) : $_POST[ 'billing_email_validator' ]) . '</strong>');
+					elseif ($_POST[ 'billing_email' ] && !$_POST[ 'billing_email_validator' ])
+						wcpgsk_add_error(  '<strong>' . __('You have to supply a validation email for: ', WCPGSK_DOMAIN) . $_POST[ 'billing_email' ] . '</strong>');
+				}
+			endif;
 			//Just communicate the required state to WC plus the label in billing context based on user choice and locale configuration
 			//WC will take care of the error handling
 			if ( isset($_POST['billing_country']) && $_POST['billing_country'] ) :
