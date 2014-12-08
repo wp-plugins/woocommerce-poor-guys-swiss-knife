@@ -324,7 +324,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					break;
 				endswitch;
 			endif;
-			if ( $product->managing_stock() && $product->product_type != 'variable' ) :
+			if ( $product->product_type != 'variable' && $product->product_type != 'external' && $product->managing_stock() ) :
 				$hdl_backorder = $product->get_availability();
 				$options = get_option( 'wcpgsk_settings' );					
 				if ( isset( $hdl_backorder ) && isset( $hdl_backorder['class'] ) && $hdl_backorder['class'] == 'available-on-backorder' && isset( $options['process']['backorderlabel'] ) && !empty( $options['process']['backorderlabel'] ) ) :
@@ -1922,8 +1922,8 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 							<tr>
 								<td><?php _e('AM/PM for calendar style time picker', WCPGSK_DOMAIN); ?>:</td>
 								<td>
-									<input name="wcpgsk_settings[checkoutform][caltimepicker]" type="hidden" value="0" />
-									<input name="wcpgsk_settings[checkoutform][caltimepicker]" type="checkbox" value="1" <?php if ( isset( $options['checkoutform']['caltimeampm'] ) && 1 == ($options['checkoutform']['caltimeampm'])) echo "checked='checked'"; ?> />
+									<input name="wcpgsk_settings[checkoutform][caltimeampm]" type="hidden" value="0" />
+									<input name="wcpgsk_settings[checkoutform][caltimeampm]" type="checkbox" value="1" <?php if ( isset( $options['checkoutform']['caltimeampm'] ) && 1 == ($options['checkoutform']['caltimeampm'])) echo "checked='checked'"; ?> />
 								</td>
 								<td>
 									<span class="description"><?php _e('Activate AM/PM support for calendar style time picker.', WCPGSK_DOMAIN); ?></span>
