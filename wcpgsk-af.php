@@ -881,7 +881,15 @@ function wcpgsk_after_checkout_form($checkout) {
 					});		
 				});
 			';
-			if ( isset( $options['checkoutform']['caltimepicker'] ) && 1 == $options['checkoutform']['caltimepicker'] ) :
+			if ( isset( $options['checkoutform']['caltimepicker'] ) && 1 == $options['checkoutform']['caltimepicker'] ) :				
+				$showLeadingZero = 'true';
+				$showPeriod = 'false';
+				$showPeriodLabels = 'false';
+				if ( isset( $options['checkoutform']['caltimeampm'] ) && 1 == $options['checkoutform']['caltimeampm'] ) :
+					$showPeriod = 'true';
+					$showPeriodLabels = 'true';
+				endif;
+
 				echo '	jQuery("input[display=\'time\']").each(function() {
 					var hMax = 23;
 					var hMin = 0;					
@@ -892,9 +900,11 @@ function wcpgsk_after_checkout_form($checkout) {
 						hourText: "' . __( 'Hour', WCPGSK_DOMAIN ) . '",
 						minuteText: "' . __( 'Minute', WCPGSK_DOMAIN ) . '",					
 						hours: { starts: hMin, ends: hMax  },
-						minutes: { interval: parseInt(jQuery(this).attr("minutesteps")) },
+						minutes: { interval: parseInt(jQuery(this).attr("minutesteps")) },						
 						rows: ( parseInt(jQuery(this).attr("minutesteps")) < 5 ? 6 : ( parseInt(jQuery(this).attr("minutesteps")) < 10 ? 4 : 3 ) ),
-						showPeriodLabels: false,
+						showPeriod: ' . $showPeriod . ',
+						showLeadingZero: ' . $showLeadingZero . ',						
+						showPeriodLabels: ' . $showPeriodLabels . ',
 						closeButtonText: "' . __( 'Close', WCPGSK_DOMAIN ) . '",
 						showCloseButton: true,
 						

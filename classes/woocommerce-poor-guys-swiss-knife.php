@@ -324,13 +324,14 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					break;
 				endswitch;
 			endif;
-			if ( $product->managing_stock() ) :
+			if ( $product->managing_stock() && $product->product_type != 'variable' ) :
 				$hdl_backorder = $product->get_availability();
 				$options = get_option( 'wcpgsk_settings' );					
-				if ( isset( $hdl_backorder ) && $hdl_backorder['class'] == 'available-on-backorder' && isset( $options['process']['backorderlabel'] ) && !empty( $options['process']['backorderlabel'] ) ) :
+				if ( isset( $hdl_backorder ) && isset( $hdl_backorder['class'] ) && $hdl_backorder['class'] == 'available-on-backorder' && isset( $options['process']['backorderlabel'] ) && !empty( $options['process']['backorderlabel'] ) ) :
 					$price = $price . '<div class="wcpgsk-extend-price-data">' . __( $options['process']['backorderlabel'], WCPGSK_DOMAIN ) . '</div>';
 				endif;
 			endif;
+			
 			return $price;
 		}
 
@@ -1917,6 +1918,17 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 									<span class="description"><?php _e('Use alternative presentation for time picker fields.', WCPGSK_DOMAIN); ?></span>
 								</td>
 							</tr>
+							
+							<tr>
+								<td><?php _e('AM/PM for calendar style time picker', WCPGSK_DOMAIN); ?>:</td>
+								<td>
+									<input name="wcpgsk_settings[checkoutform][caltimepicker]" type="hidden" value="0" />
+									<input name="wcpgsk_settings[checkoutform][caltimepicker]" type="checkbox" value="1" <?php if ( isset( $options['checkoutform']['caltimeampm'] ) && 1 == ($options['checkoutform']['caltimeampm'])) echo "checked='checked'"; ?> />
+								</td>
+								<td>
+									<span class="description"><?php _e('Activate AM/PM support for calendar style time picker.', WCPGSK_DOMAIN); ?></span>
+								</td>
+							</tr>
 							<tr>
 								<td><?php _e('Css class', WCPGSK_DOMAIN); ?>:</td>
 								<td>
@@ -2303,6 +2315,15 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					<ul class="wcpgsk-radio-list radio horizontal"><li><label><input id="wcpgsk_add_allow_null_1" for="wcpgsk_add_allow_null" value="1" type="radio"><?php _e('Yes', WCPGSK_DOMAIN) ; ?></label></li><li><label><input id="wcpgsk_add_allow_null_0" for="wcpgsk_add_allow_null" value="0" checked="&quot;checked&quot;" data-checked="&quot;checked&quot;" type="radio"><?php _e('No', WCPGSK_DOMAIN) ; ?></label></li></ul>	
 				</td>
 			</tr>
+			<tr class="field_option">
+				<td class="label">
+					<label><?php _e('Null value option text', WCRGSK_DOMAIN) ; ?></label>
+					<p><?php _e('Specify text like "Please select an option..."', WCRGSK_DOMAIN) ; ?></p>
+				</td>
+				<td>
+					<input type="text" for="wcpgsk_add_nulllabel" value="" />
+				</td>
+			</tr>			
 			<tr class="field_option field_option_select">
 				<td class="label">
 					<label><?php _e('Select multiple values?', WCPGSK_DOMAIN) ; ?></label>
@@ -3922,6 +3943,17 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								endif;
 								break;
 							case 'options':
+								$nulllabel = isset( $params['nulllabel'] ) ? $params['nulllabel'] : __( 'Select an option', WCRGSK_DOMAIN );
+								$custom_attributes['data-placeholder'] = esc_attr( $nulllabel );
+								$chosen_select = "";
+								if ( get_option( 'woocommerce_enable_chosen' ) == 'yes' ) :
+									$chosen_select = "wcrgsk-chosen-select";
+									$class[] = $chosen_select;
+								endif;
+								if ( isset( $params['allow_null'] ) && $params['allow_null'] ) :
+									//data-nulloption								
+									$seloptions[''] = empty( $chosen_select ) ? $nulllabel : '';									
+								endif;
 								
 								foreach($value as $keyval => $option) {
 									$seloptions[$keyval] = __($option, WCPGSK_DOMAIN);
@@ -4108,12 +4140,24 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 								endif;
 								break;
 							case 'options':
+								$nulllabel = isset( $params['nulllabel'] ) ? $params['nulllabel'] : __( 'Select an option', WCRGSK_DOMAIN );
+								$custom_attributes['data-placeholder'] = esc_attr( $nulllabel );
+								$chosen_select = "";
+								if ( get_option( 'woocommerce_enable_chosen' ) == 'yes' ) :
+									$chosen_select = "wcrgsk-chosen-select";
+									$class[] = $chosen_select;
+								endif;
+								if ( isset( $params['allow_null'] ) && $params['allow_null'] ) :
+									//data-nulloption								
+									$seloptions[''] = empty( $chosen_select ) ? $nulllabel : '';									
+								endif;
 								
 								foreach($value as $keyval => $option) {
 									$seloptions[$keyval] = __($option, WCPGSK_DOMAIN);
 								}
 								break;
 							case 'selected':
+							
 								if ( !empty($value) ) :
 									foreach($value as $keyval => $option) {
 										//if (!empty($option) || $value == 0) $selected = $option;
@@ -4533,6 +4577,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						'mindate' => 2,
 						'maxdate' => 450,
 						'caltimepicker' => 0,
+						'caltimeampm' => 0,
 						'enabletooltips' => 1,
 						'enabletimesliders' => 1,
 						'cssclass' => ''),
