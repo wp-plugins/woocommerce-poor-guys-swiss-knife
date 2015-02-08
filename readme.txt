@@ -1,10 +1,10 @@
 === WooCommerce Poor Guys Swiss Knife ===
 Contributors: ulih
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KJ4K2X953H8CC
-Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization, WooCommerce labels, WooCommerce email recipients, priceable extras, member registration, extras, product extras, price labels, custom price labels, ecommerce, e-commerce, product notifications, product email
+Tags: WooCommerce checkout manager, WooCommerce cart manager, quantity management, file upload, color picker, WooCommerce color picker, WooCommerce file upload, cart manager, checkout manager, checkout, cart, shop, WooCommerce, shop settings, cart settings, checkout settings, variations bulk manager, variations manager, minimum items, maximum items, quantity input, product quantities, incremental quantities, minimum quantity, maximum quantity, wholesale, checkout personalization, checkout form, checkout customization, custom forms, custom fields, confirmation, confirmation fields, cart button, payment gateways, payment gateways customization, gateways, shipping, field editor, field, buy, pay, bulk management, variations, variation extender, custom fields per product, custom fields per variation, checkout localization, WooCommerce labels, WooCommerce email recipients, priceable extras, member registration, extras, product extras, price labels, custom price labels, ecommerce, e-commerce, product notifications, product email, export, order export
 Requires at least: Wordpress 3.1 and WooCommerce 2.0
 Tested up to: 4.0
-Stable tag: 2.2.3
+Stable tag: 2.2.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,8 +91,9 @@ The companion plugin WooCommerce Rich Guys Swiss Knife allows you to add more to
 
 = What's new? =
 
+* XML export for orders and order item meta in WooCommerce Rich Guys Swiss Knife 
 * Manage price labels on per product basis
-* WooCommerce 2.2 compatibility	
+* WooCommerce 2.3 compatibility	
 * input pattern attribute support with fallback for Safari browser	
 * Add one CC and/or BCC email recipient to all WooCommerce emails
 * Global minimum and maximum for item quantities
@@ -182,6 +183,9 @@ You need to upgrade to WooCommerce Rich Guys Swiss Knife or WooCommerce Extra Gu
  
 You need to upgrade to WooCommerce Rich Guys Swiss Knife to use this feature in the context of item personalization during checkout.
 
+= XML Export =
+
+XML export for orders and order item meta in WooCommerce Rich Guys Swiss Knife
 
 == Installation ==
 
@@ -301,6 +305,10 @@ Plugins like Jetpack preconfigure the main query in the context of "infinite scr
 6. Product with Product Extras presentation
  
 == Changelog ==
+
+= 2.2.4 =
+
+* Support for upcoming WooCommerce 2.3
 
 = 2.2.3 =
 

@@ -750,7 +750,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				else
 					$product_type = 'simple';			
 				if ( $product_type === 'simple' || $product_type === 'variable' ) :
-					echo "<li class=\"wcpgsk_product_tab\"><a class=\"icon16 icon-media\" href=\"#wcpgsk_data_tab\">" . __( 'Product Cart Quantities', WCPGSK_DOMAIN ) . "</a></li>";
+					echo "<li class=\"wcpgsk_product_tab\"><a class=\"icon16 icon-media\" href=\"#wcpgsk_data_tab\">" . __( 'Cart Quantities', WCPGSK_DOMAIN ) . "</a></li>";
 				endif;
 			endif;
 		}
@@ -959,7 +959,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 					$maxqty = isset($maxqty) && !empty($maxqty) ? $maxqty : 0;
 					$stepqty = isset($stepqty) && !empty($stepqty) ? $stepqty : 0;
 					*/
-					$style = 'width:125px;padding:5px 5px 5px 5px;font-size:inherit !important;font-family:inherit !important;font-face:inherit !important;line-height: 18px !important;';
+					$style = 'min-width:140px;padding:10px 10px 10px 10px;display:block;font-size:inherit !important;font-family:inherit !important;font-face:inherit !important;line-height: 18px !important;';
 					$style_before = 'height:auto !important;vertical-align:sub;padding: 0 3px 0 0 !important;font:400 20px/1 dashicons !important;line-height: 18px !important;content:"\f163";';
 					$active_style = '';					
 					?>
@@ -4427,7 +4427,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 			global $wcpgsk_name;
 			$wcpgsk_name = apply_filters('wcpgsk_plus_name', $wcpgsk_name);
 			add_submenu_page( 'woocommerce' , __( $wcpgsk_name, WCPGSK_DOMAIN ), __( $wcpgsk_name, WCPGSK_DOMAIN ), 'manage_options', WCPGSK_DOMAIN, array($this, 'wcpgsk__options_page') );
-			add_action( 'admin_enqueue_scripts', array($this, 'wcpgsk_admin_scripts') );
+			add_action( 'admin_enqueue_scripts', array($this, 'wcpgsk_admin_scripts'), 20 );
 		}
 		
 		/**
@@ -4451,7 +4451,10 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 				if(!wp_script_is('jquery-ui-dialog', 'queue')){
 						wp_enqueue_script('jquery-ui-dialog');
 				}
-				wp_enqueue_script( 'chosen-order', plugins_url( '/assets/js/chosen.order.jquery.min.js', $this->file ), '', '' );
+				if(!wp_script_is('jquery-ui-sortable', 'queue')){
+						wp_enqueue_script('jquery-ui-sortable');
+				}
+				
 				
 				wp_register_script('accordion-js', plugins_url( '/assets/js/accordion.js', $this->file ), '', '', false);
 				wp_register_style('accordion-styles', plugins_url( '/assets/css/accordion_styles.css', $this->file ), '', '');
@@ -4536,7 +4539,7 @@ if ( ! class_exists ( 'WCPGSK_Main' ) ) {
 						'woocommerce_thankyou_order_received_text' => __( 'Thank you. Your order has been received.', 'woocommerce' ),						
 						'woocommerce_countries_tax_or_vat' => $this->WC()->countries->tax_or_vat(),
 						'woocommerce_countries_inc_tax_or_vat' => $this->WC()->countries->inc_tax_or_vat(),
-						'woocommerce_countries_ex_tax_or_vat' => $this->WC()->countries->ex_tax_or_vat(),
+						'woocommerce_countries_ex_tax_or_vat' => $this->WC()->countries->ex_tax_or_vat(),						
 					),
 					'wcpgsk_forms' => array( array(
 						'label'  => __( 'Label', WCPGSK_DOMAIN ),
