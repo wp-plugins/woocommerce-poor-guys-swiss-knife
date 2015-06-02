@@ -1,64 +1,64 @@
-jQuery(document).ready(function() {
+(function($){
 	
 	//store actual border color
-	var recCss = jQuery('form[name="checkout"]').children().find(':input[validate]').first().css('border-color');
-	var patCss = jQuery('form[name="checkout"]').children().find(':input[pattern]').first().css('border-color');
+	var recCss = $('form[name="checkout"]').children().find(':input[validate]').first().css('border-color');
+	var patCss = $('form[name="checkout"]').children().find(':input[pattern]').first().css('border-color');
 	//attach handler to be triggered by woocommerce
-	jQuery('form[name="checkout"]').on('checkout_place_order', function(e) {		
+	$('form[name="checkout"]').on('checkout_place_order', function(e) {		
 		//e.preventDefault(e);
-		$patternsearch = jQuery(this);
+		$patternsearch = $(this);
 		var count = 0;
 		var validated = true;
-		jQuery(this).children().find(':input[validate]').each(function() {		
-			var val = jQuery(this).val();
+		$(this).children().find(':input[validate]').each(function() {		
+			var val = $(this).val();
 			//required is handled by woocomerce
 			if (val != "" && val != null) {
-				switch (jQuery(this).attr('validate')) {
+				switch ($(this).attr('validate')) {
 					case "email":
 						//simple check
 						var rx = /^[\w\.-]+@[\w\.-]+\.\w+$/i;
 						if (!rx.test(val)) {
 							validated = false;
-							jQuery(this).css( "border-color", "red" );
+							$(this).css( "border-color", "red" );
 						}
-						else jQuery(this).css( "border-color", recCss );
+						else $(this).css( "border-color", recCss );
 						break;
 					case "date":
 						//simple check for different date formats
 						if (!dateval(val,{format:"yyyy-mm-dd"}) && !dateval(val,{format:"mm-dd-yyyy"}) && !dateval(val,{format:"dd-mm-yyyy"}) && !dateval(val,{format:"yyyy/mm/dd"}) && !dateval(val,{format:"mm/dd/yyyy"})  && !dateval(val,{format:"dd/mm/yyyy"})) {
 							validated = false;
-							jQuery(this).css( "border-color", "red" );
+							$(this).css( "border-color", "red" );
 						}
-						else jQuery(this).css( "border-color", recCss );
+						else $(this).css( "border-color", recCss );
 						break;
 					case "time":
 						//simple check for different time formats
 						if (!checktime(val,{format:"HH:MM:SS T"}) && !checktime(val,{format:"HH:MM T"}) && !checktime(val,{format:"HH:MM"}) && !checktime(val,{format:"HH:MM:SS"})) {
 							validated = false;
-							jQuery(this).css( "border-color", "red" );
+							$(this).css( "border-color", "red" );
 						}
-						else jQuery(this).css( "border-color", recCss );
+						else $(this).css( "border-color", recCss );
 						break;
 					case "number":
 						if (isNaN(parseFloat(val))) {
 							validated = false;
-							jQuery(this).css( "border-color", "red" );
+							$(this).css( "border-color", "red" );
 						}
-						else jQuery(this).css( "border-color", recCss );
+						else $(this).css( "border-color", recCss );
 						break;
 					case "float":
 						if (!floatval(val, {none: false})) {
-							jQuery(this).css( "border-color", "red" );
+							$(this).css( "border-color", "red" );
 							validated = false;
 						}
-						else jQuery(this).css( "border-color", recCss );
+						else $(this).css( "border-color", recCss );
 						break;
 					case "integer":
 						if (!integerval(val, {allowNegative: true})) {
-							jQuery(this).css( "border-color", "red" );
+							$(this).css( "border-color", "red" );
 							validated = false;
 						}
-						else jQuery(this).css( "border-color", recCss );
+						else $(this).css( "border-color", recCss );
 						break;
 					case "custom1":
 					case "custom2":
@@ -72,16 +72,16 @@ jQuery(document).ready(function() {
 			var is_safari = navigator.userAgent.indexOf("Safari") > -1;
 			if ( is_safari ) {
 				$patternsearch.children().find(':input[pattern]').each(function() {		
-					if(!jQuery(this).prop('pattern')) { 
+					if(!$(this).prop('pattern')) { 
 						//nothing right now
 					}
 					else {
-						if( ( !jQuery(this).val().match( new RegExp( jQuery(this).attr('pattern') ) ) ) ) {
-							jQuery(this).css( "border-color", "red" );
+						if( ( !$(this).val().match( new RegExp( $(this).attr('pattern') ) ) ) ) {
+							$(this).css( "border-color", "red" );
 							validated = false;			
 						}				
 						else {
-							jQuery(this).css( "border-color", patCss );
+							$(this).css( "border-color", patCss );
 						}
 					}
 				});
@@ -90,24 +90,24 @@ jQuery(document).ready(function() {
 		});
 
 		if (!validated) {	
-			jQuery('html, body').animate({
-				scrollTop: (jQuery('body').offset().top),
+			$('html, body').animate({
+				scrollTop: ($('body').offset().top),
 			}, 1000, 'linear', function() {
-				jQuery('#wcpgsk-dialog-validation-errors').dialog( "option", "position", { center: 60 } );
-				jQuery('#wcpgsk-dialog-validation-errors').dialog( 'open' );				
+				$('#wcpgsk-dialog-validation-errors').dialog( "option", "position", { center: 60 } );
+				$('#wcpgsk-dialog-validation-errors').dialog( 'open' );				
 			});
 			return false;
 		} else true;
 	});
-	jQuery( "#wcpgsk-dialog-validation-errors" ).dialog({
+	$( "#wcpgsk-dialog-validation-errors" ).dialog({
 		autoOpen: false,
 		height: 200,
 		width: 400,
 		modal: true,
-		//position: { of: jQuery('body') },
+		//position: { of: $('body') },
 		draggable: false,
 		focus:  function() {
-			jQuery(this).find('#wcpgsk_error_message').html(jQuery(this).dialog('option', 'errormsg'));
+			$(this).find('#wcpgsk_error_message').html($(this).dialog('option', 'errormsg'));
 		}
 	});
 	
@@ -308,5 +308,4 @@ jQuery(document).ready(function() {
 	
 	
 	
-});
-
+})(jQuery);
